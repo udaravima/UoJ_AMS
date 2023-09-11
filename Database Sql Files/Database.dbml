@@ -1,0 +1,118 @@
+
+Table "uoj_user" {
+  "user_id" INT [pk, increment]
+  "username" VARCHAR(50) [unique, not null]
+  "user_password" VARCHAR(65) [not null]
+  "user_salt" VARCHAR(25) [unique, not null]
+  "user_status" TINYINT(1) [not null, default: 2, note:'0: Inactive, 1: Active, 2:Pending']
+  "user_role" TINYINT(1) [not null, note:'0:Administrator, 1:Lecturer, 2:Instructor, 3:Student']
+  "user_session" TINYINT(1) [default: 0, note: '0: user inactive, 1:user has active session']
+}
+
+Table "uoj_student" {
+  "std_id" INT [increment]
+  "std_index" CHAR(7) [unique, not null]
+  "std_regno" VARCHAR(11) [unique, not null]
+  "std_fullname" VARCHAR(100)
+  "std_gender" TINYINT(1) [note:'0:Male, 1:Female']
+  "std_batchno" VARCHAR(10)
+  "dgree_program" VARCHAR(20)
+  "std_subjectcomb" VARCHAR(15)
+  "std_nic" VARCHAR(12)
+  "std_dob" DATE
+  "date_admission" DATE
+  "current_address" VARCHAR(50)
+  "permanent_address" CHAR(50)
+  "mobile_tp_no" CHAR(10) [unique]
+  "home_tp_no" CHAR(10)
+  "std_email" VARCHAR(50) [unique]
+  "std_profile_pic" VARCHAR(30) [unique]
+  "current_level" CHAR(2)
+  "user_id" INT
+
+Indexes {
+  (std_id, user_id) [pk]
+}
+}
+
+Table "uoj_lecturer" {
+  "lecr_id" INT [increment]
+  "lecr_name" VARCHAR(100)
+  "lecr_mobile" CHAR(10) [unique]
+  "lecr_email" VARCHAR(30) [unique]
+  "lecr_gender" TINYINT(1) [note:'0:Male, 1:Female']
+  "lecr_address" VARCHAR(50)
+  "lecr_profile_pic" VARCHAR(30) [unique]
+  "user_id" INT
+
+Indexes {
+  (lecr_id, user_id) [pk]
+}
+}
+
+Table "uoj_course" {
+  "course_id" INT [pk, increment]
+  "course_code" VARCHAR(10) [unique]
+  "course_name" VARCHAR(30)
+}
+
+Table "uoj_class" {
+  "class_id" INT [increment]
+  "lecr_id" INT
+  "course_id" INT
+  "class_date" DATE
+  "start_time" TIME
+  "end_time" TIME
+
+Indexes {
+  (class_id, lecr_id, course_id) [pk]
+}
+}
+
+Table "uoj_lecturer_course" {
+  "lecr_id" INT
+  "course_id" INT
+
+Indexes {
+  (lecr_id, course_id) [pk]
+}
+}
+
+Table "uoJ_student_class" {
+  "std_id" INT
+  "class_id" INT
+  "attend_time" TIME
+  "attendance_status" TINYINT(1)
+
+Indexes {
+  (std_id, class_id) [pk]
+}
+}
+
+Table "uoj_nfc_data" {
+  "nfc_id" INT [increment]
+  "nfc_hash" VARCHAR(100) [unique]
+  "user_id" INT
+
+Indexes {
+  (nfc_id, user_id) [pk]
+}
+}
+
+Ref:"uoj_user"."user_id" < "uoj_student"."user_id" [delete: cascade]
+
+Ref:"uoj_user"."user_id" < "uoj_lecturer"."user_id" [delete: cascade]
+
+Ref:"uoj_course"."course_id" < "uoj_class"."course_id"
+
+Ref:"uoj_lecturer"."lecr_id" < "uoj_class"."lecr_id"
+
+Ref:"uoj_lecturer"."lecr_id" < "uoj_lecturer_course"."lecr_id"
+
+Ref:"uoj_course"."course_id" < "uoj_lecturer_course"."course_id"
+
+Ref:"uoj_student"."std_id" < "uoJ_student_class"."std_id"
+
+Ref:"uoj_class"."class_id" < "uoJ_student_class"."class_id"
+
+Ref:"uoj_user"."user_id" < "uoj_nfc_data"."user_id"
