@@ -183,7 +183,7 @@ class Lecturer
         }
     }
 
-    public function getCourseList($order)
+    public function getCourseList($order = array())
     {
         $query = "SELECT * FROM $this->course ";
         if (isset($order['search'])) {
@@ -201,7 +201,7 @@ class Lecturer
         return $result;
     }
 
-    
+
 }
 
 ?>

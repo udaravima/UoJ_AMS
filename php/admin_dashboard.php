@@ -25,8 +25,10 @@ include_once ROOT_PATH . '/php/include/nav.php';
 ?>
 
 <div class="container-md mt-5 p-3">
-    <button type="button" class="btn btn-success my-3 align-content-end justify-content-end ms-auto"
-        data-bs-toggle="modal" data-bs-target="#reg_user">+Add User</button>
+    <div class="btn-group">
+        <button type="button" class="btn btn-success my-3 align-content-end justify-content-end ms-auto"
+            data-bs-toggle="modal" data-bs-target="#reg_user">+ Add User</button>
+    </div>
 </div>
 
 <!-- Lecture Table  -->

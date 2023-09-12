@@ -53,9 +53,11 @@ class Utils
         return $messageModal;
     }
 
-    public function storeProfilePic($targetDir, $fileId, $nic)
+    public function storeProfilePic($targetDir, $fileId, $nic = "")
     {
-        $targetLocation = $targetDir . (($nic) ? $nic . "_" : "") . "photo." . pathinfo(basename($_FILES[$fileId]["name"])['extension']);
+        $filename = basename($_FILES[$fileId]["name"]);
+        $extension = substr($filename, strrpos($filename, '.'));
+        $targetLocation = $targetDir . $nic . "_" . "photo" . $extension;
 
         if (move_uploaded_file($_FILES[$fileId]["tmp_name"], $targetLocation)) {
             return $targetLocation;
