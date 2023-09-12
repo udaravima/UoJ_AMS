@@ -26,6 +26,17 @@ include_once ROOT_PATH . '/php/include/nav.php';
 include_once ROOT_PATH . '/php/include/modal_form.php';
 ?>
 
+<div class="container-md mt-5 p-3">
+    <div class="btn-group" role="group">
+
+        <button type="button" class="btn btn-success my-3 align-content-end justify-content-end ms-auto"
+            data-bs-toggle="modal" data-bs-target="#add_course">+ Add Course</button>
+        <button type="button" class="btn btn-success my-3 align-content-end justify-content-end ms-auto"
+            data-bs-toggle="modal" data-bs-target="#add_class">+ Add Class</button>
+
+    </div>
+</div>
+
 <div class="container-sm mt-5" id="course_data">
     <?php
     $order = array();
@@ -37,12 +48,7 @@ include_once ROOT_PATH . '/php/include/modal_form.php';
     $totalPages = ceil($totalCount / $itemsPerPage);
     ?>
 
-
-    <div class="container-md mt-5 p-3">
-        <button type="button" class="btn btn-success my-3 align-content-end justify-content-end ms-auto"
-            data-bs-toggle="modal" data-bs-target="#reg_user">+Add Course</button>
-    </div>
-    <table class="table table-striped table-hover border shadow" id="courses_data">
+    <table class="table table-striped table-hover border shadow " id="courses_data">
         <h1>Courses</h1>
         <thead>
             <tr>

@@ -100,7 +100,7 @@ class User
     //retrieve for profile or update info
     public function setUserBadge()
     {
-        $user = $this->retrieveUserDetails($_SESSION['user_id'], $_SESSION['user_role']);
+        $user = $this->retrieveUserDetails($_SESSION['user_id']);
         if ($user) {
             $_SESSION['user_name'] = $this->processNameInitials(($_SESSION['user_role'] == 3) ? $user['std_fullname'] : $user['lecr_name']);
             $picture = (isset($user['std_profile_pic'])) ? $user['std_profile_pic'] : ((isset($user['lecr_profile_pic'])) ? $user['lecr_profile_pic'] : false);
@@ -108,12 +108,18 @@ class User
         }
     }
 
-    public function retrieveUserDetails($userId, $userRole)
+    public function retrieveUserDetails($userId)
     {
-        $userId = intval($userId);
-        $userRole = intval($userRole);
         $userTable = $this->userTable;
-
+        // get user role for select table
+        $RetUserRolequery = "SELECT user_role FROM {$this->userTable} WHERE user_id =?";
+        $stmt = $this->conn->prepare($RetUserRolequery);
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $userRole = $result->fetch_assoc()['user_role'];
+        }
 
         $table = ($userRole >= 0 && $userRole < 3) ? $this->lecrTable : $this->stdTable;
         $query = "SELECT urd.* , users.user_role, users.user_status FROM $table as urd INNER JOIN $userTable as users ON urd.user_id = users.user_id WHERE users.user_id = ?";
@@ -165,6 +171,19 @@ class User
         }
     }
 
+    public function isUsernameAvailable($username)
+    {
+        $query = "SELECT * FROM {$this->userTable} WHERE username=?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('s', $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
     public function isLoggedIn()
     {
         if (isset($_SESSION["user_id"])) {
@@ -221,7 +240,7 @@ class User
 
     }
 
-    public function getStudentTable($order)
+    public function getStudentTable($order = array())
     {
         $query = "SELECT std.*, users.user_role, users.user_status FROM $this->stdTable as std INNER JOIN $this->userTable as users ON users.user_id = std.user_id ";
         if (isset($order['search'])) {
@@ -242,7 +261,7 @@ class User
         return $results;
     }
 
-    public function getLecturerTable($order)
+    public function getLecturerTable($order = array())
     {
         $query = "SELECT lecr.*, users.user_role, users.user_status FROM $this->lecrTable as lecr INNER JOIN $this->userTable as users ON users.user_id = lecr.user_id ";
         if (isset($order['search'])) {
@@ -273,8 +292,6 @@ class User
 
     public function registerUser($username, $password, $userRole, $userData, $userStatus)
     {
-        $userRole = intval($userRole);
-        $userStatus = intval($userStatus);
         $userId = $this->insertUser($username, $password, $userRole, $userStatus);
         if ($userId) {
             if ($userRole == 0 || $userRole == 1 || $userRole == 2) {
@@ -311,7 +328,11 @@ class User
     public function insertStudent($userId, $userData)
     {
         $userData['std_index'] = strtolower($userData['std_index']);
-        $userData['std_gender'] = intval($userData['std_gender']);
+        $userData['std_regno'] = strtolower($userData['std_regno']);
+        $userData['std_fullname'] = strtolower($userData['std_fullname']);
+        //        $userData['std_dob']=date("Y-m-d",strtotime($_POST["std_dob"]));
+        //        $userData['date_admission']=date("Y-m-d",strtotime($_POST["date_admission"]));
+
         $query = "INSERT INTO $this->stdTable(std_index, std_regno, std_fullname, std_gender, std_batchno, dgree_program, std_subjectcomb, std_nic, std_dob, date_admission, current_address, permanent_address, mobile_tp_no, home_tp_no, std_email, std_profile_pic, current_level, user_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('sssisssssssssssssi', $userData['std_index'], $userData['std_regno'], $userData['std_fullname'], $userData['std_gender'], $userData['std_batchno'], $userData['dgree_program'], $userData['std_subjectcomb'], $userData['std_nic'], $userData['std_dob'], $userData['date_admission'], $userData['current_address'], $userData['permanent_address'], $userData['mobile_tp_no'], $userData['home_tp_no'], $userData['std_email'], $userData['std_profile_pic'], $userData['current_level'], $userId);
@@ -326,7 +347,7 @@ class User
     //UserData: 0->name, 1->mobile, 2->email, 3->gender, 4->address, 5->profile_pic
     public function insertLecturer($userId, $userData)
     {
-        $userData['lecr_gender'] = intval($userData['lecr_gender']);
+        $userData['lecr_name'] = strtolower($userData['lecr_name']);
         $query = "INSERT INTO $this->lecrTable(lecr_nic, lecr_name, lecr_mobile, lecr_email, lecr_gender, lecr_address, lecr_profile_pic, user_id) VALUES(?,?,?,?,?,?,?,?)";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('ssssissi', $userData['lecr_nic'], $userData['lecr_name'], $userData['lecr_mobile'], $userData['lecr_email'], $userData['lecr_gender'], $userData['lecr_address'], $userData['lecr_profile_pic'], $userId);

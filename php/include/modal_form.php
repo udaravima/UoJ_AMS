@@ -1,3 +1,66 @@
+<!-- Add class modal -->
+<div class="modal fade" id="add_class">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content rounded shadow">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title">Add Class</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <!-- Modal body -->
+            <div class="modal-body">
+                <form action="<?php echo SERVER_ROOT; ?>/php/form_action.php" method="post" id="addClass">
+                    <div class="form-group mt-3">
+                        <label for="course_code">Course Code:</label>
+                        <select name="course_id" id="course_id" class="form-control">
+                            <?php
+                            //$courses = $lecr->getCourseList();
+                            //while ($course = $courses->fetch_assoc()) {
+                            //    echo "<option value='" . $course['course_id'] . "'>" . $course['course_code'] . "</option>";
+                            //}
+                            ?>
+                        </select>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="lecr_id">LectureID: </label>
+                        <?php
+                        if ($user->isAdmin()) {
+                            echo "<select name='lecr_id' id='lecr_id' class='form-control'>";
+                            $lecturers = $user->getLecturerTable();
+                            while ($lecturer = $lecturers->fetch_assoc()) {
+                                echo "<option value='" . $lecturer['lecr_id'] . "'>" . $lecturer['lecr_name'] . "</option>";
+                            }
+                            echo "</select>";
+                        } else {
+                            echo "<input type='text' class='form-control' id='lecr_id' name='lecr_id' value='" . $_SESSION['user_id'] . "' readonly>";
+                        }
+                        ?>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="class_date">Date:</label>
+                        <input type="date" class="form-control" id="class_date" name="class_date" required>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="start_time">Start Time:</label>
+                        <input type="time" class="form-control" id="start_time" name="start_time" required>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="end_time">End Time:</label>
+                        <input type="time" class="form-control" id="end_time" name="end_time" required>
+                    </div>
+                    <input type="hidden" name="submit_class" value="submit">
+                </form>
+            </div>
+            <!-- Modal Footer -->
+            <div class="modal-footer mt-5">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close">Close</button>
+                <button type="button" onclick="extSubmit('addClass')" class="btn btn-primary" name="submit_class"
+                    id="sumbit_class">Add Class</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Add course modal -->
 <div class="modal fade" id="add_course">
     <div class="modal-dialog modal-dialog-scrollable">
@@ -9,11 +72,31 @@
             </div>
             <!-- Modal body -->
             <div class="modal-body">
-                <
+                <form action="<?php echo SERVER_ROOT; ?>/php/form_action.php" method="post" id='addCourse'>
+                    <div class="form-group mt-3">
+                        <label for="course_code">Course Code:</label>
+                        <input type="text" class="form-control" id="course_code" name="course_code"
+                            placeholder="CSC 1010" required>
+                    </div>
+                    <div class="form-group mt-3">
+                        <label for="course_name">Course Name:</label>
+                        <input type="text" class="form-control" id="course_name" name="course_name"
+                            placeholder="Introduction to Programming" required>
+                    </div>
+                    <input type="hidden" name="submit_course" value="sumbit">
+                </form>
+            </div>
+            <!-- Modal footer -->
+            <div class="modal-footer mt-5">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close">Close</button>
+                <button type="button" onclick="extSubmit('addCourse')" class="btn btn-primary" name="submit_course"
+                    id="submit_course">Add
+                    Course</button>
             </div>
         </div>
     </div>
 </div>
+
 <!-- Reg User Modal -->
 <?php
 
@@ -28,8 +111,9 @@
             </div>
             <!-- Modal Body -->
             <div class="modal-body">
-                <form action="<?php echo ROOT_PATH; ?>/php/register_user.php" method="post" id='RegistrationForm'
+                <form action="<?php echo SERVER_ROOT; ?>/php/form_action.php" method="post" id='RegistrationForm'
                     enctype="multipart/form-data">
+                    <!-- <input type="hidden" name="user_id" id="user_id" value=""> -->
                     <div class="form-group mt-3">
                         <label for="username">Username:</label>
                         <input type="text" class="form-control" id="username" name="username" placeholder="2020csc000"
@@ -219,18 +303,23 @@
                             <span id="lecr_profile_error"></span>
                         </div>
                     </div>
-                    <div class="modal-footer mt-5">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                            id="close">Close</button>
-                        <button type="submit" class="btn btn-primary" name="register" id="register">Register</button>
-                    </div>
+                    <input type="hidden" name="register" value="submit">
                 </form>
+            </div>
+            <!-- Modal Footer -->
+            <div class="modal-footer mt-5">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close">Close</button>
+                <button type="button" onclick="extSubmit('RegistrationForm')" class="btn btn-primary" name="register"
+                    id="register">Register</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
+    function extSubmit($id) {
+        document.getElementById($id).submit();
+    }
     function toggleFields() {
         var userType = document.getElementById("user_role").value;
         var studentFields = document.getElementById("std_fields");

@@ -87,7 +87,7 @@
             </div>
             <ul class="list-group list-group-flush">
                 <?php
-                $userDetails = $user->retrieveUserDetails($_SESSION['user_id'], $_SESSION['user_role']);
+                $userDetails = $user->retrieveUserDetails($_SESSION['user_id']);
 
                 if ($_SESSION['user_role'] == '0' || $_SESSION['user_role'] == '1' || $_SESSION['user_role'] == '2') {
                     $lecrInfoDsp = "
