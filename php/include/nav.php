@@ -73,7 +73,7 @@
     aria-labelledby="profileOffcanvasLabel">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="profileOffcanvasLabel">
-            Your Info
+            Your Info:
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>

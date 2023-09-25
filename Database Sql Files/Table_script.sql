@@ -32,7 +32,7 @@ CREATE TABLE uoj_student (
     mobile_tp_no CHAR(10) UNIQUE,
     home_tp_no CHAR(10),
     std_email VARCHAR(50) UNIQUE,
-    std_profile_pic VARCHAR(30) UNIQUE,
+    std_profile_pic VARCHAR(255),
     current_level CHAR(2),
     user_id INT,
     PRIMARY KEY(std_id, user_id),
@@ -40,13 +40,13 @@ CREATE TABLE uoj_student (
 );
 CREATE TABLE uoj_lecturer (
     lecr_id INT AUTO_INCREMENT,
-    lecr_nic VARCHAR(12) UNIQUE,
+    lecr_nic VARCHAR(12) UNIQUE NOT NULL,
     lecr_name VARCHAR(100),
     lecr_mobile CHAR(10) UNIQUE,
     lecr_email VARCHAR(30) UNIQUE,
     lecr_gender TINYINT(1),
     lecr_address VARCHAR(50),
-    lecr_profile_pic VARCHAR(30) UNIQUE,
+    lecr_profile_pic VARCHAR(255),
     user_id INT,
     PRIMARY key(lecr_id, user_id),
     FOREIGN KEY (user_id) REFERENCES uoj_user (user_id) ON DELETE CASCADE

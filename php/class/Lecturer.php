@@ -120,9 +120,12 @@ class Lecturer
         }
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('i', $lecrId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        return $result;
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+
     }
 
     public function getStudentCourseList($stdId)
@@ -130,9 +133,9 @@ class Lecturer
         $query = "SELECT * FROM $this->stdCourse WHERE std_id = ?";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('i', $stdId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        return $result;
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        }
     }
 
     public function enrollLectureCourse($lecrId, $courseId)
@@ -196,11 +199,23 @@ class Lecturer
             $query .= "LIMIT " . $order['limit'] . " OFFSET " . $order['offset'];
         }
         $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        return $result;
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
     }
 
+    public function retrieveTotalClassCount($courseId){
+        $query = "SELECT COUNT(*) FROM $this->class WHERE course_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $courseId);
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+    }
 
 }
 
