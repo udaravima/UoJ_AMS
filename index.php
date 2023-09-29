@@ -45,7 +45,7 @@ if (isset($_POST['sign_in'])) {
 
     } else {
         // get the message and preview on modal
-        $message = $user->getLoginMessage();
+        $message[] = $user->getLoginMessage();
         $_POST = array();
         $_SESSION["error"] = $message;
         // user message modal

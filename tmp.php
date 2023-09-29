@@ -66,5 +66,19 @@ if (password_verify($password . $salt, $hash)) {
 }
 echo "<br>" . __DIR__;
 echo "<br>";
+$tmp = [];
 
+
+if (empty($tmp)) {
+    echo "Empty";
+} else {
+    echo "Not Empty";
+}
+$tmp[] = "Hello 1";
+$tmp[] = "Hello 2";
+if ($tmp) {
+    foreach ($tmp as $t) {
+        echo $t . "<br>";
+    }
+}
 ?>

@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Form Validation</title>
 </head>
+
 <body>
     <h1>Sample Form</h1>
     <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
@@ -45,6 +47,40 @@
         <!-- Submit Button -->
         <input type="submit" name="submit" value="Submit">
     </form>
+    
+    <?php
+    // This function takes a Sri Lankan NIC number as a parameter and returns an array with the DOB, age and gender of the person
+    function get_nic_details($nic)
+    {
+        // The first two digits of the NIC number are the year of birth
+        $year = substr($nic, 0, 2);
+        // The next three digits contain the number of the day in the year for the person's birth. For females, 500 is added to the number of days
+        $day = substr($nic, 2, 3);
+        // To get the DOB, we need to subtract 500 from the day if it is greater than 500 and add the year to 1900
+        if ($day > 500) {
+            $day = $day - 500;
+            $gender = "F";
+        } else {
+            $gender = "M";
+        }
+        $year = $year + 1900;
+        // We can use the date_create_from_format function to create a date object from the year and day
+        $dob = date_create_from_format("Y-z", "$year-$day");
+        // We can use the date_format function to format the date object as YYYY-MM-DD
+        $dob = date_format($dob, "Y-m-d");
+        // To get the age, we can use the date_diff function to get the difference between the current date and the DOB in years
+        $age = date_diff(date_create($dob), date_create("today"))->y;
+        // We return an array with the DOB, age and gender
+        return array("dob" => $dob, "age" => $age, "gender" => $gender);
+    }
+
+    // Example usage
+    $nic = "912345678V";
+    $details = get_nic_details($nic);
+    echo "DOB: " . $details["dob"] . "\n";
+    echo "Age: " . $details["age"] . "\n";
+    echo "Gender: " . $details["gender"] . "\n";
+    ?>
 
     <?php
     // Server-side validation
@@ -108,4 +144,65 @@
     }
     ?>
 </body>
+
 </html>
+
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#log_info">
+    Open Modal
+</button>
+<div class='modal fade' id='log_info' tabindex='-1' aria-labelledby='login-status' aria-hidden='true'>
+    <div class='modal-dialog'>
+        <div class='modal-content'>
+            <div class='modal-header'>
+                <h3>AMS Systems</h3>
+                <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>
+            </div>
+            <div class='modal-body'>
+                <div id='login-alert' class='alert-success'>
+                    <p class=''>
+                        Some Content
+                    <ul>
+                        <?php
+                        if (!empty($goMessage)) {
+                            foreach ($goMessage as $msg) {
+                                echo "<li>$msg</li>";
+                            }
+                        }
+                        ?>
+                    </ul>
+                    </p>
+                </div>
+
+                <div id='login-alert' class='alert-danger'>
+                    <p class=''>
+                    <ul>
+                        <?php
+                        if (!empty($errors)) {
+                            foreach ($errors as $error) {
+                                echo "<li>$error</li>";
+                            }
+                        }
+                        ?>
+                    </ul>
+                    </p>
+                </div>
+            </div>
+            <div class='modal-footer'>
+                <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- <script>
+    // $(document).ready(function () {
+    //     $('#myModal').on('hidden.bs.modal', function () {
+    //         // Redirect to the index page (you can change the URL)
+    //         window.location.href = '<?php echo SERVER_ROOT; ?>/index.php';
+    //     });
+    // });
+    document.addEventListener('DOMContentLoaded', function () {
+        var loginModal = new bootstrap.Modal(document.getElementById('log_info'));
+        loginModal.show();
+    });
+</script> -->

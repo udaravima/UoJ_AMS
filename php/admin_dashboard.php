@@ -48,12 +48,13 @@ include_once ROOT_PATH . '/php/include/nav.php';
         <thead>
             <tr>
                 <th>#</th>
+                <th>Reg No</th>
                 <th>Name</th>
                 <th>Mobile</th>
                 <th>Email</th>
                 <th>Role</th>
                 <th>Status</th>
-                <th>Photo</th>
+                <th>photo</th>
                 <th class="visually-hidden">userID</th>
             </tr>
         </thead>
@@ -67,12 +68,14 @@ include_once ROOT_PATH . '/php/include/nav.php';
                 $photo = (($lecturer['lecr_profile_pic'] == null) ? $user->getDefaultProfilePic() : $lecturer['lecr_profile_pic']);
                 echo "<tr>";
                 echo "<td>" . $i++ . "</td>";
-                echo "<td>" . $lecturer['lecr_name'] . "</td>";
+                echo "<td>" . $lecturer['username'] . "</td>";
+                // echo "<td>" . $lecturer['lecr_name'] . "</td>";
+                echo "<td>" . $utils->processNameInitials($lecturer['lecr_name']) . "</td>";
                 echo "<td>" . $lecturer['lecr_mobile'] . "</td>";
                 echo "<td>" . $lecturer['lecr_email'] . "</td>";
                 echo "<td>" . $role . "</td>";
                 echo "<td>" . $status . "</td>";
-                echo "<td><img class='rounded-circle' src='" . ROOT_PATH . $photo . "' width='50px' height='50px'></td>";
+                echo "<td><img class='rounded-circle' src='" .  $photo . "' width='50px' height='50px'></td>";
                 echo "</tr>";
             }
             ?>
@@ -82,8 +85,9 @@ include_once ROOT_PATH . '/php/include/nav.php';
         <ul class="pagination justify-content-center">
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                 <li class="page-item <?php echo ($i == $currentPage) ? 'active' : ''; ?>">
-                    <a class="page-link"
-                        href="<?php echo SERVER_ROOT; ?>/php/admin_dashboard.php?page=<?php echo $i; ?>"><?php echo $i; ?></a>
+                    <a class="page-link" href="<?php echo SERVER_ROOT; ?>/php/admin_dashboard.php?page=<?php echo $i; ?>">
+                        <?php echo $i; ?>
+                    </a>
                 </li>
             <?php endfor; ?>
         </ul>
@@ -106,6 +110,7 @@ include_once ROOT_PATH . '/php/include/nav.php';
         <thead>
             <tr>
                 <th>#</th>
+                <th>Reg No</th>
                 <th>Name</th>
                 <th>Mobile</th>
                 <th>Email</th>
@@ -122,11 +127,13 @@ include_once ROOT_PATH . '/php/include/nav.php';
                 $photo = (($student['std_profile_pic'] == null) ? $user->getDefaultProfilePic() : $student['std_profile_pic']);
                 echo "<tr>";
                 echo "<td>" . $i++ . "</td>";
-                echo "<td>" . $student['std_fullname'] . "</td>";
+                echo "<td>" . $student['username'] . "</td>";
+                // echo "<td>" . $student['std_fullname'] . "</td>";
+                echo "<td>" . $utils->processNameInitials($student['std_fullname']) . "</td>";
                 echo "<td>" . $student['mobile_tp_no'] . "</td>";
                 echo "<td>" . $student['std_email'] . "</td>";
                 echo "<td>" . $status . "</td>";
-                echo "<td><img class='rounded-circle' src='" . ROOT_PATH . $photo . "' width='50px' height='50px'></td>";
+                echo "<td><img class='rounded-circle' src='" . $photo . "' width='50px' height='50px'></td>";
                 echo "</tr>";
             }
             ?>
@@ -136,8 +143,9 @@ include_once ROOT_PATH . '/php/include/nav.php';
         <ul class="pagination justify-content-center">
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                 <li class="page-item <?php echo ($i == $currentPage) ? 'active' : ''; ?>">
-                    <a class="page-link"
-                        href="<?php echo SERVER_ROOT; ?>/php/admin_dashboard.php?pageS=<?php echo $i; ?>"><?php echo $i; ?></a>
+                    <a class="page-link" href="<?php echo SERVER_ROOT; ?>/php/admin_dashboard.php?pageS=<?php echo $i; ?>">
+                        <?php echo $i; ?>
+                    </a>
                 </li>
             <?php endfor; ?>
         </ul>

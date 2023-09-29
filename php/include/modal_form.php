@@ -54,7 +54,7 @@
             <!-- Modal Footer -->
             <div class="modal-footer mt-5">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close">Close</button>
-                <button type="button" onclick="extSubmit('addClass')" class="btn btn-primary" name="submit_class"
+                <button type="button" onclick="exeSubmit('addClass')" class="btn btn-primary" name="submit_class"
                     id="sumbit_class">Add Class</button>
             </div>
         </div>
@@ -89,7 +89,7 @@
             <!-- Modal footer -->
             <div class="modal-footer mt-5">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close">Close</button>
-                <button type="button" onclick="extSubmit('addCourse')" class="btn btn-primary" name="submit_course"
+                <button type="button" onclick="exeSubmit('addCourse')" class="btn btn-primary" name="submit_course"
                     id="submit_course">Add
                     Course</button>
             </div>
@@ -115,7 +115,7 @@
                     enctype="multipart/form-data">
                     <!-- <input type="hidden" name="user_id" id="user_id" value=""> -->
                     <div class="form-group mt-3">
-                        <label for="username">Username:</label>
+                        <label for="username">Registration No:</label>
                         <input type="text" class="form-control" id="username" name="username" placeholder="2020csc000"
                             required>
                     </div>
@@ -133,7 +133,7 @@
                     </div>
                     <div class="form-group mt-3">
                         <label for="user_role">User Role:</label>
-                        <select name="user_role" id="user_role" class="form-control" onchange="toggleFields()">
+                        <select name="user_role" id="user_role" class="form-control" onchange="toggleFields()" required>
                             <option value='3' selected>Student</option>
                             <option value='1'>Lecturer</option>
                             <option value='2'>Instructor</option>
@@ -162,21 +162,10 @@
                     ?>
                     <!-- std fields -->
                     <div class="d-none" id="std_fields">
-                        <!-- <div class="form-floating">
-                            <input type="text" class="form-control" id="std_regNo" name="std_regNo"
-                                placeholder="2020csc000" required>
-                            <label for="std_regNo">Student Reg No</label>
-                        </div> -->
-
                         <!-- std_index -->
                         <div class="form-group mt-3">
                             <label for="std_index">Student Index:</label>
                             <input type="text" class="form-control" id="std_index" name="std_index">
-                        </div>
-                        <!-- std_regno -->
-                        <div class="form-group mt-3">
-                            <label for="std_regno">Student Registration Number:</label>
-                            <input type="text" class="form-control" id="std_regno" name="std_regno">
                         </div>
                         <!-- std_fullname -->
                         <div class="form-group mt-3">
@@ -195,16 +184,6 @@
                         <div class="form-group mt-3">
                             <label for="std_batchno">Batch Number:</label>
                             <input type="text" class="form-control" id="std_batchno" name="std_batchno">
-                        </div>
-                        <!-- dgree_program -->
-                        <div class="form-group mt-3">
-                            <label for="dgree_program">Degree Program:</label>
-                            <input type="text" class="form-control" id="dgree_program" name="dgree_program">
-                        </div>
-                        <!-- std_subjectcomb -->
-                        <div class="form-group mt-3">
-                            <label for="std_subjectcomb">Subject Combination:</label>
-                            <input type="text" class="form-control" id="std_subjectcomb" name="std_subjectcomb">
                         </div>
                         <!-- std_nic -->
                         <div class="form-group mt-3">
@@ -265,7 +244,7 @@
                         <!-- lecr_nic -->
                         <div class="form-group mt-3">
                             <label for="lecr_nic">NIC:</label>
-                            <input type="text" class="form-control" id="lecr_nic" name="lecr_nic">
+                            <input type="text" class="form-control" id="lecr_nic" name="lecr_nic" >
                         </div>
                         <!-- lecr_name -->
                         <div class="form-group mt-3">
@@ -309,7 +288,7 @@
             <!-- Modal Footer -->
             <div class="modal-footer mt-5">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close">Close</button>
-                <button type="button" onclick="extSubmit('RegistrationForm')" class="btn btn-primary" name="register"
+                <button type="button" onclick="exeSubmit('RegistrationForm')" class="btn btn-primary" name="register"
                     id="register">Register</button>
             </div>
         </div>
@@ -317,9 +296,10 @@
 </div>
 
 <script>
-    function extSubmit($id) {
+    function exeSubmit($id) {
         document.getElementById($id).submit();
     }
+    
     function toggleFields() {
         var userType = document.getElementById("user_role").value;
         var studentFields = document.getElementById("std_fields");
@@ -330,9 +310,10 @@
 
         if (userType == 3) {
             document.getElementById('std_index').required = true;
-            document.getElementById('std_regno').required = true;
+            // document.getElementById('std_regno').required = true;
             document.getElementById('std_fullname').required = true;
             document.getElementById('std_nic').required = true;
+            document.getElementById('std_email').required = true;
             document.getElementById('mobile_tp_no').required = true;
             studentFields.classList.remove("d-none");
         } else if (userType == 2 || userType == 1 || userType == 0) {

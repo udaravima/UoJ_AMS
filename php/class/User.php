@@ -122,7 +122,7 @@ class User
         }
 
         $table = ($userRole >= 0 && $userRole < 3) ? $this->lecrTable : $this->stdTable;
-        $query = "SELECT urd.* , users.user_role, users.user_status FROM $table as urd INNER JOIN $userTable as users ON urd.user_id = users.user_id WHERE users.user_id = ?";
+        $query = "SELECT urd.* , users.user_role, users.user_status, users.username FROM $table as urd INNER JOIN $userTable as users ON urd.user_id = users.user_id WHERE users.user_id = ?";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('i', $userId);
         $stmt->execute();
@@ -242,9 +242,9 @@ class User
 
     public function getStudentTable($order = array())
     {
-        $query = "SELECT std.*, users.user_role, users.user_status FROM $this->stdTable as std INNER JOIN $this->userTable as users ON users.user_id = std.user_id ";
+        $query = "SELECT std.*, users.user_role, users.user_status, users.username, users.user_id FROM $this->stdTable as std INNER JOIN $this->userTable as users ON users.user_id = std.user_id ";
         if (isset($order['search'])) {
-            $query .= "WHERE std.std_fullname LIKE '%" . $order['search'] . "%' OR std.std_regno LIKE '%" . $order['search'] . "%' OR std.std_nic LIKE '%" . $order['search'] . "%' OR std.std_email LIKE '%" . $order['search'] . "%' OR std.std_mobile_tp_no LIKE '%" . $order['search'] . "%' OR std.std_home_tp_no LIKE '%" . $order['search'] . "%' OR std.std_batchno LIKE '%" . $order['search'] . "%' OR std.std_dgree_program LIKE '%" . $order['search'] . "%' OR std.std_subjectcomb LIKE '%" . $order['search'] . "%' OR std.std_current_level LIKE '%" . $order['search'] . "%' OR std.std_dob LIKE '%" . $order['search'] . "%' OR std.std_date_admission LIKE '%" . $order['search'] . "%' OR std.std_current_address LIKE '%" . $order['search'] . "%' OR std.std_permanent_address LIKE '%" . $order['search'] . "%' ";
+            $query .= "WHERE std.std_fullname LIKE '%" . $order['search'] . "%' OR OR users.username LIKE '%" . $order['search'] . "%' std.std_nic LIKE '%" . $order['search'] . "%' OR std.std_email LIKE '%" . $order['search'] . "%' OR std.std_mobile_tp_no LIKE '%" . $order['search'] . "%' OR std.std_home_tp_no LIKE '%" . $order['search'] . "%' OR std.std_batchno LIKE '%" . $order['search'] . "%' OR std.std_current_level LIKE '%" . $order['search'] . "%' OR std.std_dob LIKE '%" . $order['search'] . "%' OR std.std_date_admission LIKE '%" . $order['search'] . "%' OR std.std_current_address LIKE '%" . $order['search'] . "%' OR std.std_permanent_address LIKE '%" . $order['search'] . "%' ";
         }
         //TODO: CHECK
         if (isset($order['column'])) {
@@ -263,9 +263,9 @@ class User
 
     public function getLecturerTable($order = array())
     {
-        $query = "SELECT lecr.*, users.user_role, users.user_status FROM $this->lecrTable as lecr INNER JOIN $this->userTable as users ON users.user_id = lecr.user_id ";
+        $query = "SELECT lecr.*, users.user_role, users.user_status, users.username, users.user_id FROM $this->lecrTable as lecr INNER JOIN $this->userTable as users ON users.user_id = lecr.user_id ";
         if (isset($order['search'])) {
-            $query .= "WHERE lecr.lecr_name LIKE '%" . $order['search'] . "%' OR lecr.lecr_nic LIKE '%" . $order['search'] . "%' OR lecr.lecr_email LIKE '%" . $order['search'] . "%' OR lecr.lecr_mobile LIKE '%" . $order['search'] . "%' OR lecr.lecr_address LIKE '%" . $order['search'] . "%' ";
+            $query .= "WHERE lecr.lecr_name LIKE '%" . $order['search'] . "%' OR lecr.lecr_nic LIKE '%" . $order['search'] . "%' OR users.username LIKE '%" . $order['search'] . "%' OR lecr.lecr_email LIKE '%" . $order['search'] . "%' OR lecr.lecr_mobile LIKE '%" . $order['search'] . "%' OR lecr.lecr_address LIKE '%" . $order['search'] . "%' ";
         }
         if (isset($order['column'])) {
             $query .= " ORDER BY " . $order['column'] . ' ' . $order['dir'];
@@ -328,14 +328,13 @@ class User
     public function insertStudent($userId, $userData)
     {
         $userData['std_index'] = strtolower($userData['std_index']);
-        $userData['std_regno'] = strtolower($userData['std_regno']);
         $userData['std_fullname'] = strtolower($userData['std_fullname']);
         //        $userData['std_dob']=date("Y-m-d",strtotime($_POST["std_dob"]));
         //        $userData['date_admission']=date("Y-m-d",strtotime($_POST["date_admission"]));
 
-        $query = "INSERT INTO $this->stdTable(std_index, std_regno, std_fullname, std_gender, std_batchno, dgree_program, std_subjectcomb, std_nic, std_dob, date_admission, current_address, permanent_address, mobile_tp_no, home_tp_no, std_email, std_profile_pic, current_level, user_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        $query = "INSERT INTO $this->stdTable(std_index,  std_fullname, std_gender, std_batchno,  std_nic, std_dob, date_admission, current_address, permanent_address, mobile_tp_no, home_tp_no, std_email, std_profile_pic, current_level, user_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
         $stmt = $this->conn->prepare($query);
-        $stmt->bind_param('sssisssssssssssssi', $userData['std_index'], $userData['std_regno'], $userData['std_fullname'], $userData['std_gender'], $userData['std_batchno'], $userData['dgree_program'], $userData['std_subjectcomb'], $userData['std_nic'], $userData['std_dob'], $userData['date_admission'], $userData['current_address'], $userData['permanent_address'], $userData['mobile_tp_no'], $userData['home_tp_no'], $userData['std_email'], $userData['std_profile_pic'], $userData['current_level'], $userId);
+        $stmt->bind_param('sssissssssssssi', $userData['std_index'], $userData['std_fullname'], $userData['std_gender'], $userData['std_batchno'], $userData['std_nic'], $userData['std_dob'], $userData['date_admission'], $userData['current_address'], $userData['permanent_address'], $userData['mobile_tp_no'], $userData['home_tp_no'], $userData['std_email'], $userData['std_profile_pic'], $userData['current_level'], $userId);
         if ($stmt->execute()) {
             return true;
         } else {
@@ -408,9 +407,9 @@ class User
 
     public function updateStudent($userId, $userData)
     {
-        $query = "UPDATE $this->stdTable SET std_index = ?, std_regno = ?, std_fullname = ?, std_gender = ?, std_batchno = ?, dgree_program = ?, std_subjectcomb = ?, std_nic = ?, std_dob = ?, date_admission = ?, current_address = ?, permanent_address = ?, mobile_tp_no = ?, home_tp_no = ?, std_email = ?, std_profile_pic = ?, current_level = ? WHERE user_id = ?";
+        $query = "UPDATE $this->stdTable SET std_index = ?,  std_fullname = ?, std_gender = ?, std_batchno = ?,   std_nic = ?, std_dob = ?, date_admission = ?, current_address = ?, permanent_address = ?, mobile_tp_no = ?, home_tp_no = ?, std_email = ?, std_profile_pic = ?, current_level = ? WHERE user_id = ?";
         $stmt = $this->conn->prepare($query);
-        $stmt->bind_param('sssisssssssssssssi', $userData['lecr_nic'], $userData['lecr_name'], $userData['lecr_mobile'], $userData['lecr_email'], $userData['lecr_gender'], $userData['lecr_address'], $userData['lecr_profile_pic'], $userId);
+        $stmt->bind_param('sssissssssssssi', $userData['std_index'], $userData['std_fullname'], $userData['std_gender'], $userData['std_batchno'], $userData['std_nic'], $userData['std_dob'], $userData['date_admission'], $userData['current_address'], $userData['permanent_address'], $userData['mobile_tp_no'], $userData['home_tp_no'], $userData['std_email'], $userData['std_profile_pic'], $userData['current_level'], $userId);
         if ($stmt->execute()) {
             return true;
         } else {
