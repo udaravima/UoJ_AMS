@@ -26,7 +26,7 @@ if ($user->isLoggedIn()) {
 
 if (isset($_POST['sign_in'])) {
 
-    $username = (isset($_POST['username'])) ? $_POST['username'] : null;
+    $username = (isset($_POST['reg-name'])) ? $_POST['reg-name'] : null;
     $password = (isset($_POST['user_password'])) ? $_POST['user_password'] : null;
     $rememberMe = (isset($_POST['rem_me'])) ? $_POST['rem_me'] : null;
 
@@ -78,9 +78,9 @@ include ROOT_PATH . '/php/include/content.php';
                      <p class="">Hello</p> 
                 </div> -->
                 <div class="form-floating">
-                    <input type="text" class="form-control" id="username" name="username" placeholder="2020csc000"
+                    <input type="text" class="form-control" id="reg-name" name="reg-name" placeholder="2020csc000"
                         required>
-                    <label for="username">Username</label>
+                    <label for="reg-name">Registration No:</label>
                 </div>
 
                 <div class="form-floating">

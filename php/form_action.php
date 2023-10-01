@@ -131,7 +131,7 @@ else if (isset($_POST['register'])) {
                     $errors[] = "Gender Invalid!";
                 }
             }
-            if (isset($_FILES["lecr_profile_pic"]) && !empty($_POST['lecr_nic'])) {
+            if (is_uploaded_file($_FILES["lecr_profile_pic"]["tmp_name"]) && !empty($_POST['lecr_nic'])) {
                 //TODO: get and upload photo
                 $picLocation = $util->storeProfilePic(ROOT_PATH . '/res/profiles/lecturer/', 'lecr_profile_pic', $_POST['lecr_nic']);
                 if ($picLocation != null && $picLocation) {
@@ -229,14 +229,13 @@ else if (isset($_POST['register'])) {
                 $userData['current_level'] = $_POST['current_level'];
             }
             // if (isset($_FILES["std_profile_pic"]) && $_FILES["std_profile_pic"]["error"] == 0) {
-            if (isset($_FILES["std_profile_pic"]) && !empty($_POST['std_nic'])) {
+            if (is_uploaded_file($_FILES["std_profile_pic"]["tmp_name"]) && !empty($_POST['std_nic'])) {
                 //TODO: get and upload photo
                 $picLocation = $util->storeProfilePic(ROOT_PATH . '/res/profiles/student/', 'std_profile_pic', $_POST['std_nic']);
                 if ($picLocation != null && $picLocation) {
                     $userData['std_profile_pic'] = SERVER_ROOT . "/res/profiles/student/" . basename($picLocation);
 
                 } else {
-                    // echo "<script>alert('Picture error')</script>"; // for debugging only
                     $userData['std_profile_pic'] = SERVER_ROOT . '/res/profiles/lecturer/default.png';
                     $errors[] = "Error Uploading Profile Picture";
                 }

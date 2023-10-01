@@ -12,8 +12,10 @@
                 <form action="<?php echo SERVER_ROOT; ?>/php/form_action.php" method="post" id="addClass">
                     <div class="form-group mt-3">
                         <label for="course_code">Course Code:</label>
-                        <select name="course_id" id="course_id" class="form-control">
+                        <select name="course_id" id="course_id" class="form-control" aria-label="course selection"
+                            title="course selection">
                             <?php
+                            //TODO: check following
                             //$courses = $lecr->getCourseList();
                             //while ($course = $courses->fetch_assoc()) {
                             //    echo "<option value='" . $course['course_id'] . "'>" . $course['course_code'] . "</option>";
@@ -53,7 +55,7 @@
             </div>
             <!-- Modal Footer -->
             <div class="modal-footer mt-5">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-class">Close</button>
                 <button type="button" onclick="exeSubmit('addClass')" class="btn btn-primary" name="submit_class"
                     id="sumbit_class">Add Class</button>
             </div>
@@ -88,7 +90,7 @@
             </div>
             <!-- Modal footer -->
             <div class="modal-footer mt-5">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-course">Close</button>
                 <button type="button" onclick="exeSubmit('addCourse')" class="btn btn-primary" name="submit_course"
                     id="submit_course">Add
                     Course</button>
@@ -116,8 +118,9 @@
                     <!-- <input type="hidden" name="user_id" id="user_id" value=""> -->
                     <div class="form-group mt-3">
                         <label for="username">Registration No:</label>
-                        <input type="text" class="form-control" id="username" name="username" placeholder="2020csc000"
-                            required>
+                        <input type="text" class="form-control" id="username" name="username"
+                            oninput="userAvailabilityCheck()" placeholder="2020csc000" required>
+                        <span id="availability_message"></span>
                     </div>
                     <div class="form-group mt-3">
                         <label for="password">Password:</label>
@@ -133,7 +136,8 @@
                     </div>
                     <div class="form-group mt-3">
                         <label for="user_role">User Role:</label>
-                        <select name="user_role" id="user_role" class="form-control" onchange="toggleFields()" required>
+                        <select name="user_role" id="user_role" class="form-control" onchange="toggleFields()"
+                            title="user-role" aria-label="Select user-role" required>
                             <option value='3' selected>Student</option>
                             <option value='1'>Lecturer</option>
                             <option value='2'>Instructor</option>
@@ -188,7 +192,8 @@
                         <!-- std_nic -->
                         <div class="form-group mt-3">
                             <label for="std_nic">NIC:</label>
-                            <input type="text" class="form-control" id="std_nic" name="std_nic">
+                            <input type="text" class="form-control" id="std_nic" name="std_nic"
+                                pattern="\d{9}(V|v)?$|^(\d{12})$">
                         </div>
                         <!-- std_dob -->
                         <div class="form-group mt-3">
@@ -244,7 +249,8 @@
                         <!-- lecr_nic -->
                         <div class="form-group mt-3">
                             <label for="lecr_nic">NIC:</label>
-                            <input type="text" class="form-control" id="lecr_nic" name="lecr_nic" >
+                            <input type="text" class="form-control" id="lecr_nic" name="lecr_nic"
+                                pattern="\d{9}(V|v)?$|^(\d{12})$">
                         </div>
                         <!-- lecr_name -->
                         <div class="form-group mt-3">
@@ -284,10 +290,15 @@
                     </div>
                     <input type="hidden" name="register" value="submit">
                 </form>
+                <div id="error-log" class="d-none alert alert-danger mt-3">
+                    <h5>Errors: </h5>
+                    <ul id="error-list" class="">
+                    </ul>
+                </div>
             </div>
             <!-- Modal Footer -->
             <div class="modal-footer mt-5">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-reg">Close</button>
                 <button type="button" onclick="exeSubmit('RegistrationForm')" class="btn btn-primary" name="register"
                     id="register">Register</button>
             </div>
@@ -296,10 +307,101 @@
 </div>
 
 <script>
-    function exeSubmit($id) {
-        document.getElementById($id).submit();
+    function exeSubmit(id) {
+
+        if (id == 'RegistrationForm') {
+            const username = document.getElementById("username");
+            const password = document.getElementById("password").value;
+            const confirm_password = document.getElementById("confirm_password").value;
+            const user_role = document.getElementById('user_role').value;
+            const maxSizeInBytes = 500 * 1024; //200 KB
+            var goFlag = true;
+            var errors = [];
+
+            if (user_role == '0' || user_role == '1' || user_role == '2') {
+                const lecr_nic = document.getElementById('lecr_nic');
+                if (lecr_nic.value.length != 10 && lecr_nic.value.length != 12) {
+                    errors.push('Invalid NIC');
+                    goFlag = false;
+                }
+                const lecr_mobile = document.getElementById('lecr_mobile');
+                if (lecr_mobile.value.length != 10) {
+                    errors.push('Invalid Mobile Number');
+                    goFlag = false;
+                }
+                const lecr_email = document.getElementById('lecr_email');
+                if (!lecr_email.value.includes('@') || !lecr_email.value.includes('.')) {
+                    errors.push('Invalid Email');
+                    goFlag = false;
+                }
+                const lecr_name = document.getElementById('lecr_name');
+                if (lecr_name.value.length < 5) {
+                    errors.push('Invalid Name');
+                    goFlag = false;
+                }
+                const profile = document.getElementById('lecr_profile_pic');
+                if (profile.files.length > 0 && profile.file[0].size > maxSizeInBytes) {
+                    errors.push('Upload a picture less than 500KB');
+                    goFlag = false;
+                }
+
+            } else if (user_role == '3') {
+                const profile = document.getElementById('std_profile_pic');
+                if (profile.files.length > 0 && profile.file[0].size > maxSizeInBytes) {
+                    errors.push('Upload a picture less than 500KB');
+                    goFlag = false;
+                }
+                const std_nic = document.getElementById('std_nic');
+                if (std_nic.value.length != 10 && std_nic.value.length != 12) {
+                    errors.push('Invalid NIC');
+                    goFlag = false;
+                }
+                const std_mobile = document.getElementById('mobile_tp_no');
+                if (std_mobile.value.length != 10) {
+                    errors.push('Invalid Mobile Number');
+                    goFlag = false;
+                }
+                const std_email = document.getElementById('std_email');
+                if (!std_email.value.includes('@') || !std_email.value.includes('.')) {
+                    errors.push('Invalid Email');
+                    goFlag = false;
+                }
+                const std_name = document.getElementById('std_fullname');
+                if (std_name.value.length < 5) {
+                    errors.push('Invalid Name');
+                    goFlag = false;
+                }
+                const std_index = document.getElementById('std_index');
+                if (std_index.value.length < 5) {
+                    errors.push('Invalid Index Number');
+                    goFlag = false;
+                }
+            } else {
+                errors.push('Invalid User Role');
+                goFlag = false;
+            }
+
+            if (password !== confirm_password || password.length < 8) {
+                errors.push('Password should be at least 8 chars and matched!');
+                goFlag = false;
+            }
+
+            if (goFlag) {
+                document.getElementById(id).submit();
+            } else {
+                var errorLog = document.getElementById("error-log");
+                errorLog.classList.remove("d-none");
+                var errorList = document.getElementById("error-list");
+                errorList.innerHTML = "";
+                errors.forEach(element => {
+                    errorList.innerHTML += "<li>" + element + "</li>";
+                });
+            }
+        } else {
+            document.getElementById(id).submit();
+        }
     }
-    
+
     function toggleFields() {
         var userType = document.getElementById("user_role").value;
         var studentFields = document.getElementById("std_fields");
@@ -310,7 +412,6 @@
 
         if (userType == 3) {
             document.getElementById('std_index').required = true;
-            // document.getElementById('std_regno').required = true;
             document.getElementById('std_fullname').required = true;
             document.getElementById('std_nic').required = true;
             document.getElementById('std_email').required = true;
@@ -367,37 +468,66 @@
         }
     }
 
-    document.getElementById('RegistrationForm').addEventListener('submit', function (event) {
-        event.preventDefault();
-        // const formData = document.getElementById('RegistrationForm');
-        const password = document.getElementById("password").value;
-        const confirm_password = document.getElementById("confirm_password").value;
-        const user_role = document.getElementById('user_role').value;
-        const maxSizeInBytes = 500 * 1024; //200 KB
-        var $goFlag = true;
+    function userAvailabilityCheck() {
+        var username = document.getElementById("username").value;
+        var message = document.getElementById("availability_message");
+        // Send an AJAX request to check the username availability
+        if (username.length > 5) {
+            $.ajax({
+                type: 'POST',
+                url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
+                data: { username: username },
+                dataType: 'json',
+                success: function (response) {
+                    if (response.available) {
+                        message.textContent = "Username is available";
+                        message.style.color = "green";
 
-        if (user_role == '0' || user_role == '1' || user_role == '2') {
-            const profile = document.getElementById['lecr_profile_pic'];
-            if (profile.files.length > 0 && profile.file[0].size > maxSizeInBytes) {
-                alert('Upload a picture less than 500KB');
-                $goFlag = false;
-            }
-        } else if (user_role == '3') {
-            const profile = document.getElementById['std_profile_pic'];
-            if (profile.files.length > 0 && profile.file[0].size > maxSizeInBytes) {
-                alert('Upload a picture less than 500KB');
-                $goFlag = false;
-            }
-        }
+                    } else {
+                        message.textContent = "Username is already taken";
+                        message.style.color = "red";
 
-        if (password !== confirm_password) {
-            alert('Password not matched!');
-            $goFlag = false;
+                    }
+                }
+            });
+
+        } else {
+            message.textContent = "Invalid Username!";
+            message.style.color = "red";
         }
-        if ($goFlag) {
-            this.submit();
-        }
-    });
+    }
+
+    // document.getElementById('RegistrationForm').addEventListener('submit', function (event) {
+    //     event.preventDefault();
+    //     // const formData = document.getElementById('RegistrationForm');
+    //     const password = document.getElementById("password").value;
+    //     const confirm_password = document.getElementById("confirm_password").value;
+    //     const user_role = document.getElementById('user_role').value;
+    //     const maxSizeInBytes = 500 * 1024; //200 KB
+    //     var $goFlag = true;
+
+    //     if (user_role == '0' || user_role == '1' || user_role == '2') {
+    //         const profile = document.getElementById('lecr_profile_pic');
+    //         if (profile.files.length > 0 && profile.file[0].size > maxSizeInBytes) {
+    //             alert('Upload a picture less than 500KB');
+    //             $goFlag = false;
+    //         }
+    //     } else if (user_role == '3') {
+    //         const profile = document.getElementById('std_profile_pic');
+    //         if (profile.files.length > 0 && profile.file[0].size > maxSizeInBytes) {
+    //             alert('Upload a picture less than 500KB');
+    //             $goFlag = false;
+    //         }
+    //     }
+
+    //     if (password !== confirm_password) {
+    //         alert('Password not matched!');
+    //         $goFlag = false;
+    //     }
+    //     if ($goFlag) {
+    //         this.submit();
+    //     }
+    // });
 
     document.getElementById('std_profile_pic').addEventListener('change', function () {
         const maxSizeInBytes = 500 * 1024; // 500KB
