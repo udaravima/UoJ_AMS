@@ -12,8 +12,10 @@
                 <form action="<?php echo SERVER_ROOT; ?>/php/form_action.php" method="post" id="addClass">
                     <div class="form-group mt-3">
                         <label for="course_code">Course Code:</label>
-                        <select name="course_id" id="course_id" class="form-control">
+                        <select name="course_id" id="course_id" class="form-control" aria-label="course selection"
+                            title="course selection">
                             <?php
+                            //TODO: check following
                             //$courses = $lecr->getCourseList();
                             //while ($course = $courses->fetch_assoc()) {
                             //    echo "<option value='" . $course['course_id'] . "'>" . $course['course_code'] . "</option>";
@@ -53,8 +55,8 @@
             </div>
             <!-- Modal Footer -->
             <div class="modal-footer mt-5">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close">Close</button>
-                <button type="button" onclick="extSubmit('addClass')" class="btn btn-primary" name="submit_class"
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-class">Close</button>
+                <button type="button" onclick="exeSubmit('addClass')" class="btn btn-primary" name="submit_class"
                     id="sumbit_class">Add Class</button>
             </div>
         </div>
@@ -88,8 +90,8 @@
             </div>
             <!-- Modal footer -->
             <div class="modal-footer mt-5">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close">Close</button>
-                <button type="button" onclick="extSubmit('addCourse')" class="btn btn-primary" name="submit_course"
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-course">Close</button>
+                <button type="button" onclick="exeSubmit('addCourse')" class="btn btn-primary" name="submit_course"
                     id="submit_course">Add
                     Course</button>
             </div>
@@ -113,11 +115,12 @@
             <div class="modal-body">
                 <form action="<?php echo SERVER_ROOT; ?>/php/form_action.php" method="post" id='RegistrationForm'
                     enctype="multipart/form-data">
-                    <!-- <input type="hidden" name="user_id" id="user_id" value=""> -->
+                    <input type="hidden" name="user_id" id="user_id" value=""> <!-- to pass userID -->
                     <div class="form-group mt-3">
-                        <label for="username">Username:</label>
-                        <input type="text" class="form-control" id="username" name="username" placeholder="2020csc000"
-                            required>
+                        <label for="username">Registration No:</label>
+                        <input type="text" class="form-control" id="username" name="username"
+                            oninput="userAvailabilityCheck()" placeholder="2020csc000" required>
+                        <span id="availability_message"></span>
                     </div>
                     <div class="form-group mt-3">
                         <label for="password">Password:</label>
@@ -133,7 +136,8 @@
                     </div>
                     <div class="form-group mt-3">
                         <label for="user_role">User Role:</label>
-                        <select name="user_role" id="user_role" class="form-control" onchange="toggleFields()">
+                        <select name="user_role" id="user_role" class="form-control" onchange="toggleFields()"
+                            title="user-role" aria-label="Select user-role" required>
                             <option value='3' selected>Student</option>
                             <option value='1'>Lecturer</option>
                             <option value='2'>Instructor</option>
@@ -161,22 +165,11 @@
                     }
                     ?>
                     <!-- std fields -->
-                    <div class="d-none" id="std_fields">
-                        <!-- <div class="form-floating">
-                            <input type="text" class="form-control" id="std_regNo" name="std_regNo"
-                                placeholder="2020csc000" required>
-                            <label for="std_regNo">Student Reg No</label>
-                        </div> -->
-
+                    <div class="" id="std_fields">
                         <!-- std_index -->
                         <div class="form-group mt-3">
                             <label for="std_index">Student Index:</label>
                             <input type="text" class="form-control" id="std_index" name="std_index">
-                        </div>
-                        <!-- std_regno -->
-                        <div class="form-group mt-3">
-                            <label for="std_regno">Student Registration Number:</label>
-                            <input type="text" class="form-control" id="std_regno" name="std_regno">
                         </div>
                         <!-- std_fullname -->
                         <div class="form-group mt-3">
@@ -187,8 +180,8 @@
                         <div class="form-group mt-3">
                             <label for="std_gender">Gender:</label>
                             <select class="form-control" id="std_gender" name="std_gender">
-                                <option value="0">Male</option>
-                                <option value="1">Female</option>
+                                <option value='0'>Male</option>
+                                <option value='1'>Female</option>
                             </select>
                         </div>
                         <!-- std_batchno -->
@@ -196,20 +189,11 @@
                             <label for="std_batchno">Batch Number:</label>
                             <input type="text" class="form-control" id="std_batchno" name="std_batchno">
                         </div>
-                        <!-- dgree_program -->
-                        <div class="form-group mt-3">
-                            <label for="dgree_program">Degree Program:</label>
-                            <input type="text" class="form-control" id="dgree_program" name="dgree_program">
-                        </div>
-                        <!-- std_subjectcomb -->
-                        <div class="form-group mt-3">
-                            <label for="std_subjectcomb">Subject Combination:</label>
-                            <input type="text" class="form-control" id="std_subjectcomb" name="std_subjectcomb">
-                        </div>
                         <!-- std_nic -->
                         <div class="form-group mt-3">
                             <label for="std_nic">NIC:</label>
-                            <input type="text" class="form-control" id="std_nic" name="std_nic">
+                            <input type="text" class="form-control" id="std_nic" name="std_nic"
+                                pattern="\d{9}(V|v)?$|^(\d{12})$">
                         </div>
                         <!-- std_dob -->
                         <div class="form-group mt-3">
@@ -265,7 +249,8 @@
                         <!-- lecr_nic -->
                         <div class="form-group mt-3">
                             <label for="lecr_nic">NIC:</label>
-                            <input type="text" class="form-control" id="lecr_nic" name="lecr_nic">
+                            <input type="text" class="form-control" id="lecr_nic" name="lecr_nic"
+                                pattern="\d{9}(V|v)?$|^(\d{12})$">
                         </div>
                         <!-- lecr_name -->
                         <div class="form-group mt-3">
@@ -303,22 +288,325 @@
                             <span id="lecr_profile_error"></span>
                         </div>
                     </div>
-                    <input type="hidden" name="register" value="submit">
+                    <input type="hidden" name="register" id="regSubmit" value="submit">
                 </form>
+                <div id="error-log" class="d-none alert alert-danger mt-3">
+                    <h5>Errors: </h5>
+                    <ul id="error-list" class="">
+                    </ul>
+                </div>
             </div>
             <!-- Modal Footer -->
             <div class="modal-footer mt-5">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close">Close</button>
-                <button type="button" onclick="extSubmit('RegistrationForm')" class="btn btn-primary" name="register"
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-reg">Close</button>
+                <button type="button" onclick="exeSubmit('RegistrationForm')" class="btn btn-primary" name="register"
                     id="register">Register</button>
+                <?php if ($user->isAdmin()) {
+                    echo "<button type='button' onclick='deleteRec(\"RegistrationForm\")' class='btn btn-danger d-none'
+                    name='deleteReg' id='deleteReg'>Delete</button>";
+                } ?>
+                <button type="button" onclick="updateRec('RegistrationForm')" class="btn btn-primary d-none"
+                    name="updateReg" id="updateReg">Update</button>
+
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    function extSubmit($id) {
-        document.getElementById($id).submit();
+    // Reload window when the modal closing
+    document.getElementById('add_class').addEventListener('hidden.bs.modal', function () {
+        window.location.reload();
+    });
+    document.getElementById('reg_user').addEventListener('hidden.bs.modal', function () {
+        window.location.reload();
+    });
+    // process for registration -> update and delete
+    document.getElementById('reg_user').addEventListener('show.bs.modal', function (event) {
+        var uid = $(event.relatedTarget).data("user-id");
+        if (typeof uid !== "undefined") {
+            document.getElementById('regSubmit').name = "updateReg";
+            document.getElementById('regSubmit').value = "update";
+            document.getElementById('user_id').value = uid;
+            // console.log(uid);
+            // var userForm = document.getElementById('RegistrationForm');
+            $.ajax({
+                method: 'POST',
+                url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
+                data: { uid: uid },
+                dataType: 'json',
+                success: function (response) {
+                    if (!response.error) {
+                        $('#username').val(response.username);
+                        $('#username').prop('readonly', true);
+                        $('#password-strength').html("<span class='text-success'>Leave empty to keep the current password</span>");
+                        $("#password").attr("required", false);
+                        $('#user_role').val(response.user_role);
+                        $('#user_role').prop('readonly', true);
+                        $('#updateReg').removeClass('d-none');
+                        <?php if ($user->isadmin()) {
+                            echo "
+                                $('#deleteReg').removeClass('d-none');
+                                $('#user_status').val(response.user_status);
+                            ";
+                        } ?>
+                        $('#register').addClass('d-none');
+                        if (response.user_role == 0 || response.user_role == 1 || response.user_role == 2) {
+                            $('#lecr_nic').val(response.lecr_nic);
+                            $('#lecr_mobile').val(response.lecr_mobile);
+                            $('#lecr_email').val(response.lecr_email);
+                            $('#lecr_name').val(response.lecr_name);
+                            $('#lecr_address').val(response.lecr_address);
+                            console.log(response.lecr_gender + "For debug Gender");
+                            $('#lecr_gender').val(response.lecr_gender);
+                            $('#lecr_profile_pic').prop('required', false);
+                            $('#lecr_profile_error').html("<span class='text-success'>Leave empty to keep the current profile picture</span>");
+                            $('#lecr_profile_error').removeClass('text-danger');
+                            $('#lecr_profile_error').addClass('text-success');
+                            $('#lecr_fields').removeClass('d-none');
+                            $('#std_fields').addClass('d-none');
+                        } else if (response.user_role == 3) {
+                            $('#std_index').val(response.std_index);
+                            $('#std_fullname').val(response.std_fullname);
+                            $('#mobile_tp_no').val(response.mobile_tp_no);
+                            $('#home_tp_no').val(response.home_tp_no);
+                            $('#std_email').val(response.std_email);
+                            $('#current_address').val(response.current_address);
+                            $('#permanent_address').val(response.permanent_address);
+                            $('#std_nic').val(response.std_nic);
+                            $('#std_dob').val(response.std_dob);
+                            // console.log(response.std_gender + "For debug Gender");
+                            $('#std_gender').val(response.std_gender);
+                            $('#std_batchno').val(response.std_batchno);
+                            $('#date_admission').val(response.date_admission);
+                            $('#current_level').val(response.current_level);
+                            $('#std_index').prop('readonly', true);
+
+                            $('#std_profile_pic').prop('required', false);
+                            $('#std_profile_error').html("<span class='text-success'>Leave empty to keep the current profile picture</span>");
+                            $('#std_profile_error').removeClass('text-danger');
+                            $('#std_profile_error').addClass('text-success');
+                            $('#std_profile_error').removeClass('d-none');
+                            $('#std_fields').removeClass('d-none');
+                            $('#lecr_fields').addClass('d-none');
+                        }
+                        <?php if (!$user->isAdmin())
+                            echo "
+                                $('#lecr_nic').prop('readonly', true);
+                                $('#lecr_mobile').prop('readonly', true);
+                                $('#lecr_email').prop('readonly', true);
+                                $('#std_email').prop('readonly', true);
+                                $('#std_nic').prop('readonly', true);
+                                $('#mobile_tp_no').prop('readonly', true);
+                                ";
+                        ?>
+                    } else {
+                        console.log(response.error);
+                    }
+                },
+                error: function () {
+                    console.log('error');
+                }
+            });
+        } else {
+            console.log("no data");
+        }
+    });
+
+    // Execute submission with register button with validation
+    function exeSubmit(id) {
+        // for user registration
+        if (id == 'RegistrationForm') {
+            const username = document.getElementById("username");
+            const password = document.getElementById("password").value;
+            const confirm_password = document.getElementById("confirm_password").value;
+            const user_role = document.getElementById('user_role').value;
+            const maxSizeInBytes = 1024 * 1024; //200 KB
+            var goFlag = true;
+            var errors = [];
+
+            if (user_role == '0' || user_role == '1' || user_role == '2') {
+                const lecr_nic = document.getElementById('lecr_nic');
+                if (lecr_nic.value.length != 10 && lecr_nic.value.length != 12) {
+                    errors.push('Invalid NIC');
+                    goFlag = false;
+                }
+                const lecr_mobile = document.getElementById('lecr_mobile');
+                if (lecr_mobile.value.length != 10) {
+                    errors.push('Invalid Mobile Number');
+                    goFlag = false;
+                }
+                const lecr_email = document.getElementById('lecr_email');
+                if (!lecr_email.value.includes('@') || !lecr_email.value.includes('.')) {
+                    errors.push('Invalid Email');
+                    goFlag = false;
+                }
+                const lecr_name = document.getElementById('lecr_name');
+                if (lecr_name.value.length < 5) {
+                    errors.push('Invalid Name');
+                    goFlag = false;
+                }
+                const profile = document.getElementById('lecr_profile_pic');
+                if (profile.files.length > 0 && profile.files[0].size > maxSizeInBytes) {
+                    errors.push('Upload a picture less than 1024KB');
+                    goFlag = false;
+                }
+
+            } else if (user_role == '3') {
+                const profile = document.getElementById('std_profile_pic');
+                if (profile.files.length > 0 && profile.files[0].size > maxSizeInBytes) {
+                    errors.push('Upload a picture less than 1024KB');
+                    goFlag = false;
+                }
+                const std_nic = document.getElementById('std_nic');
+                if (std_nic.value.length != 10 && std_nic.value.length != 12) {
+                    errors.push('Invalid NIC');
+                    goFlag = false;
+                }
+                const std_mobile = document.getElementById('mobile_tp_no');
+                if (std_mobile.value.length != 10) {
+                    errors.push('Invalid Mobile Number');
+                    goFlag = false;
+                }
+                const std_email = document.getElementById('std_email');
+                if (!std_email.value.includes('@') || !std_email.value.includes('.')) {
+                    errors.push('Invalid Email');
+                    goFlag = false;
+                }
+                const std_name = document.getElementById('std_fullname');
+                if (std_name.value.length < 5) {
+                    errors.push('Invalid Name');
+                    goFlag = false;
+                }
+                const std_index = document.getElementById('std_index');
+                if (std_index.value.length < 5) {
+                    errors.push('Invalid Index Number');
+                    goFlag = false;
+                }
+            } else {
+                errors.push('Invalid User Role');
+                goFlag = false;
+            }
+
+            if (password !== confirm_password || password.length < 8) {
+                errors.push('Password should be at least 8 chars and matched!');
+                goFlag = false;
+            }
+
+            if (goFlag) {
+                document.getElementById(id).submit();
+            } else {
+                var errorLog = document.getElementById("error-log");
+                errorLog.classList.remove("d-none");
+                var errorList = document.getElementById("error-list");
+                errorList.innerHTML = "";
+                errors.forEach(element => {
+                    errorList.innerHTML += "<li>" + element + "</li>";
+                });
+            }
+        } else {
+            document.getElementById(id).submit();
+        }
+    }
+
+    // execute submission for update records
+    function updateRec(formId) {
+        // for user update dialog
+        if (formId == 'RegistrationForm') {
+            // const username = document.getElementById("username");
+            const password = document.getElementById("password").value;
+            const confirm_password = document.getElementById("confirm_password").value;
+            const user_role = document.getElementById('user_role').value;
+            const maxSizeInBytes = 1024 * 1024; //200 KB
+            var goFlag = true;
+            var errors = [];
+            console.log(password);
+            if (password != null && password != "") {
+                if (password !== confirm_password || password.length < 8) {
+                    errors.push('Password should be at least 8 chars and matched!');
+                    goFlag = false;
+                }
+            }
+            if (user_role == '0' || user_role == '1' || user_role == '2') {
+                const lecr_nic = document.getElementById('lecr_nic');
+                if (lecr_nic.value.length != 10 && lecr_nic.value.length != 12) {
+                    errors.push('Invalid NIC');
+                    goFlag = false;
+                }
+                const lecr_mobile = document.getElementById('lecr_mobile');
+                if (lecr_mobile.value.length != 10) {
+                    errors.push('Invalid Mobile Number');
+                    goFlag = false;
+                }
+                const lecr_email = document.getElementById('lecr_email');
+                if (!lecr_email.value.includes('@') || !lecr_email.value.includes('.')) {
+                    errors.push('Invalid Email');
+                    goFlag = false;
+                }
+                const lecr_name = document.getElementById('lecr_name');
+                if (lecr_name.value.length < 5) {
+                    errors.push('Invalid Name');
+                    goFlag = false;
+                }
+                const profile = document.getElementById('lecr_profile_pic');
+                if (profile.files.length > 0 && profile.files[0].size > maxSizeInBytes) {
+                    errors.push('Upload a picture less than 1024KB');
+                    goFlag = false;
+                }
+
+            } else if (user_role == '3') {
+
+                const profile = document.getElementById('std_profile_pic');
+                if (profile.files.length > 0 && profile.files[0].size > maxSizeInBytes) {
+                    errors.push('Upload a picture less than 1024KB');
+                    goFlag = false;
+                }
+                const std_nic = document.getElementById('std_nic');
+                if (std_nic.value.length != 10 && std_nic.value.length != 12) {
+                    errors.push('Invalid NIC');
+                    goFlag = false;
+                }
+                const std_mobile = document.getElementById('mobile_tp_no');
+                if (std_mobile.value.length != 10) {
+                    errors.push('Invalid Mobile Number');
+                    goFlag = false;
+                }
+                const std_email = document.getElementById('std_email');
+                if (!std_email.value.includes('@') || !std_email.value.includes('.')) {
+                    errors.push('Invalid Email');
+                    goFlag = false;
+                }
+                const std_name = document.getElementById('std_fullname');
+                if (std_name.value.length < 5) {
+                    errors.push('Invalid Name');
+                    goFlag = false;
+                }
+            }
+
+            if (goFlag) {
+                document.getElementById(formId).submit();
+            } else {
+                var errorLog = document.getElementById("error-log");
+                errorLog.classList.remove("d-none");
+                var errorList = document.getElementById("error-list");
+                errorList.innerHTML = "";
+                errors.forEach(element => {
+                    errorList.innerHTML += "<li>" + element + "</li>";
+                });
+            }
+        }
+    }
+
+    // execute submission for delete records
+    function deleteRec(formId) {
+        if (formId == 'RegistrationForm') {
+            document.getElementById('regSubmit').name = "deleteReg";
+            document.getElementById('regSubmit').value = "delete";
+            var cfm = confirm('You sure you want to delete?');
+            if (cfm) {
+                document.getElementById(formId).submit();
+            }
+        }
     }
     function toggleFields() {
         var userType = document.getElementById("user_role").value;
@@ -330,9 +618,9 @@
 
         if (userType == 3) {
             document.getElementById('std_index').required = true;
-            document.getElementById('std_regno').required = true;
             document.getElementById('std_fullname').required = true;
             document.getElementById('std_nic').required = true;
+            document.getElementById('std_email').required = true;
             document.getElementById('mobile_tp_no').required = true;
             studentFields.classList.remove("d-none");
         } else if (userType == 2 || userType == 1 || userType == 0) {
@@ -386,45 +674,42 @@
         }
     }
 
-    document.getElementById('RegistrationForm').addEventListener('submit', function (event) {
-        event.preventDefault();
-        // const formData = document.getElementById('RegistrationForm');
-        const password = document.getElementById("password").value;
-        const confirm_password = document.getElementById("confirm_password").value;
-        const user_role = document.getElementById('user_role').value;
-        const maxSizeInBytes = 500 * 1024; //200 KB
-        var $goFlag = true;
+    function userAvailabilityCheck() {
+        var username = document.getElementById("username").value;
+        var message = document.getElementById("availability_message");
+        // Send an AJAX request to check the username availability
+        if (username.length > 5) {
+            $.ajax({
+                type: 'POST',
+                url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
+                data: { username: username },
+                dataType: 'json',
+                success: function (response) {
+                    if (response.available) {
+                        message.textContent = "Username is available";
+                        message.style.color = "green";
 
-        if (user_role == '0' || user_role == '1' || user_role == '2') {
-            const profile = document.getElementById['lecr_profile_pic'];
-            if (profile.files.length > 0 && profile.file[0].size > maxSizeInBytes) {
-                alert('Upload a picture less than 500KB');
-                $goFlag = false;
-            }
-        } else if (user_role == '3') {
-            const profile = document.getElementById['std_profile_pic'];
-            if (profile.files.length > 0 && profile.file[0].size > maxSizeInBytes) {
-                alert('Upload a picture less than 500KB');
-                $goFlag = false;
-            }
-        }
+                    } else {
+                        message.textContent = "Username is already taken";
+                        message.style.color = "red";
 
-        if (password !== confirm_password) {
-            alert('Password not matched!');
-            $goFlag = false;
+                    }
+                }
+            });
+
+        } else {
+            message.textContent = "Invalid Username!";
+            message.style.color = "red";
         }
-        if ($goFlag) {
-            this.submit();
-        }
-    });
+    }
 
     document.getElementById('std_profile_pic').addEventListener('change', function () {
-        const maxSizeInBytes = 500 * 1024; // 500KB
+        const maxSizeInBytes = 1024 * 1024; // 1024KB
         const file = this.files[0];
         if (file && file.size > maxSizeInBytes) {
             const error_label = document.getElementById('std_profile_error');
             error_label.textContent = "File size is too large";
-            error_label.style.color = "red";
+            error_label.addClass = "text-danger";
         } else {
             const error_label = document.getElementById('std_profile_error');
             error_label.textContent = "";
@@ -432,12 +717,12 @@
     });
 
     document.getElementById('lecr_profile_pic').addEventListener('change', function () {
-        const maxSizeInBytes = 500 * 1024; // 500KB
+        const maxSizeInBytes = 1024 * 1024; // 1024KB
         const file = this.files[0];
         if (file && file.size > maxSizeInBytes) {
             const error_label = document.getElementById('lecr_profile_error');
             error_label.textContent = "File size is too large";
-            error_label.style.color = "red";
+            error_label.addClass = "text-danger";
         } else {
             const error_label = document.getElementById('lecr_profile_error');
             error_label.textContent = "";

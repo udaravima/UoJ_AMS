@@ -1,4 +1,5 @@
 <?php
+// include_once "../../config.php";
 class Utils
 {
     public function __construct()
@@ -13,9 +14,9 @@ class Utils
         $processedName = '';
         foreach ($nameParts as $index => $namePart) {
             if ($index === count($nameParts) - 1) {
-                $processedName .= $namePart . ".";
+                $processedName .= ucfirst($namePart) . "";
             } else {
-                $processedName .= substr($namePart, 0, 1) . ". ";
+                $processedName .= ucfirst(substr($namePart, 0, 1)) . ". ";
             }
         }
         return $processedName;
@@ -33,12 +34,21 @@ class Utils
                     </div>
                     <div class='modal-body'>
                         <div id='login-alert' class='" . (($type != '') ? (($color != '') ? "$type $type-$color" : "$type") : " ") . "'>
-                            <p class=''>$message</p>
+                            <p class=''>
+                            <ul>
+                            ";
+        if ($message) {
+            foreach ($message as $msg) {
+                $messageModal .= "<li>$msg</li>";
+            }
+        }
+        $messageModal .= "</ul>
+                            </p>
                         </div>
                     </div>
                     <div class='modal-footer'>
                         <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>
-                        <!-- <button type='button' class='btn btn-primary'>Save changes</button> -->
+                        <!-- <a href='/index.php'><button type='button' class='btn btn-primary'>Save changes</button></a> -->
                     </div>
                 </div>
             </div>
@@ -49,6 +59,7 @@ class Utils
                     loginModal.show();
                 });
         </script>
+        
         ";
         return $messageModal;
     }

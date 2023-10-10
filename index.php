@@ -1,5 +1,6 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/MyAttendanceSys/config.php';
+// require_once $_SERVER['DOCUMENT_ROOT'] . '/MyAttendanceSys/config.php';
+require_once 'config.php';
 include_once ROOT_PATH . '/php/config/Database.php'; // Carefull with location!
 include_once ROOT_PATH . '/php/class/Utils.php';
 include_once ROOT_PATH . '/php/class/User.php';
@@ -25,7 +26,7 @@ if ($user->isLoggedIn()) {
 
 if (isset($_POST['sign_in'])) {
 
-    $username = (isset($_POST['username'])) ? $_POST['username'] : null;
+    $username = (isset($_POST['reg-name'])) ? $_POST['reg-name'] : null;
     $password = (isset($_POST['user_password'])) ? $_POST['user_password'] : null;
     $rememberMe = (isset($_POST['rem_me'])) ? $_POST['rem_me'] : null;
 
@@ -44,7 +45,7 @@ if (isset($_POST['sign_in'])) {
 
     } else {
         // get the message and preview on modal
-        $message = $user->getLoginMessage();
+        $message[] = $user->getLoginMessage();
         $_POST = array();
         $_SESSION["error"] = $message;
         // user message modal
@@ -77,9 +78,9 @@ include ROOT_PATH . '/php/include/content.php';
                      <p class="">Hello</p> 
                 </div> -->
                 <div class="form-floating">
-                    <input type="text" class="form-control" id="username" name="username" placeholder="2020csc000"
-                        required>
-                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="reg-name" name="reg-name" placeholder="2020csc000"
+                        required autofocus>
+                    <label for="reg-name">Registration No:</label>
                 </div>
 
                 <div class="form-floating">
