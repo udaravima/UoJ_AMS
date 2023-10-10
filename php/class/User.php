@@ -32,9 +32,9 @@ class User
         $processedName = '';
         foreach ($nameParts as $index => $namePart) {
             if ($index === count($nameParts) - 1) {
-                $processedName .= $namePart;
+                $processedName .= ucfirst($namePart);
             } else {
-                $processedName .= substr($namePart, 0, 1) . ". ";
+                $processedName .= ucfirst(substr($namePart, 0, 1)) . " ";
             }
         }
         return $processedName;
@@ -171,6 +171,17 @@ class User
         }
     }
 
+    public function retrieveUserRole($userId)
+    {
+        $query = "SELECT user_role FROM {$this->userTable} WHERE user_id =?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc()['user_role'];
+        }
+    }
     public function isUsernameAvailable($username)
     {
         $query = "SELECT * FROM {$this->userTable} WHERE username=?";
@@ -182,6 +193,20 @@ class User
             return false;
         } else {
             return true;
+        }
+    }
+
+    public function isUserIdExist($userId)
+    {
+        $query = "SELECT * FROM {$this->userTable} WHERE user_id=?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            return true;
+        } else {
+            return false;
         }
     }
     public function isLoggedIn()
@@ -250,7 +275,7 @@ class User
         if (isset($order['column'])) {
             $query .= " ORDER BY " . $order['column'] . ' ' . $order['dir'];
         } else {
-            $query .= " ORDER BY std.std_fullname ASC";
+            $query .= " ORDER BY users.username ASC";
         }
         if (isset($order['offset']) && $order['offset'] != -1) {
             $query .= " LIMIT " . $order['limit'] . ' OFFSET ' . $order['offset'];
@@ -270,7 +295,7 @@ class User
         if (isset($order['column'])) {
             $query .= " ORDER BY " . $order['column'] . ' ' . $order['dir'];
         } else {
-            $query .= " ORDER BY lecr.lecr_name ASC";
+            $query .= " ORDER BY users.username ASC";
         }
         if (isset($order['offset']) && $order['offset'] != -1) {
             $query .= " LIMIT " . $order['limit'] . ' OFFSET ' . $order['offset'];
@@ -357,34 +382,49 @@ class User
         }
     }
 
-    public function editUser($userId, $password, $userRole, $userStatus, $userData)
+    public function editUser($userId, $password, $userStatus, $userData)
     {
-        $this->updateUser($userId, $password, $userStatus);
-        if ($userRole == 0 || $userRole == 1 || $userRole == 2) {
-            $this->updateLecturer($userId, $userData);
-        } else if ($userRole == 3) {
-            $this->updateStudent($userId, $userData);
+        $userRole = $this->retrieveUserRole($userId);
+        if (!empty($password)) {
+            if (!($this->changeUserPassword($userId, $password))) {
+                return false;
+            }
         }
-
+        if (!empty($userStatus) && $this->isAdmin()) {
+            if (!($this->updateUser($userId, $userStatus))) {
+                return false;
+            }
+        }
+        if ($userRole == 0 || $userRole == 1 || $userRole == 2) {
+            if (!($this->updateLecturer($userId, $userData))) {
+                return false;
+            }
+        } else if ($userRole == 3) {
+            if (!($this->updateStudent($userId, $userData))) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    public function updateUser($userId, $password, $userStatus)
+    public function changeUserPassword($userId, $password)
     {
-        $query = "UPDATE $this->userTable SET user_status = ?";
-
-        if (!empty($password)) {
-            $query .= ", user_password = ?, user_salt = ?";
-        }
-
-        $query .= " WHERE user_id = ?";
+        $query = "UPDATE $this->userTable SET user_password = ?, user_salt = ? WHERE user_id = ?";
         $stmt = $this->conn->prepare($query);
-        if ($password) {
-            $salt = bin2hex(random_bytes(16));
-            $hashedPassword = password_hash($password . $salt, PASSWORD_BCRYPT);
-            $stmt->bind_param('issi', $userStatus, $hashedPassword, $salt, $userId);
+        $salt = bin2hex(random_bytes(16));
+        $hashedPassword = password_hash($password . $salt, PASSWORD_BCRYPT);
+        $stmt->bind_param('ssi', $hashedPassword, $salt, $userId);
+        if ($stmt->execute()) {
+            return true;
         } else {
-            $stmt->bind_param('ii', $userStatus, $userId);
+            return false;
         }
+    }
+    public function updateUser($userId, $userStatus)
+    {
+        $query = "UPDATE $this->userTable SET user_status = ? WHERE user_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('ii', $userStatus, $userId);
 
         if ($stmt->execute()) {
             return true;
@@ -417,7 +457,7 @@ class User
         }
     }
 
-    public function delete($userId)
+    public function deleteUser($userId)
     {
         $userTable = $this->userTable;
         $query = "DELETE FROM $userTable WHERE user_id = ?";

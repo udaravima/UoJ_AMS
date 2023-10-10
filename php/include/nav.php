@@ -1,3 +1,7 @@
+<?php
+include_once ROOT_PATH . '/php/include/modal_form.php';
+
+?>
 <nav class="navbar navbar-expand-md fixed-top navbar-light mt-0 mb-5">
     <div class="container-md rounded">
         <a class="navbar-brand" href="<?php echo SERVER_ROOT; ?>/index.php">
@@ -54,8 +58,8 @@
                     </strong>
                 </a>
                 <ul class="dropdown-menu text-small shadow">
-                    <li><a class="dropdown-item" href="#">New project...</a></li>
-                    <li><a class="dropdown-item" href="#">Settings</a></li>
+                    <!-- <li><a class="dropdown-item" href="#">New project...</a></li> -->
+                    <!-- <li><a class="dropdown-item" href="#">Settings</a></li> -->
                     <li><a class="dropdown-item" data-bs-toggle="offcanvas" aria-controls="profileOffcanvas"
                             href="#profileOffcanvas" role="button">Profile</a></li>
                     <li>
@@ -98,16 +102,13 @@
                     <li class='list-group-item'>Gender: {$user->getGenderStr($userDetails['lecr_gender'])}</li>
                     <li class='list-group-item'>Address: {$userDetails['lecr_address']}</li>";
                     echo $lecrInfoDsp;
-                } else if ($_SESSION['$user_role'] == '3') {
+                } else if ($_SESSION['user_role'] == '3') {
                     $stdInfoDsp = "
                     <li class='list-group-item'>Current Level: {$userDetails['current_level']}</li>
                     <li class='list-group-item'>Batch No: {$userDetails['std_batchno']}</li>
                     <li class='list-group-item'>Index No: {$userDetails['std_index']}</li>
-                    <li class='list-group-item'>Registration No: {$userDetails['std_regno']}</li>
                     <li class='list-group-item'>Full Name: {$userDetails['std_fullname']}</li>
                     <li class='list-group-item'>Gender: {$user->getGenderStr($userDetails['std_gender'])}</li>
-                    <li class='list-group-item'>Degree Program: {$userDetails['degree_program']}</li>
-                    <li class='list-group-item'>Subject Combination: {$userDetails['std_subjectcom']}</li>
                     <li class='list-group-item'>NIC No: {$userDetails['std_nic']}</li>
                     <li class='list-group-item'>Date of Birth: {$userDetails['std_dob']}</li>
                     <li class='list-group-item'>Date of Admission: {$userDetails['date_admission']}</li>
@@ -122,7 +123,9 @@
             </ul>
 
             <div class="card-body">
-                <a href="#" class="btn btn-primary">Edit Profile</a>
+                <button class="btn btn-primary" data-bs-toggle='modal' data-bs-target='#reg_user'
+                    data-user-id='<?php echo $_SESSION['user_id'] ?>'>Edit
+                    Profile</button>
                 <a href="<?php echo SERVER_ROOT; ?>/php/logout.php" class="btn btn-secondary">Logout</a>
             </div>
         </div>

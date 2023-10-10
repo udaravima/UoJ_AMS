@@ -79,7 +79,7 @@ include ROOT_PATH . '/php/include/content.php';
                 </div> -->
                 <div class="form-floating">
                     <input type="text" class="form-control" id="reg-name" name="reg-name" placeholder="2020csc000"
-                        required>
+                        required autofocus>
                     <label for="reg-name">Registration No:</label>
                 </div>
 

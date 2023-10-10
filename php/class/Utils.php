@@ -14,9 +14,9 @@ class Utils
         $processedName = '';
         foreach ($nameParts as $index => $namePart) {
             if ($index === count($nameParts) - 1) {
-                $processedName .= $namePart . "";
+                $processedName .= ucfirst($namePart) . "";
             } else {
-                $processedName .= substr($namePart, 0, 1) . ". ";
+                $processedName .= ucfirst(substr($namePart, 0, 1)) . ". ";
             }
         }
         return $processedName;

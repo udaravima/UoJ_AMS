@@ -164,13 +164,6 @@ else if (isset($_POST['register'])) {
                     $errors[] = "Gender format invalid";
                 }
             }
-            if (!empty($_POST['std_address'])) {
-                if (preg_match("/^[a-zA-Z0-9\/, ]+$/", $_POST['std_address'])) {
-                    $userData['std_address'] = $_POST['std_address'];
-                } else {
-                    $errors[] = "Address is required and should contain only letters, numbers, spaces and / or ,";
-                }
-            }
             if (!empty($_POST['std_batchno'])) {
                 $userData['std_batchno'] = $_POST['std_batchno'];
             }
@@ -252,6 +245,268 @@ else if (isset($_POST['register'])) {
         $errors[] = "Username already exists";
     }
 
+} else if (isset($_POST['updateReg'])) {
+    $userId = $_POST['user_id'];
+    if ($user->isAdmin() || $_SESSION['user_id'] == $userId) {
+
+        //to Store userData
+        $userData = array();
+        $user_role = $user->retrieveUserRole($userId);
+        $userDefault = $user->retrieveUserDetails($userId);
+        $user_status = $userDefault['user_status'];
+
+        if (!empty($_POST['password'])) {
+            $password = $_POST['password'];
+        } else {
+            $password = null;
+        }
+
+        if ($user->isAdmin()) {
+            if (!empty($_POST['user_status']) && $user->isAdmin()) {
+                if (preg_match("/^[0-4]{1}$/", $_POST['user_status'])) {
+                    $user_status = $_POST['user_status'];
+                } else {
+                    $errors[] = "Status format invalid!";
+                }
+            } else {
+                $user_status = null;
+            }
+        }
+
+        // --------------- To lecture data --> userData -------------------------
+        if ($user_role == 0 || $user_role == 1 || $user_role == 2) {
+            // Following has to change with admin privilages
+            if ($user->isAdmin()) {
+                if (!empty($_POST['lecr_nic'])) {
+                    if (preg_match("/^\d{9}(V|v)?$|^(\d{12})$/", $_POST['lecr_nic'])) {
+                        $userData['lecr_nic'] = $_POST['lecr_nic'];
+                    } else {
+                        $errors[] = "NIC should contain only 9 digits and V or 12 digits.";
+                    }
+                } else {
+                    $userData['lecr_nic'] = $userDefault['lecr_nic'];
+                }
+
+                if (!empty($_POST['lecr_email'])) {
+                    if (filter_var($_POST['lecr_email'], FILTER_VALIDATE_EMAIL)) {
+                        $userData['lecr_email'] = $_POST['lecr_email'];
+                    } else {
+                        $errors[] = "Email is required and should be valid.";
+                    }
+                } else {
+                    $userData['lecr_email'] = $userDefault['lecr_email'];
+                }
+
+                if (!empty($_POST['lecr_mobile'])) {
+                    if (preg_match("/^\d{10}$/", $_POST['lecr_mobile'])) {
+                        $userData['lecr_mobile'] = $_POST['lecr_mobile'];
+                    } else {
+                        $errors[] = "Mobile number is required and should contain only 10 digits.";
+                    }
+                } else {
+                    $userData['lecr_mobile'] = $userDefault['lecr_mobile'];
+                }
+
+            } else {
+                $userData['lecr_nic'] = $userDefault['lecr_nic'];
+                $userData['lecr_email'] = $userDefault['lecr_email'];
+                $userData['lecr_mobile'] = $userDefault['lecr_mobile'];
+            }
+
+            if (!empty($_POST['lecr_name'])) {
+                if (preg_match("/^[a-zA-Z ]*$/", $_POST['lecr_name'])) {
+                    $userData['lecr_name'] = $_POST['lecr_name'];
+                } else {
+                    $errors[] = "Name should contain only letters and whitespaces.";
+                }
+            } else {
+                $userData['lecr_name'] = $userDefault['lecr_name'];
+            }
+
+            if (!empty($_POST['lecr_address'])) {
+                if (preg_match("/^[a-zA-Z0-9\/, ]+$/", $_POST['lecr_address'])) {
+                    $userData['lecr_address'] = $_POST['lecr_address'];
+                } else {
+                    $errors[] = "Address is required and should contain only letters, numbers, spaces and / or ,";
+                }
+            } else {
+                $userData['lecr_address'] = $userDefault['lecr_address'];
+            }
+
+            if (is_uploaded_file($_FILES["lecr_profile_pic"]["tmp_name"])) {
+                //TODO: get and upload photo
+                $picLocation = $util->storeProfilePic(ROOT_PATH . '/res/profiles/lecturer/', 'lecr_profile_pic', $userData['lecr_nic']);
+                if ($picLocation != null && $picLocation) {
+                    $userData['lecr_profile_pic'] = SERVER_ROOT . "/res/profiles/lecturer/" . basename($picLocation);
+                } else {
+                    $userData['lecr_profile_pic'] = SERVER_ROOT . '/res/profiles/lecturer/default.png';
+                    $errors[] = "Error Uploading Profile Picture";
+                }
+            } else {
+                $userData['lecr_profile_pic'] = $userDefault['lecr_profile_pic'];
+            }
+            // --------------- End of To lecture data --> userData ----------------------
+            //  ----------------------------- To Student data --> userData --------------------------------
+
+        } else if ($user_role == 3) {
+            $userData['std_index'] = $userDefault['std_index'];
+
+            // Some details need admin privillages
+            if ($user->isAdmin()) {
+                if (!empty($_POST['std_nic'])) {
+                    if (preg_match("/^\d{9}(V|v)?$|^(\d{12})$/", $_POST['std_nic'])) {
+                        $userData['std_nic'] = $_POST['std_nic'];
+                    } else {
+                        $errors[] = "NIC is required and should contain only 9 digits and V or 12 digits.";
+                    }
+                } else {
+                    $userData['std_nic'] = $userDefault['std_nic'];
+                }
+
+                if (!empty($_POST['mobile_tp_no'])) {
+                    if (preg_match("/^\d{10}$/", $_POST['mobile_tp_no'])) {
+                        $userData['mobile_tp_no'] = $_POST['mobile_tp_no'];
+                    } else {
+                        $errors[] = "Mobile number is required and should contain only 10 digits.";
+                    }
+                } else {
+                    $userData['mobile_tp_no'] = $userDefault['mobile_tp_no'];
+                }
+
+                if (!empty($_POST['std_email'])) {
+                    if (filter_var($_POST['std_email'], FILTER_VALIDATE_EMAIL)) {
+                        $userData['std_email'] = $_POST['std_email'];
+                    } else {
+                        $errors[] = "Email is required and should be valid.";
+                    }
+                } else {
+                    $userData['std_email'] = $userDefault['std_email'];
+                }
+
+            } else {
+                $userData['std_nic'] = $userDefault['std_nic'];
+                $userData['mobile_tp_no'] = $userDefault['mobile_tp_no'];
+                $userData['std_email'] = $userDefault['std_email'];
+            }
+
+            if (!empty($_POST['std_fullname'])) {
+                if (preg_match("/^[A-Za-z ]*$/", $_POST['std_fullname'])) {
+                    $userData['std_fullname'] = $_POST['std_fullname'];
+                } else {
+                    $errors[] = "Name should contain only letters and whitespaces.";
+                }
+            } else {
+                $userData['std_fullname'] = $userDefault['std_fullname'];
+            }
+
+            if (!empty($_POST['std_gender'])) {
+                if (preg_match("/^[0-2]{1}$/", $_POST['std_gender'])) {
+                    $userData['std_gender'] = $_POST['std_gender'];
+                } else {
+                    $errors[] = "Gender format invalid";
+                }
+            } else {
+                $userData['std_gender'] = $userDefault['std_gender'];
+            }
+
+            if (!empty($_POST['std_batchno'])) {
+                $userData['std_batchno'] = $_POST['std_batchno'];
+            } else {
+                $userData['std_batchno'] = $userDefault['std_batchno'];
+            }
+
+            if (!empty($_POST['std_dob'])) {
+                if (preg_match("/^\d{4}-\d{2}-\d{2}$/", $_POST['std_dob'])) {
+                    $userData['std_dob'] = $_POST['std_dob'];
+                } else {
+                    $errors[] = "Date of Birth format invalid";
+                }
+            } else {
+                $userData['std_dob'] = $userDefault['std_dob'];
+            }
+
+            if (!empty($_POST['date_admission'])) {
+                if (preg_match("/^\d{4}-\d{2}-\d{2}$/", $_POST['date_addmission'])) {
+                    $userData['date_admission'] = $_POST['date_admission'];
+                } else {
+                    $errors[] = "Date of Admission format invalid";
+                }
+            } else {
+                $userData['date_admission'] = $userDefault['date_admission'];
+            }
+
+            if (!empty($_POST['current_address'])) {
+                if (preg_match("/^[a-zA-Z0-9\/, ]+$/", $_POST['current_address'])) {
+                    $userData['current_address'] = $_POST['current_address'];
+                } else {
+                    $errors[] = "Address should contain only letters, numbers, spaces and / or ,";
+                }
+            } else {
+                $userData['current_address'] = $userDefault['current_address'];
+            }
+            if (!empty($_POST['permanent_address'])) {
+                if (preg_match("/^[a-zA-Z0-9\/, ]+$/", $_POST['permanent_address'])) {
+                    $userData['permanent_address'] = $_POST['permanent_address'];
+                } else {
+                    $errors[] = "Address should contain only letters, numbers, spaces and / or ,";
+                }
+            } else {
+                $userData['permanent_address'] = $userDefault['permanent_address'];
+            }
+
+            if (!empty($_POST['home_tp_no'])) {
+                if (preg_match("/^\d{10}$/", $_POST['home_tp_no'])) {
+                    $userData['home_tp_no'] = $_POST['home_tp_no'];
+                } else {
+                    $errors[] = "Home number is required and should contain only 10 digits.";
+                }
+            } else {
+                $userData['home_tp_no'] = $userDefault['home_tp_no'];
+            }
+
+            if (!empty($_POST['current_level'])) {
+                $userData['current_level'] = $_POST['current_level'];
+            } else {
+                $userData['current_level'] = $userDefault['current_level'];
+            }
+
+            if (is_uploaded_file($_FILES["std_profile_pic"]["tmp_name"])) {
+                //TODO: get and upload photo
+                $picLocation = $util->storeProfilePic(ROOT_PATH . '/res/profiles/student/', 'std_profile_pic', $userData['std_nic']);
+                if ($picLocation != null && $picLocation) {
+                    $userData['std_profile_pic'] = SERVER_ROOT . "/res/profiles/student/" . basename($picLocation);
+
+                } else {
+                    $userData['std_profile_pic'] = SERVER_ROOT . '/res/profiles/lecturer/default.png';
+                    $errors[] = "Error Uploading Profile Picture";
+                }
+            } else {
+                $userData['std_profile_pic'] = $userDefault['std_profile_pic'];
+            }
+        }
+        if (empty($errors)) {
+            if ($user->editUser($userId, $password, $user_status, $userData)) {
+                $goMessage[] = "User Update successfull";
+            } else {
+                $errors[] = "User Update Failed";
+            }
+        }
+    } else {
+        $errors[] = "User Operation not permited!";
+    }
+
+    // Delete a User
+} else if (isset($_POST['deleteReg'])) {
+    if ($user->isAdmin()) {
+        $userId = $_POST['user_id'];
+        if ($user->deleteUser($userId)) {
+            $goMessage[] = "User $userId Deleted Successfully";
+        } else {
+            $errors[] = "User Deletion Failed";
+        }
+    } else {
+        $errors[] = "User Operation not permited!";
+    }
 } else {
     header("Location: " . SERVER_ROOT . "/index.php");
 }
@@ -259,14 +514,7 @@ else if (isset($_POST['register'])) {
 include ROOT_PATH . '/php/include/header.php';
 echo "<title>AMS Registration</title>";
 include ROOT_PATH . '/php/include/content.php';
-
 ?>
-
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#amsForm">
-    Launch static backdrop modal
-</button>
-
 <!-- Modal -->
 <div class="modal fade" id="amsForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
     aria-labelledby="amsFormLabel" aria-hidden="true">

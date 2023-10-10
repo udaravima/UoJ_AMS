@@ -66,7 +66,8 @@ include_once ROOT_PATH . '/php/include/nav.php';
                 $status = $user->getStatusStr(intval($lecturer['user_status']));
                 $role = $user->getRoleStr(intval($lecturer['user_role']));
                 $photo = (($lecturer['lecr_profile_pic'] == null) ? $user->getDefaultProfilePic() : $lecturer['lecr_profile_pic']);
-                echo "<tr>";
+                echo "<tr data-bs-toggle='modal' data-bs-target='#reg_user' data-user-id='" . $lecturer['user_id'] . "'>";
+                // echo "<tr>";
                 echo "<td>" . $i++ . "</td>";
                 echo "<td>" . $lecturer['username'] . "</td>";
                 // echo "<td>" . $lecturer['lecr_name'] . "</td>";
@@ -75,7 +76,7 @@ include_once ROOT_PATH . '/php/include/nav.php';
                 echo "<td>" . $lecturer['lecr_email'] . "</td>";
                 echo "<td>" . $role . "</td>";
                 echo "<td>" . $status . "</td>";
-                echo "<td><img class='rounded-circle' src='" .  $photo . "' width='50px' height='50px'></td>";
+                echo "<td><img class='rounded-circle' src='" . $photo . "' width='50px' height='50px'></td>";
                 echo "</tr>";
             }
             ?>
@@ -125,7 +126,8 @@ include_once ROOT_PATH . '/php/include/nav.php';
             while ($student = $students->fetch_assoc()) {
                 $status = $user->getStatusStr(intval($student['user_status']));
                 $photo = (($student['std_profile_pic'] == null) ? $user->getDefaultProfilePic() : $student['std_profile_pic']);
-                echo "<tr>";
+                echo "<tr data-bs-toggle='modal' data-bs-target='#reg_user' data-user-id='" . $student['user_id'] . "'>";
+                // echo "<tr>";
                 echo "<td>" . $i++ . "</td>";
                 echo "<td>" . $student['username'] . "</td>";
                 // echo "<td>" . $student['std_fullname'] . "</td>";
