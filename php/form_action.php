@@ -71,7 +71,7 @@ else if (isset($_POST['register'])) {
             $errors[] = "Password is required.";
         }
         // user_role
-        if (!empty($_POST['user_role'] && preg_match("/^[0-4]{1}$/", $_POST['user_role']))) {
+        if (isset($_POST['user_role']) && preg_match("/^[0-4]{1}$/", $_POST['user_role'])) {
             if ($_POST['user_role'] == 0) {
                 if ($user->isAdmin()) {
                     $user_role = $_POST['user_role'];
@@ -85,7 +85,7 @@ else if (isset($_POST['register'])) {
             $errors[] = "User Role format invalid or empty.";
         }
         //user_status
-        if (!empty($_POST['user_status']) && $user->isAdmin()) {
+        if (isset($_POST['user_status']) && $user->isAdmin()) {
             if (preg_match("/^[0-4]{1}$/", $_POST['user_status'])) {
                 $user_status = $_POST['user_status'];
             } else {
@@ -124,7 +124,7 @@ else if (isset($_POST['register'])) {
                     $errors[] = "Address is required and should contain only letters, numbers, spaces and / or ,";
                 }
             }
-            if (!empty($_POST['lecr_gender'])) {
+            if (isset($_POST['lecr_gender'])) {
                 if (preg_match("/^[0-2]{1}$/", $_POST['lecr_gender'])) {
                     $userData['lecr_gender'] = $_POST['lecr_gender'];
                 } else {
@@ -132,7 +132,6 @@ else if (isset($_POST['register'])) {
                 }
             }
             if (is_uploaded_file($_FILES["lecr_profile_pic"]["tmp_name"]) && !empty($_POST['lecr_nic'])) {
-                //TODO: get and upload photo
                 $picLocation = $util->storeProfilePic(ROOT_PATH . '/res/profiles/lecturer/', 'lecr_profile_pic', $_POST['lecr_nic']);
                 if ($picLocation != null && $picLocation) {
                     $userData['lecr_profile_pic'] = SERVER_ROOT . "/res/profiles/lecturer/" . basename($picLocation);
@@ -157,7 +156,7 @@ else if (isset($_POST['register'])) {
                     $errors[] = "Name should contain only letters and whitespaces.";
                 }
             }
-            if (!empty($_POST['std_gender'])) {
+            if (isset($_POST['std_gender'])) {
                 if (preg_match("/^[0-2]{1}$/", $_POST['std_gender'])) {
                     $userData['std_gender'] = $_POST['std_gender'];
                 } else {
@@ -223,7 +222,6 @@ else if (isset($_POST['register'])) {
             }
             // if (isset($_FILES["std_profile_pic"]) && $_FILES["std_profile_pic"]["error"] == 0) {
             if (is_uploaded_file($_FILES["std_profile_pic"]["tmp_name"]) && !empty($_POST['std_nic'])) {
-                //TODO: get and upload photo
                 $picLocation = $util->storeProfilePic(ROOT_PATH . '/res/profiles/student/', 'std_profile_pic', $_POST['std_nic']);
                 if ($picLocation != null && $picLocation) {
                     $userData['std_profile_pic'] = SERVER_ROOT . "/res/profiles/student/" . basename($picLocation);
@@ -262,7 +260,7 @@ else if (isset($_POST['register'])) {
         }
 
         if ($user->isAdmin()) {
-            if (!empty($_POST['user_status']) && $user->isAdmin()) {
+            if (isset($_POST['user_status']) && $user->isAdmin()) {
                 if (preg_match("/^[0-4]{1}$/", $_POST['user_status'])) {
                     $user_status = $_POST['user_status'];
                 } else {
@@ -312,6 +310,16 @@ else if (isset($_POST['register'])) {
                 $userData['lecr_email'] = $userDefault['lecr_email'];
                 $userData['lecr_mobile'] = $userDefault['lecr_mobile'];
             }
+            if (isset($_POST['lecr_gender'])) {
+                if (preg_match("/^[0-2]{1}$/", $_POST['lecr_gender'])) {
+                    $userData['lecr_gender'] = $_POST['lecr_gender'];
+                } else {
+                    $errors[] = "Gender format invalid";
+                }
+            } else {
+                $userData['std_gender'] = $userDefault['std_gender'];
+            }
+
 
             if (!empty($_POST['lecr_name'])) {
                 if (preg_match("/^[a-zA-Z ]*$/", $_POST['lecr_name'])) {
@@ -398,9 +406,10 @@ else if (isset($_POST['register'])) {
             } else {
                 $userData['std_fullname'] = $userDefault['std_fullname'];
             }
-
-            if (!empty($_POST['std_gender'])) {
+            // Debugging
+            if (isset($_POST['std_gender'])) {
                 if (preg_match("/^[0-2]{1}$/", $_POST['std_gender'])) {
+                    var_dump($_POST['std_gender']);
                     $userData['std_gender'] = $_POST['std_gender'];
                 } else {
                     $errors[] = "Gender format invalid";

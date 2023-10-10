@@ -180,8 +180,8 @@
                         <div class="form-group mt-3">
                             <label for="std_gender">Gender:</label>
                             <select class="form-control" id="std_gender" name="std_gender">
-                                <option value="0">Male</option>
-                                <option value="1">Female</option>
+                                <option value='0'>Male</option>
+                                <option value='1'>Female</option>
                             </select>
                         </div>
                         <!-- std_batchno -->
@@ -357,6 +357,7 @@
                             $('#lecr_email').val(response.lecr_email);
                             $('#lecr_name').val(response.lecr_name);
                             $('#lecr_address').val(response.lecr_address);
+                            console.log(response.lecr_gender + "For debug Gender");
                             $('#lecr_gender').val(response.lecr_gender);
                             $('#lecr_profile_pic').prop('required', false);
                             $('#lecr_profile_error').html("<span class='text-success'>Leave empty to keep the current profile picture</span>");
@@ -374,6 +375,7 @@
                             $('#permanent_address').val(response.permanent_address);
                             $('#std_nic').val(response.std_nic);
                             $('#std_dob').val(response.std_dob);
+                            // console.log(response.std_gender + "For debug Gender");
                             $('#std_gender').val(response.std_gender);
                             $('#std_batchno').val(response.std_batchno);
                             $('#date_admission').val(response.date_admission);
@@ -419,7 +421,7 @@
             const password = document.getElementById("password").value;
             const confirm_password = document.getElementById("confirm_password").value;
             const user_role = document.getElementById('user_role').value;
-            const maxSizeInBytes = 500 * 1024; //200 KB
+            const maxSizeInBytes = 1024 * 1024; //200 KB
             var goFlag = true;
             var errors = [];
 
@@ -445,15 +447,15 @@
                     goFlag = false;
                 }
                 const profile = document.getElementById('lecr_profile_pic');
-                if (profile.files.length > 0 && profile.file[0].size > maxSizeInBytes) {
-                    errors.push('Upload a picture less than 500KB');
+                if (profile.files.length > 0 && profile.files[0].size > maxSizeInBytes) {
+                    errors.push('Upload a picture less than 1024KB');
                     goFlag = false;
                 }
 
             } else if (user_role == '3') {
                 const profile = document.getElementById('std_profile_pic');
-                if (profile.files.length > 0 && profile.file[0].size > maxSizeInBytes) {
-                    errors.push('Upload a picture less than 500KB');
+                if (profile.files.length > 0 && profile.files[0].size > maxSizeInBytes) {
+                    errors.push('Upload a picture less than 1024KB');
                     goFlag = false;
                 }
                 const std_nic = document.getElementById('std_nic');
@@ -515,7 +517,7 @@
             const password = document.getElementById("password").value;
             const confirm_password = document.getElementById("confirm_password").value;
             const user_role = document.getElementById('user_role').value;
-            const maxSizeInBytes = 500 * 1024; //200 KB
+            const maxSizeInBytes = 1024 * 1024; //200 KB
             var goFlag = true;
             var errors = [];
             console.log(password);
@@ -547,16 +549,16 @@
                     goFlag = false;
                 }
                 const profile = document.getElementById('lecr_profile_pic');
-                if (profile.files.length > 0 && profile.file[0].size > maxSizeInBytes) {
-                    errors.push('Upload a picture less than 500KB');
+                if (profile.files.length > 0 && profile.files[0].size > maxSizeInBytes) {
+                    errors.push('Upload a picture less than 1024KB');
                     goFlag = false;
                 }
 
             } else if (user_role == '3') {
 
                 const profile = document.getElementById('std_profile_pic');
-                if (profile.files.length > 0 && profile.file[0].size > maxSizeInBytes) {
-                    errors.push('Upload a picture less than 500KB');
+                if (profile.files.length > 0 && profile.files[0].size > maxSizeInBytes) {
+                    errors.push('Upload a picture less than 1024KB');
                     goFlag = false;
                 }
                 const std_nic = document.getElementById('std_nic');
@@ -702,7 +704,7 @@
     }
 
     document.getElementById('std_profile_pic').addEventListener('change', function () {
-        const maxSizeInBytes = 500 * 1024; // 500KB
+        const maxSizeInBytes = 1024 * 1024; // 1024KB
         const file = this.files[0];
         if (file && file.size > maxSizeInBytes) {
             const error_label = document.getElementById('std_profile_error');
@@ -715,7 +717,7 @@
     });
 
     document.getElementById('lecr_profile_pic').addEventListener('change', function () {
-        const maxSizeInBytes = 500 * 1024; // 500KB
+        const maxSizeInBytes = 1024 * 1024; // 1024KB
         const file = this.files[0];
         if (file && file.size > maxSizeInBytes) {
             const error_label = document.getElementById('lecr_profile_error');
