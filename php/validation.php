@@ -13,7 +13,7 @@ header('Content-Type: application/json');
 
 // check username availability
 if (isset($_POST['username'])) {
-    $username = $_POST['username'];
+    $username = strtolower($_POST['username']);
     $usernameAvailable = $user->isUsernameAvailable($username);
     if ($usernameAvailable) {
         echo json_encode(['available' => true]);

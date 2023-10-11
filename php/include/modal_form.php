@@ -10,6 +10,7 @@
             <!-- Modal body -->
             <div class="modal-body">
                 <form action="<?php echo SERVER_ROOT; ?>/php/form_action.php" method="post" id="addClass">
+                    <input type="hidden" name="class_id" id="class_id" value="">
                     <div class="form-group mt-3">
                         <label for="course_code">Course Code:</label>
                         <select name="course_id" id="course_id" class="form-control" aria-label="course selection"
@@ -100,9 +101,6 @@
 </div>
 
 <!-- Reg User Modal -->
-<?php
-
-?>
 <div class="modal fade" tabindex="-1" id="reg_user">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content rounded shadow">
@@ -315,11 +313,52 @@
 
 <script>
     // Reload window when the modal closing
+    document.getElementById('add_course').addEventListener('hidden.bs.modal', function () {
+        window.location.reload();
+    });
     document.getElementById('add_class').addEventListener('hidden.bs.modal', function () {
         window.location.reload();
     });
     document.getElementById('reg_user').addEventListener('hidden.bs.modal', function () {
         window.location.reload();
+    });
+    //proccess for update class
+    document.getElementById('update_class').addEventListener('show.bs.modal', function (event) {
+        var cid = $(event.relatedTarget).data("class-id");
+        if (typeof cid !== "undefined") {
+            document.getElementById('classSubmit').name = "updateClass";
+            document.getElementById('classSubmit').value = "update";
+            document.getElementById('class_id').value = cid;
+            // console.log(cid);
+            // var userForm = document.getElementById('RegistrationForm');
+            $.ajax({
+                method: 'POST',
+                url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
+                data: { cid: cid },
+                dataType: 'json',
+                success: function (response) {
+                    if (!response.error) {
+                        $('#course_id').val(response.course_id);
+                        $('#course_id').prop('readonly', true);
+                        $('#lecr_id').val(response.lecr_id);
+                        $('#lecr_id').prop('readonly', true);
+                        $('#class_date').val(response.class_date);
+                        $('#start_time').val(response.start_time);
+                        $('#end_time').val(response.end_time);
+                        $('#updateClass').removeClass('d-none');
+                        $('#deleteClass').removeClass('d-none');
+                        $('#addClass').addClass('d-none');
+                    } else {
+                        console.log(response.error);
+                    }
+                },
+                error: function () {
+                    console.log('error');
+                }
+            });
+        } else {
+            console.log("no data");
+        }
     });
     // process for registration -> update and delete
     document.getElementById('reg_user').addEventListener('show.bs.modal', function (event) {
