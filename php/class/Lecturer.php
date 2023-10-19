@@ -76,11 +76,11 @@ class Lecturer
         }
     }
 
-    public function updateCourse($courseId, $courseData)
+    public function updateCourse($courseId, $courseCode, $courseName)
     {
         $query = "UPDATE $this->course SET course_code = ?, course_name = ? WHERE course_id = ?";
         $stmt = $this->conn->prepare($query);
-        $stmt->bind_param('ssi', $courseData['course_code'], $courseData['course_name'], $courseId);
+        $stmt->bind_param('ssi', $courseCode, $courseName, $courseId);
         if ($stmt->execute()) {
             return true;
         } else {
@@ -114,8 +114,8 @@ class Lecturer
 
     public function getLecturerCourseList($lecrId, $order)
     {
-        $query = "SELECT * FROM $this->lecrCourse WHERE lecr_id = ?";
-        if ($order['search']) {
+        $query = "SELECT * FROM {$this->lecrCourse} INNER JOIN {$this->course} ON {$this->lecrCourse}.course_id = {$this->course}.course_id WHERE lecr_id = ?";
+        if (isset($order['search'])) {
             $query .= " AND course_id LIKE '%" . $order['search'] . "%'";
         }
         $stmt = $this->conn->prepare($query);
@@ -128,13 +128,18 @@ class Lecturer
 
     }
 
-    public function getStudentCourseList($stdId)
+    public function getStudentCourseList($stdId, $order = array())
     {
-        $query = "SELECT * FROM $this->stdCourse WHERE std_id = ?";
+        $query = "SELECT * FROM {$this->stdCourse} INNER JOIN {$this->course} ON {$this->stdCourse}.course_id = {$this->course}.course_id WHERE std_id = ?";
+        if (isset($order['search'])) {
+            $query .= " AND course_id LIKE '%" . $order['search'] . "%'";
+        }
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('i', $stdId);
         if ($stmt->execute()) {
             return $stmt->get_result();
+        } else {
+            return false;
         }
     }
 
@@ -186,27 +191,35 @@ class Lecturer
         }
     }
 
-    public function getCourseList($order = array())
+    public function getCourseList($order)
     {
-        $query = "SELECT * FROM $this->course ";
+        $query = "SELECT * FROM {$this->course} ";
+
         if (isset($order['search'])) {
-            $query .= "WHERE course_code LIKE '%" . $order['search'] . "%' OR course_name LIKE '%" . $order['search'] . "%' ";
+            $query .= "WHERE course_code LIKE ? OR course_name LIKE ?";
+            $search = "%" . $order['search'] . "%";
         }
         if (isset($order['column'])) {
-            $query .= "ORDER BY " . $order['column'] . " " . $order['order'] . " ";
+            $query .= " ORDER BY " . $order['column'] . " " . $order['order'];
         }
-        if ($order['offset'] != -1) {
-            $query .= "LIMIT " . $order['limit'] . " OFFSET " . $order['offset'];
+        if (isset($order['offset']) && $order['offset'] != -1) {
+            $query .= " LIMIT " . $order['limit'] . " OFFSET " . $order['offset'];
         }
         $stmt = $this->conn->prepare($query);
+        if (isset($search)) {
+            $stmt->bind_param('ss', $search, $search);
+        }
         if ($stmt->execute()) {
             return $stmt->get_result();
         } else {
             return false;
         }
+
     }
 
-    public function retrieveTotalClassCount($courseId){
+    // retrieve count of classes for a course
+    public function retrieveTotalClassCount($courseId)
+    {
         $query = "SELECT COUNT(*) FROM $this->class WHERE course_id = ?";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('i', $courseId);
@@ -217,6 +230,180 @@ class Lecturer
         }
     }
 
-}
+    public function retrieveTotalStudentCount($courseId)
+    {
+        $query = "SELECT COUNT(*) FROM $this->stdCourse WHERE course_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $courseId);
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+    }
 
+    // How many classes for the course
+    public function retrieveTotalAttendanceCount($courseId)
+    {
+        $query = "SELECT COUNT(*) FROM $this->stdClass WHERE course_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $courseId);
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+    }
+
+    // How many students for the paticular class
+    public function retrieveTotalAttendanceCountByClass($classId)
+    {
+        $query = "SELECT COUNT(*) FROM $this->stdClass WHERE class_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $classId);
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+    }
+    // How many classes student joined
+    public function retrieveTotalAttendanceCountByStudent($stdId)
+    {
+        $query = "SELECT COUNT(*) FROM $this->stdClass WHERE std_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $stdId);
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+    }
+
+    // public function isPresentForTheClass($stdId, $classId)
+    // {
+    //     $query = "SELECT COUNT(*) FROM $this->stdClass WHERE std_id = ? AND class_id = ?";
+    //     $stmt = $this->conn->prepare($query);
+    //     $stmt->bind_param('ii', $stdId, $classId);
+    //     if ($stmt->execute()) {
+    //         return $stmt->get_result();
+    //     } else {
+    //         return false;
+    //     }
+    // }
+
+    public function isCourseExist($courseId)
+    {
+        $query = "SELECT * FROM $this->course WHERE course_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $courseId);
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            if ($result->num_rows > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    public function retrieveCourseDetails($courseId)
+    {
+        $query = "SELECT * FROM $this->course WHERE course_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $courseId);
+        if ($stmt->execute()) {
+            return $stmt->get_result()->fetch_assoc();
+        } else {
+            return false;
+        }
+    }
+
+    public function isClassExist($classId)
+    {
+        $query = "SELECT * FROM $this->class WHERE class_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $classId);
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            if ($result->num_rows > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    public function retrieveClassDetails($classId)
+    {
+        $query = "SELECT * FROM $this->class WHERE class_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $classId);
+        if ($stmt->execute()) {
+            return $stmt->get_result()->fetch_assoc();
+        } else {
+            return false;
+        }
+    }
+
+    public function isLectureEnrolledToCourse($lecrId, $courseId)
+    {
+        $query = "SELECT * FROM $this->lecrCourse WHERE lecr_id = ? AND course_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('ii', $lecrId, $courseId);
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            if ($result->num_rows > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    public function isStudentEnrolledToCourse($stdId, $courseId)
+    {
+        $query = "SELECT * FROM $this->stdCourse WHERE std_id = ? AND course_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('ii', $stdId, $courseId);
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            if ($result->num_rows > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    public function isStudentEnrolledToClass($stdId, $classId)
+    {
+        $query = "SELECT * FROM $this->stdClass WHERE std_id = ? AND class_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('ii', $stdId, $classId);
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            if ($result->num_rows > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    public function isCourseCodeAvailable($courseCode)
+    {
+        $query = "SELECT * FROM $this->course WHERE course_code = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('s', $courseCode);
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            if ($result->num_rows > 0) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
+}
 ?>

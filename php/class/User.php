@@ -59,6 +59,11 @@ class User
                     if ($user['user_status'] == 1) {
                         $_SESSION["user_id"] = $user['user_id'];
                         $_SESSION["user_role"] = $user['user_role'];
+                        if ($user['user_role'] == 3) {
+                            $_SESSION["std_id"] = $this->getStdId($user['user_id']);
+                        } else {
+                            $_SESSION["lecr_id"] = $this->getLecrId($user['user_id']);
+                        }
                         $this->setUserBadge();
                         $this->setUserLock(true);
                         return true;
@@ -85,6 +90,40 @@ class User
 
     }
 
+    public function logout()
+    {
+        $this->setUserLock(false);
+        $_SESSION['user_id'] = '';
+        session_destroy();
+        header("Location: " . SERVER_ROOT . "/index.php");
+    }
+
+    public function getStdId($user_id)
+    {
+        $query = "SELECT std_id FROM {$this->stdTable} WHERE user_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc()['std_id'];
+        } else {
+            return false;
+        }
+    }
+    public function getLecrId($user_id)
+    {
+        $query = "SELECT lecr_id FROM {$this->lecrTable} WHERE user_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc()['lecr_id'];
+        } else {
+            return false;
+        }
+    }
     public function setUserLock($status)
     {
         $query = "UPDATE $this->userTable SET user_session = " . (($status) ? 1 : 0) . " WHERE user_id= ?";
@@ -119,6 +158,8 @@ class User
         $result = $stmt->get_result();
         if ($result->num_rows > 0) {
             $userRole = $result->fetch_assoc()['user_role'];
+        } else {
+            return false;
         }
 
         $table = ($userRole >= 0 && $userRole < 3) ? $this->lecrTable : $this->stdTable;
@@ -315,6 +356,7 @@ class User
         return $results->fetch_assoc()['count'];
     }
 
+    // Register User -> Insert User -> (Register Lecturer OR Register Student)
     public function registerUser($username, $password, $userRole, $userData, $userStatus)
     {
         $userId = $this->insertUser($username, $password, $userRole, $userStatus);
@@ -382,6 +424,7 @@ class User
         }
     }
 
+    // editUser -> Update User(User Status) -> (Update Lecturer OR Update Student)Details or update password
     public function editUser($userId, $password, $userStatus, $userData)
     {
         $userRole = $this->retrieveUserRole($userId);

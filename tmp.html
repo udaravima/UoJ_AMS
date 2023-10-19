@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="/js/color-modes.js"></script>
+    <script src="js/color-modes.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
@@ -17,6 +17,7 @@
 
 
 </head>
+<!-- Bootstrap 5 Theme setup  -->
 
 <body class="align-content-center py-4 bg-body-tertiary">
 
@@ -87,97 +88,67 @@
             </li>
         </ul>
     </div>
+    <!-- Bootstrap NavBar -->
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top mt-0 mb-5">
+        <div class="container-fluid">
+            <a href="#" class="navbar-brand">Brand</a>
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-main"
+                aria-controls="navbar-main" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <!-- **bring content to Begin remove justify-content-end and me-5 -->
+            <div class="navbar-collapse collapse justify-content-end me-5" id="navbar-main">
+                <ul class="navbar-nav nav ml-auto nav-pills">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Link</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Bootstrap row -->
+
     <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-4">
-                <div class="card">
-                    <img src="profile-image.jpg" alt="Profile Image" class="card-img-top">
-                    <div class="card-body">
-                        <h5 class="card-title">John Doe</h5>
-                        <p class="card-text">Web Developer</p>
-                    </div>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">Email: john.doe@example.com</li>
-                        <li class="list-group-item">Location: New York, USA</li>
-                        <li class="list-group-item">Website: <a href="https://example.com">https://example.com</a></li>
-                    </ul>
-                    <div class="card-body">
-                        <a href="#" class="card-link">Edit Profile</a>
-                        <a href="#" class="card-link">Logout</a>
-                    </div>
+        <div class="input-group mb-3" id="assign-courses">
+
+            <input type="search" class="form-control" placeholder="Search Course" aria-label="Search Course"
+                aria-describedby="course-addon" id="search-course" name="search-course" data-bs-toggle="dropdown"
+                data-bs-target="#recordassigncourses">
+            <div class="input-group-append">
+                <button class="btn btn-success rounded" type="button" id="course-addon" aria-haspopup="true"
+                    aria-expanded="false">Add</button>
+            </div>
+
+            <div class="dropdown-menu" aria-labelledby="course-addon" id="recordassigncourses">
+                <!-- Courses goes here -->
+                <!-- temp example -->
+                <div class="form-control form-checkbox dropdown-item">
+                    <input type="checkbox" class="form-control-input" id="filterCheckbox3" name="option3">
+                    <label class="form-control-label" for="filterCheckbox3">Option 3</label>
                 </div>
             </div>
         </div>
     </div>
 
-    <meter value="90" max="100" min="0" high="80" low="75"></meter>
-    <!-- Button to trigger the modal -->
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
-        Open Modal
-    </button>
-
-    <!-- The Modal -->
-    <div class="modal" id="myModal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-
-                <!-- Modal Header -->
-                <div class="modal-header">
-                    <h4 class="modal-title">Modal Heading</h4>
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                </div>
-
-                <!-- Modal body -->
-                <div class="modal-body">
-                    Modal content goes here.
-                </div>
-
-                <!-- Modal footer -->
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-
-            </div>
-        </div>
+    <div class="container mt-5">
+        <form>
+            <!-- <input type="form-control" name="courseSearch" id="courseSearch" aria-label="course search"> -->
+            <select class="form-select" name="test2" aria-label="Default select example">
+                <option value="1">Option 1</option>
+                <option value="2">Option 2</option>
+                <option value="3">Option 3</option>
+            </select>
+        </form>
     </div>
-    <!-- Edit user modal -->
-    <div class="modal fade" id="edit-user">
-        <div class="modal-dialog  modal-dialog-scrollable">
-            <div class="modal-content rounded shadow">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit User Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-
-                </div>
-                <div class="modal-footer mt-5">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                        id="close-edit">Close</button>
-                    <button type="button" onclick="exeSubmit('editUser')" class="btn btn-primary" name="edit_user"
-                        id="edit_user">Save Changes</button>
-                    <button type="button" onclick="exeSubmit('editUser')" class="btn btn-primary" name="edit_user"
-                        id="edit_user">Save Changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Include jQuery (if not already included) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Include Bootstrap JavaScript (if not already included) -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <!-- JavaScript code to handle modal closing -->
-    <script>
-        $(document).ready(function () {
-            $('#myModal').on('hidden.bs.modal', function () {
-                // Redirect to the index page (you can change the URL)
-                window.location.href = 'index.html';
-            });
-        });
-    </script>
-
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous">

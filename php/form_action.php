@@ -1,6 +1,4 @@
 <?php
-//TODO: USE REGISTRATION NUMBER AS USERNAME AND REMOVE REGNO FOR BOTH LECTURER AND STUDENT
-// require_once $_SERVER['DOCUMENT_ROOT'] . '/MyAttendanceSys/config.php';
 require_once '../config.php';
 include_once ROOT_PATH . '/php/config/Database.php';
 include_once ROOT_PATH . '/php/class/User.php';
@@ -16,14 +14,10 @@ $util = new Utils();
 $errors = [];
 $goMessage = [];
 
-// if (!($user->isLoggedIn())) {
-//     header("Location: " . SERVER_ROOT . "/index.php");
-// }
-
 // ---------- course Registration ---------------
 if (isset($_POST['submit_course'])) {
 
-    if (isset($_POST['course_code']) && isset($_POST['course_name'])) {
+    if (isset($_POST['course_code']) && isset($_POST['course_name']) && $user->isAdmin()) {
         $courseCode = $_POST['course_code'];
         $courseName = $_POST['course_name'];
         if ($lecr->createCourse($courseCode, $courseName)) {
@@ -33,6 +27,31 @@ if (isset($_POST['submit_course'])) {
         }
     } else {
         $errors[] = "Course Validation Faild";
+    }
+} else if (isset($_POST['updateCourse'])) {
+    if (isset($_POST['course_id']) && isset($_POST['course_code']) && isset($_POST['course_name']) && $user->isAdmin()) {
+        $courseId = $_POST['course_id'];
+        $courseCode = $_POST['course_code'];
+        $courseName = $_POST['course_name'];
+        if ($lecr->updateCourse($courseId, $courseCode, $courseName)) {
+            $goMessage[] = "Course Updated Successfully";
+        } else {
+            $errors[] = "Course Update Failed";
+        }
+    } else {
+        $errors[] = "Course Validation Faild";
+    }
+
+} else if (isset($_POST['deleteCourse'])) {
+    if (isset($_POST['course_id']) && $user->isAdmin()) {
+        $courseId = $_POST['course_id'];
+        if ($lecr->deleteCourse($courseId)) {
+            $goMessage[] = "Course Deleted Successfully";
+        } else {
+            $errors[] = "Course Deletion Failed";
+        }
+    } else {
+        $errors[] = "Invalid Privillages or Invalid Course";
     }
 }
 
@@ -51,6 +70,37 @@ else if (isset($_POST['submit_class'])) {
         }
     } else {
         $errors[] = "Class Validation Faild";
+    }
+
+} else if (isset($_POST['updateClass'])) {
+
+    if (isset($_POST['class_id']) && isset($_POST['course_id']) && isset($_POST['lecr_id']) && isset($_POST['class_date']) && isset($_POST['start_time']) && isset($_POST['end_time'])) {
+        $classData = array();
+        $classData['classId'] = $_POST['class_id'];
+        $classData['courseId'] = $_POST['course_id'];
+        $classData['lecrId'] = $_POST['lecr_id'];
+        $classData['classDate'] = $_POST['class_date'];
+        $classData['startTime'] = $_POST['start_time'];
+        $classData['endTime'] = $_POST['end_time'];
+        if ($lecr->updateClassInfo($classId, $classData)) {
+            $goMessage[] = "Class Updated Successfully";
+        } else {
+            $errors[] = "Class Update Failed";
+        }
+    } else {
+        $errors[] = "Class Validation Faild";
+    }
+
+} else if (isset($_POST['DeleteClass'])) {
+    if (isset($_POST['class_id']) && ($user->isAdmin() || $user->isLecturer())) {
+        $classId = $_POST['class_id'];
+        if ($lecr->deleteClass($classId)) {
+            $goMessage[] = "Class Deleted Successfully";
+        } else {
+            $errors[] = "Class Deletion Failed";
+        }
+    } else {
+        $errors[] = "Invalid Privillages or Invalid Class";
     }
 }
 
@@ -180,7 +230,7 @@ else if (isset($_POST['register'])) {
                 }
             }
             if (!empty($_POST['date_admission'])) {
-                if (preg_match("/^\d{4}-\d{2}-\d{2}$/", $_POST['date_addmission'])) {
+                if (preg_match("/^\d{4}-\d{2}-\d{2}$/", $_POST['date_admission'])) {
                     $userData['date_admission'] = $_POST['date_admission'];
                 } else {
                     $errors[] = "Date of Admission format invalid";
@@ -409,7 +459,6 @@ else if (isset($_POST['register'])) {
             // Debugging
             if (isset($_POST['std_gender'])) {
                 if (preg_match("/^[0-2]{1}$/", $_POST['std_gender'])) {
-                    var_dump($_POST['std_gender']);
                     $userData['std_gender'] = $_POST['std_gender'];
                 } else {
                     $errors[] = "Gender format invalid";
@@ -435,7 +484,7 @@ else if (isset($_POST['register'])) {
             }
 
             if (!empty($_POST['date_admission'])) {
-                if (preg_match("/^\d{4}-\d{2}-\d{2}$/", $_POST['date_addmission'])) {
+                if (preg_match("/^\d{4}-\d{2}-\d{2}$/", $_POST['date_admission'])) {
                     $userData['date_admission'] = $_POST['date_admission'];
                 } else {
                     $errors[] = "Date of Admission format invalid";

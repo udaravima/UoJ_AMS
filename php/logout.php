@@ -9,7 +9,6 @@ $user = new User($conn);
 
 session_start();
 $user->setUserLock(false);
-header("Location: " . SERVER_ROOT . "/index.php");
 $_SESSION['user_id'] = '';
 session_destroy();
 header("Location: " . SERVER_ROOT . "/index.php");

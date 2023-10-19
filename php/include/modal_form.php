@@ -1,5 +1,5 @@
 <!-- Add class modal -->
-<div class="modal fade" id="add_class">
+<div class="modal fade" id="add_class" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content rounded shadow">
             <!-- Modal Header -->
@@ -59,13 +59,19 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-class">Close</button>
                 <button type="button" onclick="exeSubmit('addClass')" class="btn btn-primary" name="submit_class"
                     id="sumbit_class">Add Class</button>
+                <?php if ($user->isAdmin()) {
+                    echo "<button type='button' onclick='deleteRec(\"addClass\")' class='btn btn-danger d-none'
+                    name='deleteClass' id='deleteClass'>Delete</button>";
+                } ?>
+                <button type="button" onclick="updateRec('addClass')" class="btn btn-primary d-none" name="updateClass"
+                    id="updateClass">Update</button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Add course modal -->
-<div class="modal fade" id="add_course">
+<div class="modal fade" id="add_course" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content rounded shadow">
             <!-- Modal Header -->
@@ -76,25 +82,33 @@
             <!-- Modal body -->
             <div class="modal-body">
                 <form action="<?php echo SERVER_ROOT; ?>/php/form_action.php" method="post" id='addCourse'>
+                    <input type="hidden" name="course_id" id="cid" value="">
                     <div class="form-group mt-3">
                         <label for="course_code">Course Code:</label>
                         <input type="text" class="form-control" id="course_code" name="course_code"
-                            placeholder="CSC 1010" required>
+                            oninput="courseAvailabilityCheck()" placeholder="CSC101S3" required>
+                        <span id="course_availability_message"></span>
                     </div>
                     <div class="form-group mt-3">
                         <label for="course_name">Course Name:</label>
                         <input type="text" class="form-control" id="course_name" name="course_name"
                             placeholder="Introduction to Programming" required>
                     </div>
-                    <input type="hidden" name="submit_course" value="sumbit">
+                    <input type="hidden" name="submit_course" value="sumbit" id="submit_course">
                 </form>
             </div>
             <!-- Modal footer -->
             <div class="modal-footer mt-5">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-course">Close</button>
                 <button type="button" onclick="exeSubmit('addCourse')" class="btn btn-primary" name="submit_course"
-                    id="submit_course">Add
+                    id="submitCourse">Add
                     Course</button>
+                <button type='button' onclick='updateRec("addCourse")' class='btn btn-primary d-none'
+                    name='updateCourse' id='updateCourse'> Update </button>
+                <button type='button' onclick='deleteRec("addCourse")' class='btn btn-danger d-none' name='deleteCourse'
+                    id='deleteCourse'> Delete </button>
+
+
             </div>
         </div>
     </div>
@@ -323,14 +337,12 @@
         window.location.reload();
     });
     //proccess for update class
-    document.getElementById('update_class').addEventListener('show.bs.modal', function (event) {
-        var cid = $(event.relatedTarget).data("class-id");
-        if (typeof cid !== "undefined") {
-            document.getElementById('classSubmit').name = "updateClass";
-            document.getElementById('classSubmit').value = "update";
-            document.getElementById('class_id').value = cid;
-            // console.log(cid);
-            // var userForm = document.getElementById('RegistrationForm');
+    document.getElementById('add_class').addEventListener('show.bs.modal', function (event) {
+        var clid = $(event.relatedTarget).data("class-id");
+        if (typeof clid !== "undefined") {
+            document.getElementById('submit_class').name = "updateClass";
+            document.getElementById('submit_class').value = "update";
+            document.getElementById('class_id').value = clid;
             $.ajax({
                 method: 'POST',
                 url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
@@ -356,9 +368,48 @@
                     console.log('error');
                 }
             });
-        } else {
-            console.log("no data");
         }
+    });
+    //process for update course
+    document.getElementById('add_course').addEventListener('show.bs.modal', function (event) {
+        var cid = $(event.relatedTarget).data("course-id");
+        if (typeof cid !== "undefined") {
+            document.getElementById('submit_course').name = "updateCourse";
+            document.getElementById('submit_course').value = "update"; // change submission name
+            $('#submitCourse').addClass('d-none'); // hide add button
+            document.getElementById('cid').value = cid;
+
+            $.ajax({
+                method: 'POST',
+                url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
+                data: { cid: cid },
+                dataType: 'json',
+                success: function (response) {
+                    if (!response.error) {
+                        $('#course_code').val(response.course_code);
+                        $('#course_code').prop('readonly', true);
+                        $('#course_name').val(response.course_name);
+                        $('#course_name').prop('readonly', true);
+                        <?php
+                        if ($user->isAdmin()) {
+                            echo "
+                                $('#course_name').prop('readonly', false);
+                                $('#deleteCourse').removeClass('d-none');
+                                $('#updateCourse').removeClass('d-none');
+                            ";
+                        }
+                        ?>
+                    } else {
+                        console.log(response.error);
+                    }
+                },
+                error: function () {
+                    console.log('error');
+                }
+            });
+        }
+
+
     });
     // process for registration -> update and delete
     document.getElementById('reg_user').addEventListener('show.bs.modal', function (event) {
@@ -367,8 +418,6 @@
             document.getElementById('regSubmit').name = "updateReg";
             document.getElementById('regSubmit').value = "update";
             document.getElementById('user_id').value = uid;
-            // console.log(uid);
-            // var userForm = document.getElementById('RegistrationForm');
             $.ajax({
                 method: 'POST',
                 url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
@@ -396,7 +445,6 @@
                             $('#lecr_email').val(response.lecr_email);
                             $('#lecr_name').val(response.lecr_name);
                             $('#lecr_address').val(response.lecr_address);
-                            console.log(response.lecr_gender + "For debug Gender");
                             $('#lecr_gender').val(response.lecr_gender);
                             $('#lecr_profile_pic').prop('required', false);
                             $('#lecr_profile_error').html("<span class='text-success'>Leave empty to keep the current profile picture</span>");
@@ -414,7 +462,6 @@
                             $('#permanent_address').val(response.permanent_address);
                             $('#std_nic').val(response.std_nic);
                             $('#std_dob').val(response.std_dob);
-                            // console.log(response.std_gender + "For debug Gender");
                             $('#std_gender').val(response.std_gender);
                             $('#std_batchno').val(response.std_batchno);
                             $('#date_admission').val(response.date_admission);
@@ -447,8 +494,6 @@
                     console.log('error');
                 }
             });
-        } else {
-            console.log("no data");
         }
     });
 
@@ -467,26 +512,31 @@
             if (user_role == '0' || user_role == '1' || user_role == '2') {
                 const lecr_nic = document.getElementById('lecr_nic');
                 if (lecr_nic.value.length != 10 && lecr_nic.value.length != 12) {
+                    lecr_nic.classList.add('is-invalid');
                     errors.push('Invalid NIC');
                     goFlag = false;
                 }
                 const lecr_mobile = document.getElementById('lecr_mobile');
                 if (lecr_mobile.value.length != 10) {
+                    lecr_mobile.classList.add('is-invalid');
                     errors.push('Invalid Mobile Number');
                     goFlag = false;
                 }
                 const lecr_email = document.getElementById('lecr_email');
                 if (!lecr_email.value.includes('@') || !lecr_email.value.includes('.')) {
+                    lecr_email.classList.add('is-invalid');
                     errors.push('Invalid Email');
                     goFlag = false;
                 }
                 const lecr_name = document.getElementById('lecr_name');
                 if (lecr_name.value.length < 5) {
+                    lecr_name.classList.add('is-invalid');
                     errors.push('Invalid Name');
                     goFlag = false;
                 }
                 const profile = document.getElementById('lecr_profile_pic');
                 if (profile.files.length > 0 && profile.files[0].size > maxSizeInBytes) {
+                    profile.classList.add('is-invalid');
                     errors.push('Upload a picture less than 1024KB');
                     goFlag = false;
                 }
@@ -494,31 +544,37 @@
             } else if (user_role == '3') {
                 const profile = document.getElementById('std_profile_pic');
                 if (profile.files.length > 0 && profile.files[0].size > maxSizeInBytes) {
+                    profile.classList.add('is-invalid');
                     errors.push('Upload a picture less than 1024KB');
                     goFlag = false;
                 }
                 const std_nic = document.getElementById('std_nic');
                 if (std_nic.value.length != 10 && std_nic.value.length != 12) {
+                    std_nic.classList.add('is-invalid');
                     errors.push('Invalid NIC');
                     goFlag = false;
                 }
                 const std_mobile = document.getElementById('mobile_tp_no');
                 if (std_mobile.value.length != 10) {
+                    std_mobile.classList.add('is-invalid');
                     errors.push('Invalid Mobile Number');
                     goFlag = false;
                 }
                 const std_email = document.getElementById('std_email');
                 if (!std_email.value.includes('@') || !std_email.value.includes('.')) {
+                    std_email.classList.add('is-invalid');
                     errors.push('Invalid Email');
                     goFlag = false;
                 }
                 const std_name = document.getElementById('std_fullname');
                 if (std_name.value.length < 5) {
+                    std_name.classList.add('is-invalid');
                     errors.push('Invalid Name');
                     goFlag = false;
                 }
                 const std_index = document.getElementById('std_index');
                 if (std_index.value.length < 5) {
+                    std_index.classList.add('is-invalid');
                     errors.push('Invalid Index Number');
                     goFlag = false;
                 }
@@ -544,6 +600,7 @@
                 });
             }
         } else {
+            // for add class and add course for now
             document.getElementById(id).submit();
         }
     }
@@ -552,16 +609,16 @@
     function updateRec(formId) {
         // for user update dialog
         if (formId == 'RegistrationForm') {
-            // const username = document.getElementById("username");
             const password = document.getElementById("password").value;
             const confirm_password = document.getElementById("confirm_password").value;
             const user_role = document.getElementById('user_role').value;
             const maxSizeInBytes = 1024 * 1024; //200 KB
             var goFlag = true;
             var errors = [];
-            console.log(password);
             if (password != null && password != "") {
                 if (password !== confirm_password || password.length < 8) {
+                    document.getElementById("password").classList.add('is-invalid');
+                    document.getElementById("confirm_password").classList.add('is-invalid');
                     errors.push('Password should be at least 8 chars and matched!');
                     goFlag = false;
                 }
@@ -569,26 +626,31 @@
             if (user_role == '0' || user_role == '1' || user_role == '2') {
                 const lecr_nic = document.getElementById('lecr_nic');
                 if (lecr_nic.value.length != 10 && lecr_nic.value.length != 12) {
+                    lecr_nic.classList.add('is-invalid');
                     errors.push('Invalid NIC');
                     goFlag = false;
                 }
                 const lecr_mobile = document.getElementById('lecr_mobile');
                 if (lecr_mobile.value.length != 10) {
+                    lecr_mobile.classList.add('is-invalid');
                     errors.push('Invalid Mobile Number');
                     goFlag = false;
                 }
                 const lecr_email = document.getElementById('lecr_email');
                 if (!lecr_email.value.includes('@') || !lecr_email.value.includes('.')) {
+                    lecr_email.classList.add('is-invalid');
                     errors.push('Invalid Email');
                     goFlag = false;
                 }
                 const lecr_name = document.getElementById('lecr_name');
                 if (lecr_name.value.length < 5) {
+                    lecr_name.classList.add('is-invalid');
                     errors.push('Invalid Name');
                     goFlag = false;
                 }
                 const profile = document.getElementById('lecr_profile_pic');
                 if (profile.files.length > 0 && profile.files[0].size > maxSizeInBytes) {
+                    profile.classList.add('is-invalid');
                     errors.push('Upload a picture less than 1024KB');
                     goFlag = false;
                 }
@@ -597,26 +659,31 @@
 
                 const profile = document.getElementById('std_profile_pic');
                 if (profile.files.length > 0 && profile.files[0].size > maxSizeInBytes) {
+                    profile.classList.add('is-invalid');
                     errors.push('Upload a picture less than 1024KB');
                     goFlag = false;
                 }
                 const std_nic = document.getElementById('std_nic');
                 if (std_nic.value.length != 10 && std_nic.value.length != 12) {
+                    std_nic.classList.add('is-invalid');
                     errors.push('Invalid NIC');
                     goFlag = false;
                 }
                 const std_mobile = document.getElementById('mobile_tp_no');
                 if (std_mobile.value.length != 10) {
+                    std_mobile.classList.add('is-invalid');
                     errors.push('Invalid Mobile Number');
                     goFlag = false;
                 }
                 const std_email = document.getElementById('std_email');
                 if (!std_email.value.includes('@') || !std_email.value.includes('.')) {
+                    std_email.classList.add('is-invalid');
                     errors.push('Invalid Email');
                     goFlag = false;
                 }
                 const std_name = document.getElementById('std_fullname');
                 if (std_name.value.length < 5) {
+                    std_name.classList.add('is-invalid');
                     errors.push('Invalid Name');
                     goFlag = false;
                 }
@@ -634,6 +701,10 @@
                 });
             }
         }
+        else {
+            // for add class and add course for now
+            document.getElementById(formId).submit();
+        }
     }
 
     // execute submission for delete records
@@ -641,6 +712,22 @@
         if (formId == 'RegistrationForm') {
             document.getElementById('regSubmit').name = "deleteReg";
             document.getElementById('regSubmit').value = "delete";
+            var cfm = confirm('You sure you want to delete?');
+            if (cfm) {
+                document.getElementById(formId).submit();
+            }
+        }
+        else if (formId == 'addClass') {
+            document.getElementById('submit_class').name = "deleteClass";
+            document.getElementById('submit_class').value = "delete";
+            var cfm = confirm('You sure you want to delete?');
+            if (cfm) {
+                document.getElementById(formId).submit();
+            }
+        }
+        else if (formId == 'addCourse') {
+            document.getElementById('submit_course').name = "deleteCourse";
+            document.getElementById('submit_course').value = "delete";
             var cfm = confirm('You sure you want to delete?');
             if (cfm) {
                 document.getElementById(formId).submit();
@@ -703,9 +790,13 @@
 
         // Validate password match
         if (password === confirm_password && password !== "") {
+            document.getElementById("confirm_password").classList.remove("is-valid");
+            document.getElementById("password").classList.remove("is-valid");
             password_match.textContent = "Passwords match";
             password_match.style.color = "green";
         } else if (confirm_password !== "") {
+            document.getElementById("confirm_password").classList.remove("is-valid");
+            document.getElementById("confirm_password").classList.add("is-invalid");
             password_match.textContent = "Passwords do not match";
             password_match.style.color = "red";
         } else {
@@ -713,6 +804,40 @@
         }
     }
 
+    function courseAvailabilityCheck() {
+        var course_code = document.getElementById("course_code").value;
+        var message = document.getElementById("course_availability_message");
+        // Send an AJAX request to check the username availability
+        if (course_code.length > 5) {
+            $.ajax({
+                type: 'POST',
+                url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
+                data: { course_code: course_code },
+                dataType: 'json',
+                success: function (response) {
+                    if (response.available) {
+                        document.getElementById("course_code").classList.remove("is-invalid");
+                        document.getElementById("course_code").classList.add("is-valid");
+                        message.textContent = "Course Code is available";
+                        message.style.color = "green";
+
+                    } else {
+                        document.getElementById("course_code").classList.remove("is-valid");
+                        document.getElementById("course_code").classList.add("is-invalid");
+                        message.textContent = "Course Code is already taken";
+                        message.style.color = "red";
+
+                    }
+                }
+            });
+
+        } else {
+            document.getElementById("course_code").classList.remove("is-valid");
+            document.getElementById("course_code").classList.add("is-invalid");
+            message.textContent = "Invalid Course Code!";
+            message.style.color = "red";
+        }
+    }
     function userAvailabilityCheck() {
         var username = document.getElementById("username").value;
         var message = document.getElementById("availability_message");
@@ -725,10 +850,13 @@
                 dataType: 'json',
                 success: function (response) {
                     if (response.available) {
+                        document.getElementById("username").classList.add("is-valid");
                         message.textContent = "Username is available";
                         message.style.color = "green";
 
                     } else {
+                        document.getElementById("username").classList.remove("is-valid");
+                        document.getElementById("username").classList.add("is-invalid");
                         message.textContent = "Username is already taken";
                         message.style.color = "red";
 
@@ -737,6 +865,8 @@
             });
 
         } else {
+            document.getElementById("username").classList.remove("is-valid");
+            document.getElementById("username").classList.add("is-invalid");
             message.textContent = "Invalid Username!";
             message.style.color = "red";
         }
@@ -747,10 +877,12 @@
         const file = this.files[0];
         if (file && file.size > maxSizeInBytes) {
             const error_label = document.getElementById('std_profile_error');
+            document.getElementById('std_profile_pic').classList.add('is-invalid');
             error_label.textContent = "File size is too large";
             error_label.addClass = "text-danger";
         } else {
             const error_label = document.getElementById('std_profile_error');
+            document.getElementById('std_profile_pic').classList.remove('is-valid');
             error_label.textContent = "";
         }
     });
@@ -760,12 +892,42 @@
         const file = this.files[0];
         if (file && file.size > maxSizeInBytes) {
             const error_label = document.getElementById('lecr_profile_error');
+            document.getElementById('lecr_profile_pic').classList.add('is-invalid');
             error_label.textContent = "File size is too large";
             error_label.addClass = "text-danger";
         } else {
             const error_label = document.getElementById('lecr_profile_error');
+            document.getElementById('lecr_profile_pic').classList.remove('is-valid');
             error_label.textContent = "";
         }
     });
 
+    /*$('#class_date').change(function () {
+        var date = $(this).val();
+        var today = new Date();
+        var today_date = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
+        if (date < today_date) {
+            $('#class_date').val("");
+            alert("Please select a valid date");
+        }
+    });
+    $('#start_time').change(function () {
+        var start_time = $(this).val();
+        var today = new Date();
+        var today_time = today.getHours() + ":" + today.getMinutes();
+        if ($('#class_date').val() == today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate()) {
+            if (start_time < today_time) {
+                $('#start_time').val("");
+                alert("Please select a valid time");
+            }
+        }
+    });
+    $('#end_time').change(function () {
+        var end_time = $(this).val();
+        var start_time = $('#start_time').val();
+        if (end_time < start_time) {
+            $('#end_time').val("");
+            alert("Please select a valid time");
+        }
+    });*/
 </script>
