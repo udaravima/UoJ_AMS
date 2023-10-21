@@ -29,8 +29,8 @@ include_once ROOT_PATH . '/php/include/modal_form.php';
 
 <div class="container-md mt-5 p-3">
     <div class="btn-group" role="group">
-        <button type="button" class="btn btn-success my-3 "
-            data-bs-toggle="modal" data-bs-target="#add_class">+ Add Class</button>
+        <button type="button" class="btn btn-success my-3 " data-bs-toggle="modal" data-bs-target="#add_class">+ Add
+            Class</button>
     </div>
 </div>
 
@@ -41,7 +41,7 @@ include_once ROOT_PATH . '/php/include/modal_form.php';
     $currentPage = isset($_GET['pageC']) ? $_GET['pageC'] : 1;
     $order['offset'] = ($currentPage - 1) * $itemsPerPage;
     $order['limit'] = $itemsPerPage;
-    $totalCount = $user->countRecords('uoj_course');
+    $totalCount = $user->countRecords('uoj_lecturer_course', 'lecr_id', $_SESSION["lecr_id"]);
     $totalPages = ceil($totalCount / $itemsPerPage);
     ?>
 

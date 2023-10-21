@@ -60,9 +60,9 @@ class User
                         $_SESSION["user_id"] = $user['user_id'];
                         $_SESSION["user_role"] = $user['user_role'];
                         if ($user['user_role'] == 3) {
-                            $_SESSION["std_id"] = $this->getStdId($user['user_id']);
+                            $_SESSION["std_id"] = $this->getStudentIdByUserId($user['user_id']);
                         } else {
-                            $_SESSION["lecr_id"] = $this->getLecrId($user['user_id']);
+                            $_SESSION["lecr_id"] = $this->getLectureIdByUserId($user['user_id']);
                         }
                         $this->setUserBadge();
                         $this->setUserLock(true);
@@ -98,32 +98,6 @@ class User
         header("Location: " . SERVER_ROOT . "/index.php");
     }
 
-    public function getStdId($user_id)
-    {
-        $query = "SELECT std_id FROM {$this->stdTable} WHERE user_id = ?";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bind_param('i', $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-            return $result->fetch_assoc()['std_id'];
-        } else {
-            return false;
-        }
-    }
-    public function getLecrId($user_id)
-    {
-        $query = "SELECT lecr_id FROM {$this->lecrTable} WHERE user_id = ?";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bind_param('i', $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
-            return $result->fetch_assoc()['lecr_id'];
-        } else {
-            return false;
-        }
-    }
     public function setUserLock($status)
     {
         $query = "UPDATE $this->userTable SET user_session = " . (($status) ? 1 : 0) . " WHERE user_id= ?";
@@ -347,9 +321,12 @@ class User
         return $results;
     }
 
-    public function countRecords($userTable)
+    public function countRecords($userTable, $filter = null, $filtervalue = null)
     {
-        $query = "SELECT COUNT(*) as count FROM $userTable";
+        $query = "SELECT COUNT(*) as count FROM $userTable ";
+        if ($filter !== null && $filtervalue !== null) {
+            $query .= "WHERE $filter = $filtervalue";
+        }
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $results = $stmt->get_result();
@@ -512,10 +489,32 @@ class User
             return false;
         }
     }
-}
+    public function getStudentIdByUserId($userId)
+    {
+        $query = "SELECT std_id FROM {$this->stdTable} WHERE user_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc()['std_id'];
+        } else {
+            return false;
+        }
+    }
 
-/*
- *   /index.php
- *   /php/admin_dashboard.php
- *   /php/
- */
+    public function getLectureIdByUserId($userId)
+    {
+        $query = "SELECT lecr_id FROM {$this->lecrTable} WHERE user_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc()['lecr_id'];
+        } else {
+            return false;
+        }
+    }
+
+}

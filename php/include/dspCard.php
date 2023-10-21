@@ -28,8 +28,8 @@
                             aria-describedby="course-addon" id="search-course" data-bs-toggle="dropdown"
                             data-bs-target="#update-course-list" name="search-course">
                         <div class="input-group-append">
-                            <button class="btn btn-success rounded btn-group" type="button" id="course-selectAll"
-                                onclick="selectAllCourses()">*</button>
+                            <button class="btn btn-secondary rounded btn-group" type="button" id="course-selectAll"
+                                onclick="selectAllCourses(this)">*</button>
                             <button class="btn btn-success rounded" type="button" id="course-addon">Add</button>
                         </div>
                         <div class="dropdown-menu" aria-labelledby="course-addon" id="update-course-list">
@@ -60,7 +60,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type='button' class='btn btn-warning' data-user-id='' id="record-update-button">Update</button>
+                <button type='button' class='btn btn-warning' data-user-id='' onclick="updateUserCourse(this)"
+                    id="record-update-button">Update</button>
                 <button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#reg_user'
                     data-user-id='' id="record-edit-button">Edit Profile</button>
             </div>
@@ -72,18 +73,18 @@
     // global variables
     let addCourseList = [];
     let removeCourseList = [];
-    let uid = null;
     let indexNewCourse = 1;
 
     document.getElementById('fetch-user-details').addEventListener('hidden.bs.modal', function (event) {
         document.getElementById('record-user-details').innerHTML = "";
+        document.getElementById('record-edit-button').setAttribute("data-user-id", '');
+        document.getElementById('record-update-button').setAttribute("data-user-id", '');
         //reset global
         addCourseList = [];
         removeCourseList = [];
-        uid = null;
         indexNewCourse = 1;
+        // window.location.href = '<?php //echo SERVER_ROOT; ?>/index.php';
     });
-
 
     document.getElementById("search-course").addEventListener("keyup", function (event) {
         if (event.keyCode === 13) {
@@ -107,23 +108,25 @@
                         dropListCourse.empty();
                         (response.courses).forEach(course => {
                             let data = $(document.createElement("div")).addClass("form-check");
-                            data.append($(document.createElement("input")).addClass("form-check-input").attr("type", "checkbox").attr("value", course[0]).attr("id", "filterCourseCheckbox" + course[0]).attr("name", "course-select[]").attr("onchange", "addCourse(this, '" + course[1] + "', '" + course[2] + "')"));
+                            data.append($(document.createElement("input")).addClass("form-check-input").attr("type", "checkbox").attr("value", course[0]).attr("id", "filterCourseCheckbox" + course[0]).attr("name", "course-select[]").attr("data-course-code", course[1]).attr("data-course-name", course[2]).attr("onchange", "addCourse(this)"));
                             data.append($(document.createElement("label")).addClass("form-check-label").attr("for", "filterCourseCheckbox" + course[0]).text(course[1] + " - " + course[2]));
                             dropListCourse.append(data);
                         });
                     }
                 },
                 error: function () {
-                    console.log('error');
+                    sendMessage('Error on loading courses', 'danger');
                 }
             });
         }
     });
-
+    // features corosponding to User detail card
+    // Getting User details on modal loading
     document.getElementById('fetch-user-details').addEventListener('show.bs.modal', function (event) {
-        uid = $(event.relatedTarget).data("user-id");
+        let uid = $(event.relatedTarget).data("user-id");
         if (typeof uid !== "undefined") {
             document.getElementById('record-edit-button').setAttribute("data-user-id", uid);
+            document.getElementById('record-update-button').setAttribute("data-user-id", uid);
             //Retrieve User Info
             $.ajax({
                 method: 'POST',
@@ -183,18 +186,20 @@
                             courses.append(rw);
                         });
                     } else {
-                        console.log(response.error);
+                        sendMessage(response.message, 'danger');
                     }
                 },
                 error: function () {
-                    console.log('error');
+                    sendMessage('card loading error Ajax :(', 'danger');
                 }
             });
 
         }
     });
 
-    function addCourse(checkbox, courseCode, courseName) {
+    function addCourse(checkbox) {
+        courseCode = checkbox.getAttribute("data-course-code");
+        courseName = checkbox.getAttribute("data-course-name");
         if (checkbox.checked) {
             $('#filterCourseCheckbox' + checkbox.value).parent('div').addClass("active");
             if ($('#existCourse' + checkbox.value).length > 0) {
@@ -230,8 +235,6 @@
                 indexNewCourse--;
             }
         }
-        console.log("addList " + addCourseList);
-        console.log("RemoveList " + removeCourseList);
     }
 
     function resetCourseCheckBox(cid) {
@@ -245,8 +248,6 @@
             $('#filterCourseCheckbox' + cid).prop('checked', false);
             $('#filterCourseCheckbox' + cid).parent('div').removeClass("active");
         }
-        console.log("addList " + addCourseList);
-        console.log("RemoveList " + removeCourseList);
     }
 
     function toggleExistCourse(cid) {
@@ -262,39 +263,67 @@
             removeCourseList.push(cid);
             $('#existCourse' + cid).removeClass("btn-danger").addClass('btn-warning').text("-Pending");
         }
-        console.log("RemoveList " + removeCourseList);
-        console.log("addList " + addCourseList);
     }
 
-    function updateUserCourse() {
+    function updateUserCourse(button) {
+        let userid = button.getAttribute("data-user-id");
         if (addCourseList.length > 0 || removeCourseList.length > 0) {
             $.ajax({
                 method: 'POST',
                 url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
-                data: { uid: uid, addCourseList: addCourseList, removeCourseList: removeCourseList },
+                data: { userid: userid, addCourseList: addCourseList, removeCourseList: removeCourseList },
                 dataType: 'json',
                 success: function (response) {
-                    if (!response.error) {
-                        console.log(response);
-                        // $('#fetch-user-details').modal('hide');
-                    } else {
-                        console.log(response.error);
+                    $('#messageModalBody').empty();
+                    if (response.errors.length > 0) {
+                        let errorsRw = $(document.createElement("div")).addClass("alert").addClass("alert-danger");
+                        let dataList = $(document.createElement("ul"));
+                        (response.errors).forEach(error => {
+                            dataList.append($(document.createElement("li")).text(error));
+                        });
+                        errorsRw.append(dataList);
+                        $('#messageModalBody').append(errorsRw);
                     }
+                    if (response.messages.length > 0) {
+                        let messageRw = $(document.createElement("div")).addClass("alert").addClass("alert-success");
+                        let dataList = $(document.createElement("ul"));
+                        (response.messages).forEach(message => {
+                            dataList.append($(document.createElement("li")).text(message));
+                        });
+                        messageRw.append(dataList);
+                        $('#messageModalBody').append(messageRw);
+                    }
+
+                    $('#messageModal').modal('show');
+                    $('#messageModal').on('hidden.bs.modal', function (e) {
+                        window.location.reload();
+                    });
                 },
                 error: function () {
-                    console.log('error');
+                    sendMessage('error on Update :(', 'danger');
                 }
             });
         }
     }
 
-    function selectAllCourses() {
+    function selectAllCourses(button) {
         let checkboxes = document.getElementsByName('course-select[]');
-        for (let i = 0; i < checkboxes.length; i++) {
-            if (checkboxes[i].type == 'checkbox') {
-                checkboxes[i].checked = true;
-                addCourse(checkboxes[i], checkboxes[i].value, checkboxes[i].name);
+        if (button.classList.contains('btn-secondary')) {
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].type == 'checkbox') {
+                    checkboxes[i].checked = true;
+                    addCourse(checkboxes[i]);
+                }
             }
+            $('#course-selectAll').removeClass('btn-secondary').addClass('btn-primary');
+        } else {
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].type == 'checkbox') {
+                    checkboxes[i].checked = false;
+                    addCourse(checkboxes[i]);
+                }
+            }
+            $('#course-selectAll').removeClass('btn-primary').addClass('btn-secondary');
         }
     }
 

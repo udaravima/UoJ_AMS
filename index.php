@@ -79,13 +79,13 @@ include ROOT_PATH . '/php/include/content.php';
                 </div> -->
                 <div class="form-floating">
                     <input type="text" class="form-control" id="reg-name" name="reg-name" placeholder="2020csc000"
-                        required autofocus>
+                        autocomplete="username" required autofocus>
                     <label for="reg-name">Registration No:</label>
                 </div>
 
                 <div class="form-floating">
                     <input type="password" class="form-control" id="user_password" name="user_password"
-                        placeholder="Password" required>
+                        placeholder="Password" autocomplete="current-password" required>
                     <label for="user_password">Password</label>
                 </div>
 

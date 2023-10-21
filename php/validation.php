@@ -35,9 +35,9 @@ if (isset($_POST['username'])) {
                 'user_role' => $userDetails['user_role'],
                 'user_status' => $userDetails['user_status']
             ];
-            // echo json_encode(['user_photo' => $userDetails['user_photo']]);
             if ($userDetails['user_role'] == 0 || $userDetails['user_role'] == 1 || $userDetails['user_role'] == 2) {
-                $userCourses = $lecr->getLecturerCourseList($userId, array());
+                $lecr_id = $user->getLectureIdByUserId($userId);
+                $userCourses = $lecr->getLecturerCourseList($lecr_id, array());
                 $response['lecr_name'] = $userDetails['lecr_name'];
                 $response['lecr_id'] = $userDetails['lecr_id'];
                 $response['lecr_mobile'] = $userDetails['lecr_mobile'];
@@ -49,7 +49,8 @@ if (isset($_POST['username'])) {
                 $response['courses'] = $userCourses->fetch_all();
 
             } else if ($userDetails['user_role'] == 3) {
-                $userCourses = $lecr->getStudentCourseList($userId, array());
+                $std_id = $user->getStudentIdByUserId($userId);
+                $userCourses = $lecr->getStudentCourseList($std_id, array());
                 $response['std_index'] = $userDetails['std_index'];
                 $response['std_shortname'] = $utils->processNameInitials($userDetails['std_fullname']);
                 $response['std_fullname'] = $userDetails['std_fullname'];
@@ -78,9 +79,11 @@ if (isset($_POST['username'])) {
         echo json_encode(['error' => 'Invalid Privillages']);
     }
 
+    // retrieve course data of a paticular course by logged in user
 } else if (isset($_POST['cid'])) {
     $courseId = $_POST['cid'];
-    if ($user->isLoggedIn() && ($user->isLecturer() || $user->isAdmin())) {
+    if ($user->isLoggedIn()) {
+
         if ($lecr->isCourseExist($courseId)) {
             $courseDetails = $lecr->retrieveCourseDetails($courseId);
             $response = [
@@ -98,9 +101,10 @@ if (isset($_POST['username'])) {
         echo json_encode(['error' => 'Invalid Privillages']);
     }
 
+    // retrieve class data of a paticular class by logged in user
 } else if (isset($_POST['clid'])) {
     $classId = $_POST['clid'];
-    if ($user->isLoggedIn() && ($user->isLecturer() || $user->isAdmin())) {
+    if ($user->isLoggedIn()) {
         if ($lecr->isClassExist($classId)) {
             $classDetails = $lecr->retrieveClassDetails($classId);
             $response = [
@@ -124,6 +128,7 @@ if (isset($_POST['username'])) {
         echo json_encode(['error' => 'Invalid Privillages']);
     }
 
+    // checking whether the course code is available
 } else if (isset($_POST['course_code'])) {
     if ($lecr->isCourseCodeAvailable($_POST['course_code'])) {
         echo json_encode(['available' => true]);
@@ -226,16 +231,95 @@ if (isset($_POST['username'])) {
 //     echo json_encode($response);
 
 // } 
+
+// making a course search by logged in user
 else if (isset($_POST['cids'])) {
-    $search = $_POST['cids'];
-    $order['search'] = $search;
-    $courses = $lecr->getCourseList($order);
+    if ($user->isLoggedIn()) {
+        $search = $_POST['cids'];
+        $order['search'] = $search;
+        $courses = $lecr->getCourseList($order);
+        $response = [
+            'error' => false,
+            'courses' => $courses->fetch_all()
+        ];
+        echo json_encode($response);
+    } else {
+        echo json_encode(['error' => 'Invalid Privillages']);
+    }
+
+
+    // Update User Course list by admin 
+} else if (isset($_POST['userid']) && $user->isAdmin()) {
+    $errors = [];
+    $messages = [];
+    $addCourseList = (isset($_POST['addCourseList'])) ? $_POST['addCourseList'] : array();
+    $removeCourseList = (isset($_POST['removeCourseList'])) ? $_POST['removeCourseList'] : array();
+    $userId = $_POST['userid'];
+    $userRole = $user->retrieveUserRole($userId);
+
+    if ($userRole == 0 || $userRole == 1 || $userRole == 2) {
+        $lecr_id = $user->getLectureIdByUserId($userId);
+        foreach ($addCourseList as $courseId) {
+            if ($lecr->isCourseExist($courseId)) {
+                if ($lecr->enrollLectureToCourse($lecr_id, $courseId)) {
+                    $messages[] = "Course Id: " . $courseId . " added successfully";
+                } else {
+                    $errors[] = "Course Id: " . $courseId . " already exist";
+                }
+            } else {
+                $errors[] = "Course Id: " . $courseId . " not found";
+            }
+        }
+        foreach ($removeCourseList as $courseId) {
+            if ($lecr->isCourseExist($courseId)) {
+                if ($lecr->derollLecturerToCourse($lecr_id, $courseId)) {
+                    $messages[] = "Course Id: " . $courseId . " removed successfully";
+                } else {
+                    $errors[] = "Course Id: " . $courseId . " not found";
+                }
+            } else {
+                $errors[] = "Course Id: " . $courseId . " not found";
+            }
+        }
+
+    } else if ($userRole == 3) {
+        $std_id = $user->getStudentIdByUserId($userId);
+        foreach ($addCourseList as $courseId) {
+            if ($lecr->isCourseExist($courseId)) {
+                if ($lecr->enrollStudentToCourse($std_id, $courseId)) {
+                    $messages[] = "Course Id: " . $courseId . " added successfully";
+                } else {
+                    $errors[] = "Course Id: " . $courseId . " already exist";
+                }
+            } else {
+                $errors[] = "Course Id: " . $courseId . " not found";
+            }
+        }
+        foreach ($removeCourseList as $courseId) {
+            if ($lecr->isCourseExist($courseId)) {
+                if ($lecr->derollStudentToCourse($std_id, $courseId)) {
+                    $messages[] = "Course Id: " . $courseId . " removed successfully";
+                } else {
+                    $errors[] = "Course Id: " . $courseId . " not found";
+                }
+            } else {
+                $errors[] = "Course Id: " . $courseId . " not found";
+            }
+        }
+    }
     $response = [
         'error' => false,
-        'courses' => $courses->fetch_all()
+        'messages' => $messages,
+        'errors' => $errors,
+        'success' => true
     ];
+
     echo json_encode($response);
+
 } else {
     header("Location: " . SERVER_ROOT . "/index.php");
 }
+// } else {
+//     header("Location: " . SERVER_ROOT . "/index.php");
+// }
 ?>

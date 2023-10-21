@@ -39,11 +39,14 @@ include_once ROOT_PATH . '/php/include/modal_form.php';
                     <a class='nav-link " . (($activeDash == 2) ? "active" : "") . "' href='" . SERVER_ROOT . "/php/Instructor_dashboard.php'>Instructor</a>
                 </li>";
                 }
-                ?>
+                if ($_SESSION['user_role'] == 3) {
+                    echo "
                 <li class='nav-item'>
-                    <a class='nav-link <?php echo ($activeDash == 3) ? "active" : ""; ?>'
-                        href='<?php echo SERVER_ROOT; ?>/php/student_dashboard.php'>Student</a>
-                </li>
+                    <a class='nav-link " . ($activeDash == 3) ? "active" : "" . "
+                        href='" . SERVER_ROOT . "/php/student_dashboard.php'>Student</a>
+                </li>";
+                }
+                ?>
             </ul>
 
             <hr>

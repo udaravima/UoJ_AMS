@@ -8,12 +8,24 @@
 </head>
 
 <body>
+    <input type="checkbox" name="course[]" value="1" id="1" data-course-name="Computer Science" data-course-code="csc001"
+    placeholder="csc001">
     <script>
         let tempo = [];
-        tempo.push(1);
-        console.log(tempo);
-        console.log(tempo.includes("1"));
+        // tempo.push(1);
+        // console.log(tempo);
+        // console.log(tempo.includes("1"));
+
+        let courses = document.getElementsByName("course[]");
+        courses.forEach((course) => {
+            console.log("Course value: " + course.value);
+            console.log("Course name: " + course.dataset.courseName);
+            console.log("Course code: " + course.dataset.courseCode);
+        });
+
+
     </script>
+
 </body>
 
 </html>

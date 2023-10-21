@@ -137,13 +137,14 @@
                     <div class="form-group mt-3">
                         <label for="password">Password:</label>
                         <input type="password" class="form-control" id="password" name="password"
-                            oninput="validatePassword()" placeholder="Password" required>
+                            oninput="validatePassword()" placeholder="Password" required autocomplete="new-password">
                         <span id="password-strength"></span>
                     </div>
                     <div class="form-group mt-3">
                         <label for="confirm_password">Confirm Password:</label>
                         <input type="password" class="form-control" id="confirm_password" name="confirm_password"
-                            oninput="validatePassword()" placeholder="Confirm Password" required>
+                            oninput="validatePassword()" placeholder="Confirm Password" required
+                            autocomplete="new-password">
                         <span id="password-match"></span>
                     </div>
                     <div class="form-group mt-3">
