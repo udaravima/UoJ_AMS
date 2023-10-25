@@ -2,6 +2,7 @@
 class Lecturer
 {
     // Data Tables
+    private $user = 'uoj_user';
     private $std = 'uoj_student';
     private $lecr = 'uoj_lecturer';
     private $course = 'uoj_course';
@@ -131,7 +132,6 @@ class Lecturer
         } else {
             return false;
         }
-
     }
 
     public function getStudentCourseList($stdId, $order = array())
@@ -148,6 +148,42 @@ class Lecturer
         }
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('i', $stdId);
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+    }
+
+    public function getStudentsFromCourseId($courseId, $order = array())
+    {
+        $query = "SELECT {$this->user}.username , {$this->std}.std_fullname, {$this->std}.std_index , {$this->stdCourse}.std_id  FROM {$this->stdCourse} INNER JOIN {$this->std} ON {$this->stdCourse}.std_id = {$this->std}.std_id INNER JOIN {$this->user} ON {$this->std}.user_id = {$this->user}.user_id WHERE {$this->stdCourse}.course_id = ?";
+        if (isset($order["column"])) {
+            $query .= " ORDER BY " . $order['column'] . " " . $order['order'];
+        }
+        if (isset($order['offset']) && $order['offset'] != -1) {
+            $query .= " LIMIT " . $order['limit'] . " OFFSET " . $order['offset'];
+        }
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $courseId);
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+    }
+
+    public function getLecturersFromCourseId($courseId, $order = array())
+    {
+        $query = "SELECT {$this->user}.username , {$this->lecr}.lecr_name , {$this->lecrCourse}.lecr_id FROM {$this->lecrCourse} INNER JOIN {$this->lecr} ON {$this->lecrCourse}.lecr_id = {$this->lecr}.lecr_id INNER JOIN {$this->user} ON {$this->lecr}.user_id = {$this->user}.user_id WHERE {$this->lecrCourse}.course_id = ?";
+        if (isset($order["column"])) {
+            $query .= " ORDER BY " . $order['column'] . " " . $order['order'];
+        }
+        if (isset($order['offset']) && $order['offset'] != -1) {
+            $query .= " LIMIT " . $order['limit'] . " OFFSET " . $order['offset'];
+        }
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $courseId);
         if ($stmt->execute()) {
             return $stmt->get_result();
         } else {
@@ -234,7 +270,6 @@ class Lecturer
         } else {
             return false;
         }
-
     }
 
     // retrieve count of classes for a course
@@ -456,4 +491,3 @@ class Lecturer
 //     public function isStudentEnrolledToCourse($stdId, $courseId)
 //     public function isStudentEnrolledToClass($stdId, $classId)
 //     public function isCourseCodeAvailable($courseCode)
-?>

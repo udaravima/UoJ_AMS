@@ -193,7 +193,8 @@ include_once ROOT_PATH . '/php/include/nav.php';
             $courses = $lecr->getCourseList($order);
             $i = 1;
             while ($course = $courses->fetch_assoc()) {
-                echo "<tr data-bs-toggle='modal' data-bs-target='#add_course' data-course-id='" . $course['course_id'] . "'>";
+                echo "<tr data-bs-toggle='modal' data-bs-target='#course-info-card' data-course-id='" . $course['course_id'] . "'>";
+                // echo "<tr data-bs-toggle='modal' data-bs-target='#add_course' data-course-id='" . $course['course_id'] . "'>";
                 echo "<td>" . $i++ . "</td>";
                 echo "<td>" . $course['course_code'] . "</td>";
                 echo "<td>" . $course['course_name'] . "</td>";

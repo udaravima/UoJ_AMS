@@ -12,8 +12,7 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-4">
-                                <img src="<?php echo $user->getDefaultProfilePic() ?>" class="img-fluid rounded-circle"
-                                    alt="Profile Picture" id="user-profile-photo">
+                                <img src="<?php echo $user->getDefaultProfilePic() ?>" class="img-fluid rounded-circle" alt="Profile Picture" id="user-profile-photo">
                             </div>
                             <div class="col-md-8" id="record-user-details">
                                 <!-- User details goes here -->
@@ -24,13 +23,9 @@
                 <!-- Assign Courses search bar-->
                 <div class="container mt-3">
                     <div class="input-group mb-3">
-                        <input type="search" class="form-control" placeholder="Search Course" aria-label="Search Course"
-                            aria-describedby="course-addon" id="search-course" data-bs-toggle="dropdown"
-                            data-bs-target="#update-course-list" name="search-course">
+                        <input type="search" class="form-control" placeholder="Search Course" aria-label="Search Course" aria-describedby="course-addon" id="search-course" data-bs-toggle="dropdown" data-bs-target="#update-course-list" name="search-course">
                         <div class="input-group-append">
-                            <button class="btn btn-secondary rounded btn-group" type="button" id="course-selectAll"
-                                onclick="selectAllCourses(this)">*</button>
-                            <button class="btn btn-success rounded" type="button" id="course-addon">Add</button>
+                            <button class="btn btn-secondary rounded btn-group" type="button" id="course-selectAll" onclick="selectAllCourses(this, 'course-select[]')">*</button>
                         </div>
                         <div class="dropdown-menu" aria-labelledby="course-addon" id="update-course-list">
                             <!-- Courses goes here -->
@@ -60,22 +55,116 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type='button' class='btn btn-warning' data-user-id='' onclick="updateUserCourse(this)"
-                    id="record-update-button">Update</button>
-                <button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#reg_user'
-                    data-user-id='' id="record-edit-button">Edit Profile</button>
+                <button type='button' class='btn btn-warning' data-user-id='' onclick="updateUserCourse(this)" id="record-update-button">Update</button>
+                <button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#reg_user' data-user-id='' id="record-edit-button">Edit Profile</button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- course details Modal-->
+
+<div class="modal fade" id="course-info-card" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content rounded shadow">
+            <div class="modal-header">
+                <h5 class="modal-title" id="record-course-title">Course Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- User Search -->
+                <div class="container mt-3">
+                    <div class="input-group mb-3">
+                        <input type="search" class="form-control" placeholder="Search User" aria-label="Search Course" aria-describedby="course-addon" id="search-user-for-course" data-bs-toggle="dropdown" data-bs-target="#update-user-list" name="search-user-for-course">
+                        <div class="input-group-append">
+                            <button class="btn btn-secondary rounded btn-group" type="button" id="user-selectAll" onclick="selectAllUsers(this)">*</button>
+                        </div>
+                        <div class="dropdown-menu" aria-labelledby="users-addon-course" id="update-user-list">
+                            <!-- users goes here -->
+                            <!-- wait -->
+                        </div>
+                    </div>
+                </div>
+                <!-- Student table -->
+                <div class="container mt-3">
+                    <!-- Student table -->
+                    <table class="table table-striped table-hover border shadow">
+                        <h3>Student</h3>
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Index</th>
+                                <th scope="col">Reg No</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="current-student-course">
+                            <!-- Current students for the course goes here -->
+                        </tbody>
+                    </table>
+                    <nav aria-label="Page navigation">
+                        <ul class="pageination justify-content-center" id="current-student-page-navigation">
+                            <!-- pagination goes here -->
+                        </ul>
+                    </nav>
+                </div>
+
+                <div class="container mt-3">
+                    <!-- Lecture table -->
+                    <table class="table table-striped table-hover border shadow">
+                        <h3>Lecture</h3>
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Reg No</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="current-lecture-course">
+                            <!-- Current lectures for the course goes here -->
+                        </tbody>
+                    </table>
+                    <nav aria-label="Page navigation">
+                        <ul class="pageination justify-content-center" id="current-student-page-navigation">
+                            <!-- pagination goes here -->
+                        </ul>
+                    </nav>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type='button' class='btn btn-warning' data-course-id='' onclick="updateUserForCourse(this)" id="user-update-button">Update</button>
+                <button type='button' class='btn btn-primary' data-bs-toggle='modal' data-bs-target='#add_course' data-course-id='' id="course-edit-button">Edit Course</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script>
     // User card preview
     // global variables
     let addCourseList = [];
     let removeCourseList = [];
     let indexNewCourse = 1;
+    document.getElementById('course-info-card').addEventListener('hidden.bs.modal', function(event) {
+        document.getElementById('course-edit-button').setAttribute("data-course-id", '');
+        document.getElementById('user-update-button').setAttribute("data-course-id", '');
+        document.getElementById('current-student-course').innerHTML = "";
+        document.getElementById('current-lecture-course').innerHTML = "";
+        document.getElementById('search-user-for-course').value = "";
+        document.getElementById('search-course').value = "";
+        document.getElementById('update-user-list').innerHTML = "";
+        document.getElementById('update-course-list').innerHTML = "";
+        document.getElementById('course-info-card').setAttribute("data-course-id", '');
 
-    document.getElementById('fetch-user-details').addEventListener('hidden.bs.modal', function (event) {
+        // window.location.href = '<?php //echo SERVER_ROOT; 
+                                    ?>/index.php';
+    });
+    document.getElementById('fetch-user-details').addEventListener('hidden.bs.modal', function(event) {
         document.getElementById('record-user-details').innerHTML = "";
         document.getElementById('record-edit-button').setAttribute("data-user-id", '');
         document.getElementById('record-update-button').setAttribute("data-user-id", '');
@@ -83,26 +172,50 @@
         addCourseList = [];
         removeCourseList = [];
         indexNewCourse = 1;
-        // window.location.href = '<?php //echo SERVER_ROOT; ?>/index.php';
+        // window.location.href = '<?php //echo SERVER_ROOT; 
+                                    ?>/index.php';
     });
 
-    document.getElementById("search-course").addEventListener("keyup", function (event) {
-        if (event.keyCode === 13) {
-            // event.preventDefault();
-            document.getElementById("course-addon").click();
+    document.getElementById('search-user-for-course').addEventListener('keyup', function(event) {
+        let userSearch = document.getElementById('search-user-for-course').value;
+        if (userSearch.length > 4) {
+            $.ajax({
+                method: 'POST',
+                url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
+                data: {
+                    userSearch: userSearch
+                },
+                dataType: 'json',
+                success: function(response) {
+                    let userListCourse = $('#update-user-list');
+                    userListCourse.empty();
+                    (response.users)
+                },
+                error: function() {
+                    sendMessage('Error on loading users', 'danger');
+                }
+            })
         }
-        if (event.keyCode === 27) {
-            // event.preventDefault();
-            document.getElementById("search-course").value = "";
-        }
+    });
+
+    document.getElementById("search-course").addEventListener("keyup", function(event) {
+        // if (event.keyCode === 13) {
+        //     // event.preventDefault();
+        // }
+        // if (event.keyCode === 27) {
+        //     // event.preventDefault();
+        //     document.getElementById("search-course").value = "";
+        // }
         let cids = document.getElementById("search-course").value;
         if (cids.length > 3) {
             $.ajax({
                 method: 'POST',
                 url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
-                data: { cids: cids },
+                data: {
+                    cids: cids
+                },
                 dataType: 'json',
-                success: function (response) {
+                success: function(response) {
                     if (!response.error) {
                         let dropListCourse = $('#update-course-list');
                         dropListCourse.empty();
@@ -114,15 +227,66 @@
                         });
                     }
                 },
-                error: function () {
+                error: function() {
                     sendMessage('Error on loading courses', 'danger');
+                }
+            });
+        }
+    });
+
+    //On modal loading Course Details
+    document.getElementById('course-info-card').addEventListener('show.bs.modal', function(event) {
+        let courseId = $(event.relatedTarget).data("course-id");
+        if (courseId !== "undefined") {
+            document.getElementById('course-edit-button').setAttribute("data-course-id", courseId);
+            document.getElementById('user-update-button').setAttribute("data-course-id", courseId);
+            //Retrieve Course Info
+            $.ajax({
+                method: 'POST',
+                url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
+                data: {
+                    courseId: courseId
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (!response.error) {
+                        let currentStudent = $('#current-student-course');
+                        let currentLecture = $('#current-lecture-course');
+                        currentStudent.empty();
+                        currentLecture.empty();
+                        document.getElementById('record-course-title').innerHTML = response.courseCode + " - " + response.courseName;
+                        let i = 1;
+                        (response.students).forEach(student => {
+                            let rw = $(document.createElement("tr"));
+                            rw.append($(document.createElement("td")).text(i++));
+                            rw.append($(document.createElement("td")).text(student[0]));
+                            rw.append($(document.createElement("td")).text(student[1]));
+                            rw.append($(document.createElement("td")).text(student[2]));
+                            rw.append($(document.createElement("td")).append($(document.createElement("button")).addClass("btn btn-danger rounded-pill").attr("type", "button").attr("onclick", "toggleExistStudent(" + student[3] + ")").attr("id", "existCourse" + student[3]).text("Remove")));
+                            currentStudent.append(rw);
+                        });
+                        i = 1;
+                        (response.lecturers).forEach(lecture => {
+                            let rw = $(document.createElement("tr"));
+                            rw.append($(document.createElement("td")).text(i++));
+                            rw.append($(document.createElement("td")).text(lecture[0]));
+                            rw.append($(document.createElement("td")).text(lecture[1]));
+                            rw.append($(document.createElement("td")).append($(document.createElement("button")).addClass("btn btn-danger rounded-pill").attr("type", "button").attr("onclick", "toggleExistLecture(" + lecture[2] + ")").attr("id", "existCourse" + lecture[2]).text("Remove")));
+                            currentLecture.append(rw);
+                        });
+                    } else {
+                        sendMessage(response.message, 'danger');
+                    }
+                },
+                error: function() {
+                    sendMessage('Course card loading error :Ajax :(', 'danger');
                 }
             });
         }
     });
     // features corosponding to User detail card
     // Getting User details on modal loading
-    document.getElementById('fetch-user-details').addEventListener('show.bs.modal', function (event) {
+    document.getElementById('fetch-user-details').addEventListener('show.bs.modal', function(event) {
         let uid = $(event.relatedTarget).data("user-id");
         if (typeof uid !== "undefined") {
             document.getElementById('record-edit-button').setAttribute("data-user-id", uid);
@@ -131,9 +295,11 @@
             $.ajax({
                 method: 'POST',
                 url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
-                data: { uid: uid },
+                data: {
+                    uid: uid
+                },
                 dataType: 'json',
-                success: function (response) {
+                success: function(response) {
                     if (!response.error) {
                         $('#user-profile-photo').attr("src", "<?php echo $user->getDefaultProfilePic() ?>");
                         let details = $('#record-user-details');
@@ -189,7 +355,7 @@
                         sendMessage(response.message, 'danger');
                     }
                 },
-                error: function () {
+                error: function() {
                     sendMessage('card loading error Ajax :(', 'danger');
                 }
             });
@@ -271,9 +437,13 @@
             $.ajax({
                 method: 'POST',
                 url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
-                data: { userid: userid, addCourseList: addCourseList, removeCourseList: removeCourseList },
+                data: {
+                    userid: userid,
+                    addCourseList: addCourseList,
+                    removeCourseList: removeCourseList
+                },
                 dataType: 'json',
-                success: function (response) {
+                success: function(response) {
                     $('#messageModalBody').empty();
                     if (response.errors.length > 0) {
                         let errorsRw = $(document.createElement("div")).addClass("alert").addClass("alert-danger");
@@ -295,19 +465,19 @@
                     }
 
                     $('#messageModal').modal('show');
-                    $('#messageModal').on('hidden.bs.modal', function (e) {
+                    $('#messageModal').on('hidden.bs.modal', function(e) {
                         window.location.reload();
                     });
                 },
-                error: function () {
+                error: function() {
                     sendMessage('error on Update :(', 'danger');
                 }
             });
         }
     }
 
-    function selectAllCourses(button) {
-        let checkboxes = document.getElementsByName('course-select[]');
+    function selectAllCourses(button, selectName) {
+        let checkboxes = document.getElementsByName(selectName);
         if (button.classList.contains('btn-secondary')) {
             for (let i = 0; i < checkboxes.length; i++) {
                 if (checkboxes[i].type == 'checkbox') {
@@ -315,7 +485,7 @@
                     addCourse(checkboxes[i]);
                 }
             }
-            $('#course-selectAll').removeClass('btn-secondary').addClass('btn-primary');
+            this.classList.remove('btn-secondary').addClass('btn-primary');
         } else {
             for (let i = 0; i < checkboxes.length; i++) {
                 if (checkboxes[i].type == 'checkbox') {
@@ -323,8 +493,7 @@
                     addCourse(checkboxes[i]);
                 }
             }
-            $('#course-selectAll').removeClass('btn-primary').addClass('btn-secondary');
+            this.classList.remove('btn-primary').addClass('btn-secondary');
         }
     }
-
 </script>

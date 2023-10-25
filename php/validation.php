@@ -47,7 +47,6 @@ if (isset($_POST['username'])) {
                 $response['lecr_gender'] = $userDetails['lecr_gender'];
                 $response['lecr_profile_pic'] = $userDetails['lecr_profile_pic'];
                 $response['courses'] = $userCourses->fetch_all();
-
             } else if ($userDetails['user_role'] == 3) {
                 $std_id = $user->getStudentIdByUserId($userId);
                 $userCourses = $lecr->getStudentCourseList($std_id, array());
@@ -74,7 +73,6 @@ if (isset($_POST['username'])) {
         } else {
             echo json_encode(['error' => 'User Id not found']);
         }
-
     } else {
         echo json_encode(['error' => 'Invalid Privillages']);
     }
@@ -96,7 +94,6 @@ if (isset($_POST['username'])) {
         } else {
             echo json_encode(['error' => 'Course Id not found']);
         }
-
     } else {
         echo json_encode(['error' => 'Invalid Privillages']);
     }
@@ -123,9 +120,9 @@ if (isset($_POST['username'])) {
         } else {
             echo json_encode(['error' => 'Class Id not found']);
         }
-
     } else {
         echo json_encode(['error' => 'Invalid Privillages']);
+        exit();
     }
 
     // checking whether the course code is available
@@ -155,6 +152,7 @@ if (isset($_POST['username'])) {
 //         'currentPage' => $currentPage
 //     ];
 //     echo json_encode($response);
+
 // } else if (isset($_POST['searchClass'])) {
 //     $searchClass = $_POST['searchClass'];
 //     $order = array();
@@ -173,6 +171,7 @@ if (isset($_POST['username'])) {
 //         'currentPage' => $currentPage
 //     ];
 //     echo json_encode($response);
+
 // } else if (isset($_POST['searchUser'])) {
 //     $searchUser = $_POST['searchUser'];
 //     $order = array();
@@ -191,6 +190,7 @@ if (isset($_POST['username'])) {
 //         'currentPage' => $currentPage
 //     ];
 //     echo json_encode($response);
+
 // } else if (isset($_POST['searchLecturer'])) {
 //     $searchUser = $_POST['searchLecturer'];
 //     $order = array();
@@ -209,6 +209,7 @@ if (isset($_POST['username'])) {
 //         'currentPage' => $currentPage
 //     ];
 //     echo json_encode($response);
+
 // } else if (isset($_POST['searchStudent'])) {
 //     $searchUser = $_POST['
 //     searchStudent'];
@@ -231,6 +232,41 @@ if (isset($_POST['username'])) {
 //     echo json_encode($response);
 
 // } 
+//retireving tables and data for paticular course
+else if (isset($_POST['courseId'])) {
+    if ($user->isAdmin()) {
+        $courseId = $_POST['courseId'];
+        $response = [];
+        $errors = [];
+
+        $courseInfo = $lecr->retrieveCourseDetails($courseId);
+        $response['courseCode'] = $courseInfo['course_code'];
+        $response['courseName'] = $courseInfo['course_name'];
+
+        try {
+            $studentRecs = $lecr->getStudentsFromCourseId($courseId);
+            $response['students'] = $studentRecs->fetch_all();
+        } catch (Exception $e) {
+            $errors[] = $e->getMessage();
+            $errors[] = "Error in retrieving students";
+        }
+
+        try {
+            $lecturerRecs = $lecr->getLecturersFromCourseId($courseId);
+            $response['lecturers'] = $lecturerRecs->fetch_all();
+        } catch (Exception $e) {
+            $errors[] = $e->getMessage();
+            $errors[] = "Error in retrieving lecturers";
+        }
+
+        $response['errors'] = $errors;
+        $response['error'] = false;
+        echo json_encode($response);
+    } else {
+        echo json_encode(['error' => 'Invalid Privillages']);
+        exit();
+    }
+}
 
 // making a course search by logged in user
 else if (isset($_POST['cids'])) {
@@ -245,6 +281,7 @@ else if (isset($_POST['cids'])) {
         echo json_encode($response);
     } else {
         echo json_encode(['error' => 'Invalid Privillages']);
+        exit();
     }
 
 
@@ -281,7 +318,6 @@ else if (isset($_POST['cids'])) {
                 $errors[] = "Course Id: " . $courseId . " not found";
             }
         }
-
     } else if ($userRole == 3) {
         $std_id = $user->getStudentIdByUserId($userId);
         foreach ($addCourseList as $courseId) {
@@ -315,11 +351,10 @@ else if (isset($_POST['cids'])) {
     ];
 
     echo json_encode($response);
-
 } else {
     header("Location: " . SERVER_ROOT . "/index.php");
+    exit();
 }
 // } else {
 //     header("Location: " . SERVER_ROOT . "/index.php");
 // }
-?>

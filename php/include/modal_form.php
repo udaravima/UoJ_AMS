@@ -13,8 +13,7 @@
                     <input type="hidden" name="class_id" id="class_id" value="">
                     <div class="form-group mt-3">
                         <label for="course_code">Course Code:</label>
-                        <select name="course_id" id="course_id" class="form-control" aria-label="course selection"
-                            title="course selection">
+                        <select name="course_id" id="course_id" class="form-control" aria-label="course selection" title="course selection">
                             <?php
                             //TODO: check following
                             //$courses = $lecr->getCourseList();
@@ -57,14 +56,12 @@
             <!-- Modal Footer -->
             <div class="modal-footer mt-5">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-class">Close</button>
-                <button type="button" onclick="exeSubmit('addClass')" class="btn btn-primary" name="submit_class"
-                    id="sumbit_class">Add Class</button>
+                <button type="button" onclick="exeSubmit('addClass')" class="btn btn-primary" name="submit_class" id="sumbit_class">Add Class</button>
                 <?php if ($user->isAdmin()) {
                     echo "<button type='button' onclick='deleteRec(\"addClass\")' class='btn btn-danger d-none'
                     name='deleteClass' id='deleteClass'>Delete</button>";
                 } ?>
-                <button type="button" onclick="updateRec('addClass')" class="btn btn-primary d-none" name="updateClass"
-                    id="updateClass">Update</button>
+                <button type="button" onclick="updateRec('addClass')" class="btn btn-primary d-none" name="updateClass" id="updateClass">Update</button>
             </div>
         </div>
     </div>
@@ -85,14 +82,12 @@
                     <input type="hidden" name="course_id" id="cid" value="">
                     <div class="form-group mt-3">
                         <label for="course_code">Course Code:</label>
-                        <input type="text" class="form-control" id="course_code" name="course_code"
-                            oninput="courseAvailabilityCheck()" placeholder="CSC101S3" required>
+                        <input type="text" class="form-control" id="course_code" name="course_code" oninput="courseAvailabilityCheck()" placeholder="CSC101S3" required>
                         <span id="course_availability_message"></span>
                     </div>
                     <div class="form-group mt-3">
                         <label for="course_name">Course Name:</label>
-                        <input type="text" class="form-control" id="course_name" name="course_name"
-                            placeholder="Introduction to Programming" required>
+                        <input type="text" class="form-control" id="course_name" name="course_name" placeholder="Introduction to Programming" required>
                     </div>
                     <input type="hidden" name="submit_course" value="sumbit" id="submit_course">
                 </form>
@@ -100,13 +95,10 @@
             <!-- Modal footer -->
             <div class="modal-footer mt-5">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-course">Close</button>
-                <button type="button" onclick="exeSubmit('addCourse')" class="btn btn-primary" name="submit_course"
-                    id="submitCourse">Add
+                <button type="button" onclick="exeSubmit('addCourse')" class="btn btn-primary" name="submit_course" id="submitCourse">Add
                     Course</button>
-                <button type='button' onclick='updateRec("addCourse")' class='btn btn-primary d-none'
-                    name='updateCourse' id='updateCourse'> Update </button>
-                <button type='button' onclick='deleteRec("addCourse")' class='btn btn-danger d-none' name='deleteCourse'
-                    id='deleteCourse'> Delete </button>
+                <button type='button' onclick='updateRec("addCourse")' class='btn btn-primary d-none' name='updateCourse' id='updateCourse'> Update </button>
+                <button type='button' onclick='deleteRec("addCourse")' class='btn btn-danger d-none' name='deleteCourse' id='deleteCourse'> Delete </button>
 
 
             </div>
@@ -125,32 +117,26 @@
             </div>
             <!-- Modal Body -->
             <div class="modal-body">
-                <form action="<?php echo SERVER_ROOT; ?>/php/form_action.php" method="post" id='RegistrationForm'
-                    enctype="multipart/form-data">
+                <form action="<?php echo SERVER_ROOT; ?>/php/form_action.php" method="post" id='RegistrationForm' enctype="multipart/form-data">
                     <input type="hidden" name="user_id" id="user_id" value=""> <!-- to pass userID -->
                     <div class="form-group mt-3">
                         <label for="username">Registration No:</label>
-                        <input type="text" class="form-control" id="username" name="username"
-                            oninput="userAvailabilityCheck()" placeholder="2020csc000" required>
+                        <input type="text" class="form-control" id="username" name="username" oninput="userAvailabilityCheck()" placeholder="2020csc000" required>
                         <span id="availability_message"></span>
                     </div>
                     <div class="form-group mt-3">
                         <label for="password">Password:</label>
-                        <input type="password" class="form-control" id="password" name="password"
-                            oninput="validatePassword()" placeholder="Password" required autocomplete="new-password">
+                        <input type="password" class="form-control" id="password" name="password" oninput="validatePassword()" placeholder="Password" required autocomplete="new-password">
                         <span id="password-strength"></span>
                     </div>
                     <div class="form-group mt-3">
                         <label for="confirm_password">Confirm Password:</label>
-                        <input type="password" class="form-control" id="confirm_password" name="confirm_password"
-                            oninput="validatePassword()" placeholder="Confirm Password" required
-                            autocomplete="new-password">
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" oninput="validatePassword()" placeholder="Confirm Password" required autocomplete="new-password">
                         <span id="password-match"></span>
                     </div>
                     <div class="form-group mt-3">
                         <label for="user_role">User Role:</label>
-                        <select name="user_role" id="user_role" class="form-control" onchange="toggleFields()"
-                            title="user-role" aria-label="Select user-role" required>
+                        <select name="user_role" id="user_role" class="form-control" onchange="toggleFields()" title="user-role" aria-label="Select user-role" required>
                             <option value='3' selected>Student</option>
                             <option value='1'>Lecturer</option>
                             <option value='2'>Instructor</option>
@@ -205,8 +191,7 @@
                         <!-- std_nic -->
                         <div class="form-group mt-3">
                             <label for="std_nic">NIC:</label>
-                            <input type="text" class="form-control" id="std_nic" name="std_nic"
-                                pattern="\d{9}(V|v)?$|^(\d{12})$">
+                            <input type="text" class="form-control" id="std_nic" name="std_nic" pattern="\d{9}(V|v)?$|^(\d{12})$">
                         </div>
                         <!-- std_dob -->
                         <div class="form-group mt-3">
@@ -246,8 +231,7 @@
                         <!-- std_profile_pic -->
                         <div class="form-group mt-3">
                             <label for="std_profile_pic">Profile Picture:</label>
-                            <input type="file" class="form-control-file" id="std_profile_pic" name="std_profile_pic"
-                                accept=".jpg, .jpeg, .png">
+                            <input type="file" class="form-control-file" id="std_profile_pic" name="std_profile_pic" accept=".jpg, .jpeg, .png">
                             <span id="std_profile_error"></span>
                         </div>
                         <!-- current_level -->
@@ -262,8 +246,7 @@
                         <!-- lecr_nic -->
                         <div class="form-group mt-3">
                             <label for="lecr_nic">NIC:</label>
-                            <input type="text" class="form-control" id="lecr_nic" name="lecr_nic"
-                                pattern="\d{9}(V|v)?$|^(\d{12})$">
+                            <input type="text" class="form-control" id="lecr_nic" name="lecr_nic" pattern="\d{9}(V|v)?$|^(\d{12})$">
                         </div>
                         <!-- lecr_name -->
                         <div class="form-group mt-3">
@@ -296,8 +279,7 @@
                         <!-- lecr_profile_pic -->
                         <div class="form-group mt-3">
                             <label for="lecr_profile_pic">Profile Picture:</label>
-                            <input type="file" class="form-control-file" id="lecr_profile_pic" name="lecr_profile_pic"
-                                accept=".jpg, .jpeg, .png">
+                            <input type="file" class="form-control-file" id="lecr_profile_pic" name="lecr_profile_pic" accept=".jpg, .jpeg, .png">
                             <span id="lecr_profile_error"></span>
                         </div>
                     </div>
@@ -312,14 +294,12 @@
             <!-- Modal Footer -->
             <div class="modal-footer mt-5">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-reg">Close</button>
-                <button type="button" onclick="exeSubmit('RegistrationForm')" class="btn btn-primary" name="register"
-                    id="register">Register</button>
+                <button type="button" onclick="exeSubmit('RegistrationForm')" class="btn btn-primary" name="register" id="register">Register</button>
                 <?php if ($user->isAdmin()) {
                     echo "<button type='button' onclick='deleteRec(\"RegistrationForm\")' class='btn btn-danger d-none'
                     name='deleteReg' id='deleteReg'>Delete</button>";
                 } ?>
-                <button type="button" onclick="updateRec('RegistrationForm')" class="btn btn-primary d-none"
-                    name="updateReg" id="updateReg">Update</button>
+                <button type="button" onclick="updateRec('RegistrationForm')" class="btn btn-primary d-none" name="updateReg" id="updateReg">Update</button>
 
             </div>
         </div>
@@ -328,17 +308,17 @@
 
 <script>
     // Reload window when the modal closing
-    document.getElementById('add_course').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('add_course').addEventListener('hidden.bs.modal', function() {
         window.location.reload();
     });
-    document.getElementById('add_class').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('add_class').addEventListener('hidden.bs.modal', function() {
         window.location.reload();
     });
-    document.getElementById('reg_user').addEventListener('hidden.bs.modal', function () {
+    document.getElementById('reg_user').addEventListener('hidden.bs.modal', function() {
         window.location.reload();
     });
     //proccess for update class
-    document.getElementById('add_class').addEventListener('show.bs.modal', function (event) {
+    document.getElementById('add_class').addEventListener('show.bs.modal', function(event) {
         var clid = $(event.relatedTarget).data("class-id");
         if (typeof clid !== "undefined") {
             document.getElementById('submit_class').name = "updateClass";
@@ -347,9 +327,11 @@
             $.ajax({
                 method: 'POST',
                 url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
-                data: { cid: cid },
+                data: {
+                    cid: cid
+                },
                 dataType: 'json',
-                success: function (response) {
+                success: function(response) {
                     if (!response.error) {
                         $('#course_id').val(response.course_id);
                         $('#course_id').prop('readonly', true);
@@ -365,14 +347,14 @@
                         console.log(response.error);
                     }
                 },
-                error: function () {
+                error: function() {
                     console.log('error');
                 }
             });
         }
     });
     //process for update course
-    document.getElementById('add_course').addEventListener('show.bs.modal', function (event) {
+    document.getElementById('add_course').addEventListener('show.bs.modal', function(event) {
         var cid = $(event.relatedTarget).data("course-id");
         if (typeof cid !== "undefined") {
             document.getElementById('submit_course').name = "updateCourse";
@@ -383,9 +365,11 @@
             $.ajax({
                 method: 'POST',
                 url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
-                data: { cid: cid },
+                data: {
+                    cid: cid
+                },
                 dataType: 'json',
-                success: function (response) {
+                success: function(response) {
                     if (!response.error) {
                         $('#course_code').val(response.course_code);
                         $('#course_code').prop('readonly', true);
@@ -404,7 +388,7 @@
                         console.log(response.error);
                     }
                 },
-                error: function () {
+                error: function() {
                     console.log('error');
                 }
             });
@@ -413,7 +397,7 @@
 
     });
     // process for registration -> update and delete
-    document.getElementById('reg_user').addEventListener('show.bs.modal', function (event) {
+    document.getElementById('reg_user').addEventListener('show.bs.modal', function(event) {
         var uid = $(event.relatedTarget).data("user-id");
         if (typeof uid !== "undefined") {
             document.getElementById('regSubmit').name = "updateReg";
@@ -422,9 +406,11 @@
             $.ajax({
                 method: 'POST',
                 url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
-                data: { uid: uid },
+                data: {
+                    uid: uid
+                },
                 dataType: 'json',
-                success: function (response) {
+                success: function(response) {
                     if (!response.error) {
                         $('#username').val(response.username);
                         $('#username').prop('readonly', true);
@@ -491,7 +477,7 @@
                         console.log(response.error);
                     }
                 },
-                error: function () {
+                error: function() {
                     console.log('error');
                 }
             });
@@ -701,8 +687,7 @@
                     errorList.innerHTML += "<li>" + element + "</li>";
                 });
             }
-        }
-        else {
+        } else {
             // for add class and add course for now
             document.getElementById(formId).submit();
         }
@@ -717,16 +702,14 @@
             if (cfm) {
                 document.getElementById(formId).submit();
             }
-        }
-        else if (formId == 'addClass') {
+        } else if (formId == 'addClass') {
             document.getElementById('submit_class').name = "deleteClass";
             document.getElementById('submit_class').value = "delete";
             var cfm = confirm('You sure you want to delete?');
             if (cfm) {
                 document.getElementById(formId).submit();
             }
-        }
-        else if (formId == 'addCourse') {
+        } else if (formId == 'addCourse') {
             document.getElementById('submit_course').name = "deleteCourse";
             document.getElementById('submit_course').value = "delete";
             var cfm = confirm('You sure you want to delete?');
@@ -735,6 +718,7 @@
             }
         }
     }
+
     function toggleFields() {
         var userType = document.getElementById("user_role").value;
         var studentFields = document.getElementById("std_fields");
@@ -813,9 +797,11 @@
             $.ajax({
                 type: 'POST',
                 url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
-                data: { course_code: course_code },
+                data: {
+                    course_code: course_code
+                },
                 dataType: 'json',
-                success: function (response) {
+                success: function(response) {
                     if (response.available) {
                         document.getElementById("course_code").classList.remove("is-invalid");
                         document.getElementById("course_code").classList.add("is-valid");
@@ -839,6 +825,7 @@
             message.style.color = "red";
         }
     }
+
     function userAvailabilityCheck() {
         var username = document.getElementById("username").value;
         var message = document.getElementById("availability_message");
@@ -847,9 +834,11 @@
             $.ajax({
                 type: 'POST',
                 url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
-                data: { username: username },
+                data: {
+                    username: username
+                },
                 dataType: 'json',
-                success: function (response) {
+                success: function(response) {
                     if (response.available) {
                         document.getElementById("username").classList.add("is-valid");
                         message.textContent = "Username is available";
@@ -873,7 +862,7 @@
         }
     }
 
-    document.getElementById('std_profile_pic').addEventListener('change', function () {
+    document.getElementById('std_profile_pic').addEventListener('change', function() {
         const maxSizeInBytes = 1024 * 1024; // 1024KB
         const file = this.files[0];
         if (file && file.size > maxSizeInBytes) {
@@ -888,7 +877,7 @@
         }
     });
 
-    document.getElementById('lecr_profile_pic').addEventListener('change', function () {
+    document.getElementById('lecr_profile_pic').addEventListener('change', function() {
         const maxSizeInBytes = 1024 * 1024; // 1024KB
         const file = this.files[0];
         if (file && file.size > maxSizeInBytes) {
