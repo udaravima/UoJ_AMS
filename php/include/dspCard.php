@@ -292,9 +292,9 @@
                         (response.students).forEach(student => {
                             let rw = $(document.createElement("tr"));
                             rw.append($(document.createElement("td")).text(i++));
+                            rw.append($(document.createElement("td")).text(student[2]));
                             rw.append($(document.createElement("td")).text(student[0]));
                             rw.append($(document.createElement("td")).text(student[1]));
-                            rw.append($(document.createElement("td")).text(student[2]));
                             rw.append($(document.createElement("td")).append($(document.createElement("button")).addClass("btn btn-danger rounded-pill").attr("type", "button").attr("onclick", "toggleExistStudent(" + student[3] + ")").attr("id", "existCourseStd" + student[3]).text("Remove")));
                             currentStudent.append(rw);
                         });
