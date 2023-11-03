@@ -351,6 +351,98 @@ else if (isset($_POST['cids'])) {
     ];
 
     echo json_encode($response);
+
+    // Update User Course list by admin
+} else if (isset($_POST["userSearch"]) && $user->isAdmin()) {
+    $errors = [];
+    $messages = [];
+    $search = $_POST["userSearch"];
+    $order = array();
+    $response = [];
+    $order['search'] = $search;
+    try {
+        $lectures = $user->getLecturerTable($order);
+        $response['lecturers'] = $lectures->fetch_all();
+    } catch (Exception $e) {
+        $errors[] = $e->getMessage();
+        $errors[] = "Error in retrieving lecturers";
+        $response['lecturers'] = [];
+    }
+    try {
+        $students = $user->getStudentTable($order);
+        $response['students'] = $students->fetch_all();
+    } catch (Exception $e) {
+        $errors[] = $e->getMessage();
+        $errors[] = "Error in retrieving students";
+        $response['students'] = [];
+    }
+    $response['errors'] = $errors;
+    $response['error'] = false;
+    echo json_encode($response);
+    //add user to course by admin
+} else if (isset($_POST['courseUserId'])) {
+    $errors = [];
+    $messages = [];
+    $courseId = $_POST['courseUserId'];
+    $addStudentList = (isset($_POST['addStudentList'])) ? $_POST['addStudentList'] : array();
+    $removeStudentList = (isset($_POST['removeStudentList'])) ? $_POST['removeStudentList'] : array();
+    $addLectureList = (isset($_POST['addLectureList'])) ? $_POST['addLectureList'] : array();
+    $removeLectureList = (isset($_POST['removeLectureList'])) ? $_POST['removeLectureList'] : array();
+    if ($lecr->isCourseIdExist($courseId)) {
+        foreach ($addStudentList as $studentId) {
+            if ($user->isStudentIdExist($studentId)) {
+                if ($lecr->enrollStudentToCourse($studentId, $courseId)) {
+                    $messages[] = "Student Id: " . $studentId . " added successfully";
+                } else {
+                    $errors[] = "Student Id: " . $studentId . " already exist";
+                }
+            } else {
+                $errors[] = "Student Id: " . $studentId . " not found";
+            }
+        }
+        foreach ($removeStudentList as $studentId) {
+            if ($user->isStudentIdExist($studentId)) {
+                if ($lecr->derollStudentToCourse($studentId, $courseId)) {
+                    $messages[] = "Student Id: " . $studentId . " removed successfully";
+                } else {
+                    $errors[] = "Student Id: " . $studentId . " not found";
+                }
+            } else {
+                $errors[] = "Student Id: " . $studentId . " not found";
+            }
+        }
+        foreach ($addLectureList as $lectureId) {
+            if ($user->isLectureIdExist($lectureId)) {
+                if ($lecr->enrollLectureToCourse($lectureId, $courseId)) {
+                    $messages[] = "Lecture Id: " . $lectureId . " added successfully";
+                } else {
+                    $errors[] = "Lecture Id: " . $lectureId . " already exist";
+                }
+            } else {
+                $errors[] = "Lecture Id: " . $lectureId . " not found";
+            }
+        }
+        foreach ($removeLectureList as $lectureId) {
+            if ($user->isLectureIdExist($lectureId)) {
+                if ($lecr->derollLecturerToCourse($lectureId, $courseId)) {
+                    $messages[] = "Lecture Id: " . $lectureId . " removed successfully";
+                } else {
+                    $errors[] = "Lecture Id: " . $lectureId . " not found";
+                }
+            } else {
+                $errors[] = "Lecture Id: " . $lectureId . " not found";
+            }
+        }
+    } else {
+        $errors[] = "Course Id: " . $courseId . " not found";
+    }
+    $response = [
+        'error' => false,
+        'messages' => $messages,
+        'errors' => $errors,
+        'success' => true
+    ];
+    echo json_encode($response);
 } else {
     header("Location: " . SERVER_ROOT . "/index.php");
     exit();

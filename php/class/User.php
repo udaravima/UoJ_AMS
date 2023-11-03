@@ -87,7 +87,6 @@ class User
             $this->loginMessage = "Username or Password Invalid!";
             return false; // Message if username or password is empty!
         }
-
     }
 
     public function logout()
@@ -271,20 +270,18 @@ class User
 
     public function listStaffUsers()
     {
-
     }
 
     public function getDefaultProfilePic()
     {
         return $this->default_pro_picture;
-
     }
 
     public function getStudentTable($order = array())
     {
         $query = "SELECT std.*, users.user_role, users.user_status, users.username, users.user_id FROM $this->stdTable as std INNER JOIN $this->userTable as users ON users.user_id = std.user_id ";
         if (isset($order['search'])) {
-            $query .= "WHERE std.std_fullname LIKE '%" . $order['search'] . "%' OR OR users.username LIKE '%" . $order['search'] . "%' std.std_nic LIKE '%" . $order['search'] . "%' OR std.std_email LIKE '%" . $order['search'] . "%' OR std.std_mobile_tp_no LIKE '%" . $order['search'] . "%' OR std.std_home_tp_no LIKE '%" . $order['search'] . "%' OR std.std_batchno LIKE '%" . $order['search'] . "%' OR std.std_current_level LIKE '%" . $order['search'] . "%' OR std.std_dob LIKE '%" . $order['search'] . "%' OR std.std_date_admission LIKE '%" . $order['search'] . "%' OR std.std_current_address LIKE '%" . $order['search'] . "%' OR std.std_permanent_address LIKE '%" . $order['search'] . "%' ";
+            $query .= "WHERE std.std_fullname LIKE '%" . $order['search'] . "%' OR users.username LIKE '%" . $order['search'] . "%' OR std.std_nic LIKE '%" . $order['search'] . "%' OR std.std_email LIKE '%" . $order['search'] . "%' OR std.mobile_tp_no LIKE '%" . $order['search'] . "%' OR std.home_tp_no LIKE '%" . $order['search'] . "%'";
         }
         //TODO: CHECK
         if (isset($order['column'])) {
@@ -384,7 +381,6 @@ class User
         } else {
             return false;
         }
-
     }
 
     //UserData: 0->name, 1->mobile, 2->email, 3->gender, 4->address, 5->profile_pic
@@ -517,4 +513,30 @@ class User
         }
     }
 
+    public function isStudentIdExist($stdId)
+    {
+        $query = "SELECT * FROM {$this->stdTable} WHERE std_id=?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $stdId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public function isLectureIdExist($lecrId)
+    {
+        $query = "SELECT * FROM {$this->lecrTable} WHERE lecr_id=?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $lecrId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

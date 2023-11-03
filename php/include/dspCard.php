@@ -27,7 +27,7 @@
                         <div class="input-group-append">
                             <button class="btn btn-secondary rounded btn-group" type="button" id="course-selectAll" onclick="selectAllCourses(this, 'course-select[]')">*</button>
                         </div>
-                        <div class="dropdown-menu" aria-labelledby="course-addon" id="update-course-list">
+                        <div class="dropdown-menu" style="overflow:hidden auto; max-height:245px;" aria-labelledby="course-addon" id="update-course-list">
                             <!-- Courses goes here -->
                             <!-- temp example -->
 
@@ -75,11 +75,12 @@
                 <!-- User Search -->
                 <div class="container mt-3">
                     <div class="input-group mb-3">
-                        <input type="search" class="form-control" placeholder="Search User" aria-label="Search Course" aria-describedby="course-addon" id="search-user-for-course" data-bs-toggle="dropdown" data-bs-target="#update-user-list" name="search-user-for-course">
+                        <input type="search" class="form-control" placeholder="Search User" aria-label="Search Course" aria-describedby="course-addon" id="search-user-for-course" data-bs-toggle="dropdown" data-bs-target="#course-assigned-user" name="search-user-for-course">
                         <div class="input-group-append">
-                            <button class="btn btn-secondary rounded btn-group" type="button" id="user-selectAll" onclick="selectAllUsers(this)">*</button>
+                            <button class="btn btn-secondary rounded btn-group" type="button" id="user-selectAll" onclick="selectAllUsers(this, 'student-list[]')">Students</button>
+                            <button class="btn btn-secondary rounded btn-group" type="button" id="user-selectAll" onclick="selectAllUsers(this, 'lecturer-list[]')">Lecturer</button>
                         </div>
-                        <div class="dropdown-menu" aria-labelledby="users-addon-course" id="update-user-list">
+                        <div class="dropdown-menu" aria-labelledby="users-addon-course" style="overflow:hidden auto; max-height:245px;" id="course-assigned-user">
                             <!-- users goes here -->
                             <!-- wait -->
                         </div>
@@ -150,6 +151,15 @@
     let addCourseList = [];
     let removeCourseList = [];
     let indexNewCourse = 1;
+    let addStudentList = [];
+    let removeStudentList = [];
+    let indexNewStudent = 1;
+    let addLectureList = [];
+    let removeLectureList = [];
+    let indexNewLecture = 1;
+
+
+
     document.getElementById('course-info-card').addEventListener('hidden.bs.modal', function(event) {
         document.getElementById('course-edit-button').setAttribute("data-course-id", '');
         document.getElementById('user-update-button').setAttribute("data-course-id", '');
@@ -157,9 +167,15 @@
         document.getElementById('current-lecture-course').innerHTML = "";
         document.getElementById('search-user-for-course').value = "";
         document.getElementById('search-course').value = "";
-        document.getElementById('update-user-list').innerHTML = "";
+        document.getElementById('course-assigned-user').innerHTML = "";
         document.getElementById('update-course-list').innerHTML = "";
         document.getElementById('course-info-card').setAttribute("data-course-id", '');
+        addStudentList = [];
+        removeStudentList = [];
+        indexNewStudent = 1;
+        addLectureList = [];
+        removeLectureList = [];
+        indexNewLecture = 1;
 
         // window.location.href = '<?php //echo SERVER_ROOT; 
                                     ?>/index.php';
@@ -175,10 +191,9 @@
         // window.location.href = '<?php //echo SERVER_ROOT; 
                                     ?>/index.php';
     });
-
     document.getElementById('search-user-for-course').addEventListener('keyup', function(event) {
         let userSearch = document.getElementById('search-user-for-course').value;
-        if (userSearch.length > 4) {
+        if (userSearch.length > 3) {
             $.ajax({
                 method: 'POST',
                 url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
@@ -187,9 +202,27 @@
                 },
                 dataType: 'json',
                 success: function(response) {
-                    let userListCourse = $('#update-user-list');
+                    let userListCourse = $('#course-assigned-user');
                     userListCourse.empty();
-                    (response.users)
+                    // let optionGroupStd = $(document.createElement("optgroup")).attr("label", "Student");
+                    // let optionGroupLecr = $(document.createElement("optgroup")).attr("label", "Lecture");
+                    userListCourse.append($(document.createElement("div")).addClass("dropdown-header").text("Student"));
+                    (response.students).forEach(student => {
+                        let data = $(document.createElement("div")).addClass("form-check").addClass("dropdown-item");
+                        data.append($(document.createElement("input")).addClass("form-check-input").attr("value", student[0]).attr("type", "checkbox").attr("id", "filterStdCheckbox" + student[0]).attr("name", "student-list[]").attr("data-user-role", 3).attr("data-user-name", student[2]).attr("data-user-index", student[1]).attr("data-user-reg", student[18]).attr("onchange", "addUserToCourse(this)"));
+                        data.append($(document.createElement("label")).addClass("form-check-label").attr("for", "filterStdCheckbox" + student[0]).text(student[1] + " - " + student[18]));
+                        userListCourse.append(data);
+                    });
+                    userListCourse.append($(document.createElement("div")).addClass("dropdown-divider"));
+                    userListCourse.append($(document.createElement("div")).addClass("dropdown-header").text("Lecturer"));
+                    (response.lecturers).forEach(lecture => {
+                        let data = $(document.createElement("div")).addClass("form-check").addClass("dropdown-item");
+                        data.append($(document.createElement("input")).addClass("form-check-input").attr("value", lecture[0]).attr("type", "checkbox").attr("id", "filterLecrCheckbox" + lecture[0]).attr("name", "lecturer-list[]").attr("data-user-role", 1).attr("data-user-name", lecture[2]).attr("data-user-reg", lecture[11]).attr("onchange", "addUserToCourse(this)"));
+                        data.append($(document.createElement("label")).addClass("form-check-label").attr("for", "filterLecrCheckbox" + lecture[0]).text(lecture[11] + " - " + lecture[2]));
+                        userListCourse.append(data);
+                    });
+                    $('#course-assigned-user').selectpicker('refresh');
+
                 },
                 error: function() {
                     sendMessage('Error on loading users', 'danger');
@@ -262,7 +295,7 @@
                             rw.append($(document.createElement("td")).text(student[0]));
                             rw.append($(document.createElement("td")).text(student[1]));
                             rw.append($(document.createElement("td")).text(student[2]));
-                            rw.append($(document.createElement("td")).append($(document.createElement("button")).addClass("btn btn-danger rounded-pill").attr("type", "button").attr("onclick", "toggleExistStudent(" + student[3] + ")").attr("id", "existCourse" + student[3]).text("Remove")));
+                            rw.append($(document.createElement("td")).append($(document.createElement("button")).addClass("btn btn-danger rounded-pill").attr("type", "button").attr("onclick", "toggleExistStudent(" + student[3] + ")").attr("id", "existCourseStd" + student[3]).text("Remove")));
                             currentStudent.append(rw);
                         });
                         i = 1;
@@ -271,7 +304,7 @@
                             rw.append($(document.createElement("td")).text(i++));
                             rw.append($(document.createElement("td")).text(lecture[0]));
                             rw.append($(document.createElement("td")).text(lecture[1]));
-                            rw.append($(document.createElement("td")).append($(document.createElement("button")).addClass("btn btn-danger rounded-pill").attr("type", "button").attr("onclick", "toggleExistLecture(" + lecture[2] + ")").attr("id", "existCourse" + lecture[2]).text("Remove")));
+                            rw.append($(document.createElement("td")).append($(document.createElement("button")).addClass("btn btn-danger rounded-pill").attr("type", "button").attr("onclick", "toggleExistLecture(" + lecture[2] + ")").attr("id", "existCourseLecr" + lecture[2]).text("Remove")));
                             currentLecture.append(rw);
                         });
                     } else {
@@ -363,6 +396,158 @@
         }
     });
 
+    function selectAllUsers(button, selection) {
+        let checkboxes = document.getElementsByName(selection);
+        if (button.classList.contains('btn-secondary')) {
+            for (let i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = true;
+                addUserToCourse(checkboxes[i]);
+            }
+            button.classList.remove('btn-secondary');
+            button.classList.add('btn-primary');
+
+        } else {
+            for (let i = 0; i < checkboxes.length; i++) {
+                checkboxes[i].checked = false;
+                addUserToCourse(checkboxes[i]);
+            }
+            button.classList.remove('btn-primary');
+            button.classList.add('btn-secondary');
+        }
+    }
+
+    function selectAllCourses(button, selectName) {
+        let checkboxes = document.getElementsByName(selectName);
+        if (button.classList.contains('btn-secondary')) {
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].type == 'checkbox') {
+                    checkboxes[i].checked = true;
+                    addCourse(checkboxes[i]);
+                }
+            }
+            button.classList.remove('btn-secondary');
+            button.classList.add('btn-primary');
+        } else {
+            for (let i = 0; i < checkboxes.length; i++) {
+                if (checkboxes[i].type == 'checkbox') {
+                    checkboxes[i].checked = false;
+                    addCourse(checkboxes[i]);
+                }
+            }
+            button.classList.remove('btn-primary');
+            button.classList.add('btn-secondary');
+        }
+    }
+
+
+    function addUserToCourse(checkbox) {
+        let userRole = checkbox.getAttribute("data-user-role");
+        let userId = checkbox.value;
+        let userName = checkbox.getAttribute("data-user-name");
+        let userReg = checkbox.getAttribute("data-user-reg");
+        if (userRole < 3) {
+            if (checkbox.checked) {
+                $('#filterLecrCheckbox' + userId).parent('div').addClass("active");
+                if ($('#existCourseLecr' + userId).length > 0) {
+                    if (removeLectureList.includes(Number(userId))) {
+                        removeLectureList.splice(removeLectureList.indexOf(Number(userId)), 1);
+                        $('#existCourseLecr' + userId).removeClass("btn-warning").addClass('btn-danger').text("Remove");
+                    }
+                } else {
+                    if (!(addLectureList.includes(Number(userId)))) {
+                        addLectureList.push(Number(userId));
+                        let lectures = $('#current-lecture-course');
+                        let rw = $(document.createElement("tr"));
+                        rw.append($(document.createElement("td")).text(indexNewLecture++));
+                        rw.append($(document.createElement("td")).text(userReg));
+                        rw.append($(document.createElement("td")).text(userName));
+                        rw.append($(document.createElement("td")).append($(document.createElement("button")).addClass("btn btn-warning rounded-pill").attr("type", "button").attr("onclick", "resetLectureCheckBox(" + userId + ")").attr("id", "newLecture" + userId).text("+Pending")));
+                        lectures.append(rw);
+                    }
+                }
+            } else {
+                $('#filterLecrCheckbox' + userId).parent('div').removeClass("active");
+                if (addLectureList.includes(Number(userId))) {
+                    addLectureList.splice(addLectureList.indexOf(Number(userId)), 1);
+                }
+                if ($('#existCourseLecr' + userId).length > 0) {
+                    if (!(removeLectureList.includes(Number(userId)))) {
+                        removeLectureList.push(Number(userId));
+                        $('#existCourseLecr' + userId).removeClass("btn-danger").addClass('btn-warning').text("-Pending");
+                    }
+                }
+                if ($('#newLecture' + userId).length > 0) {
+                    $('#newLecture' + userId).closest('tr').remove();
+                    indexNewLecture--;
+                }
+            }
+        } else if (userRole == 3) {
+            let index = checkbox.getAttribute("data-user-index");
+            if (checkbox.checked) {
+                $('#filterStdCheckbox' + userId).parent('div').addClass("active");
+                if ($('#existCourseStd' + userId).length > 0) {
+                    if (removeStudentList.includes(Number(userId))) {
+                        removeStudentList.splice(removeStudentList.indexOf(Number(userId)), 1);
+                        $('#existCourseStd' + userId).removeClass("btn-warning").addClass('btn-danger').text("Remove");
+                    }
+                } else {
+                    if (!(addStudentList.includes(Number(userId)))) {
+                        addStudentList.push(Number(userId));
+                        let students = $('#current-student-course');
+                        let rw = $(document.createElement("tr"));
+                        rw.append($(document.createElement("td")).text(indexNewStudent++));
+                        rw.append($(document.createElement("td")).text(index));
+                        rw.append($(document.createElement("td")).text(userReg));
+                        rw.append($(document.createElement("td")).text(userName));
+                        rw.append($(document.createElement("td")).append($(document.createElement("button")).addClass("btn btn-warning rounded-pill").attr("type", "button").attr("onclick", "resetStudentCheckBox(" + userId + ")").attr("id", "newStudent" + userId).text("+Pending")));
+                        students.append(rw);
+                    }
+                }
+            } else {
+                $('#filterStdCheckbox' + userId).parent('div').removeClass("active");
+                if (addStudentList.includes(Number(userId))) {
+                    addStudentList.splice(addStudentList.indexOf(Number(userId)), 1);
+                }
+                if ($('#existCourseStd' + userId).length > 0) {
+                    if (!(removeStudentList.includes(Number(userId)))) {
+                        removeStudentList.push(Number(userId));
+                        $('#existCourseStd' + userId).removeClass("btn-danger").addClass('btn-warning').text("-Pending");
+                    }
+                }
+                if ($('#newStudent' + userId).length > 0) {
+                    $('#newStudent' + userId).closest('tr').remove();
+                    indexNewStudent--;
+                }
+            }
+        }
+    }
+
+    function resetStudentCheckBox(sid) {
+        sid = Number(sid);
+        if (addStudentList.includes(sid)) {
+            addStudentList.splice(addStudentList.indexOf(sid), 1);
+            $('#newStudent' + sid).closest('tr').remove();
+            indexNewStudent--;
+        }
+        if ($('#filterStdCheckbox' + sid).length > 0) {
+            $('#filterStdCheckbox' + sid).prop('checked', false);
+            $('#filterStdCheckbox' + sid).parent('div').removeClass("active");
+        }
+    }
+
+    function resetLectureCheckBox(lid) {
+        lid = Number(lid);
+        if (addLectureList.includes(lid)) {
+            addLectureList.splice(addLectureList.indexOf(lid), 1);
+            $('#newLecture' + lid).closest('tr').remove();
+            indexNewLecture--;
+        }
+        if ($('#filterLecrCheckbox' + lid).length > 0) {
+            $('#filterLecrCheckbox' + lid).prop('checked', false);
+            $('#filterLecrCheckbox' + lid).parent('div').removeClass("active");
+        }
+    }
+
     function addCourse(checkbox) {
         courseCode = checkbox.getAttribute("data-course-code");
         courseName = checkbox.getAttribute("data-course-name");
@@ -431,6 +616,28 @@
         }
     }
 
+    function toggleExistStudent($stdId) {
+        $stdId = Number($stdId);
+        if (removeStudentList.includes($stdId)) {
+            removeStudentList.splice(removeStudentList.indexOf($stdId), 1);
+            $('#existCourseStd' + $stdId).removeClass("btn-warning").addClass('btn-danger').text("Remove");
+        } else {
+            removeStudentList.push($stdId);
+            $('#existCourseStd' + $stdId).removeClass("btn-danger").addClass('btn-warning').text("-Pending");
+        }
+    }
+
+    function toggleExistLecture($lecrId) {
+        $lecrId = Number($lecrId);
+        if (removeLectureList.includes($lecrId)) {
+            removeLectureList.splice(removeLectureList.indexOf($lecrId), 1);
+            $('#existCourseLecr' + $lecrId).removeClass("btn-warning").addClass('btn-danger').text("Remove");
+        } else {
+            removeLectureList.push($lecrId);
+            $('#existCourseLecr' + $lecrId).removeClass("btn-danger").addClass('btn-warning').text("-Pending");
+        }
+    }
+
     function updateUserCourse(button) {
         let userid = button.getAttribute("data-user-id");
         if (addCourseList.length > 0 || removeCourseList.length > 0) {
@@ -476,24 +683,51 @@
         }
     }
 
-    function selectAllCourses(button, selectName) {
-        let checkboxes = document.getElementsByName(selectName);
-        if (button.classList.contains('btn-secondary')) {
-            for (let i = 0; i < checkboxes.length; i++) {
-                if (checkboxes[i].type == 'checkbox') {
-                    checkboxes[i].checked = true;
-                    addCourse(checkboxes[i]);
+    function updateUserForCourse(button) {
+        let courseUserId = button.getAttribute("data-course-id");
+        
+        if (addStudentList.length > 0 || removeStudentList.length > 0 || addLectureList.length > 0 || removeLectureList.length > 0) {
+            $.ajax({
+                method: 'POST',
+                url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
+                data: {
+                    courseUserId: courseUserId,
+                    addStudentList: addStudentList,
+                    removeStudentList: removeStudentList,
+                    addLectureList: addLectureList,
+                    removeLectureList: removeLectureList
+                },
+                dataType: 'json',
+                success: function(response) {
+                    $('#messageModalBody').empty();
+                    if (response.errors.length > 0) {
+                        let errorsRw = $(document.createElement("div")).addClass("alert").addClass("alert-danger");
+                        let dataList = $(document.createElement("ul"));
+                        (response.errors).forEach(error => {
+                            dataList.append($(document.createElement("li")).text(error));
+                        });
+                        errorsRw.append(dataList);
+                        $('#messageModalBody').append(errorsRw);
+                    }
+                    if (response.messages.length > 0) {
+                        let messageRw = $(document.createElement("div")).addClass("alert").addClass("alert-success");
+                        let dataList = $(document.createElement("ul"));
+                        (response.messages).forEach(message => {
+                            dataList.append($(document.createElement("li")).text(message));
+                        });
+                        messageRw.append(dataList);
+                        $('#messageModalBody').append(messageRw);
+                    }
+
+                    $('#messageModal').modal('show');
+                    $('#messageModal').on('hidden.bs.modal', function(e) {
+                        window.location.reload();
+                    });
+                },
+                error: function() {
+                    sendMessage('error on Update :(', 'danger');
                 }
-            }
-            this.classList.remove('btn-secondary').addClass('btn-primary');
-        } else {
-            for (let i = 0; i < checkboxes.length; i++) {
-                if (checkboxes[i].type == 'checkbox') {
-                    checkboxes[i].checked = false;
-                    addCourse(checkboxes[i]);
-                }
-            }
-            this.classList.remove('btn-primary').addClass('btn-secondary');
+            });
         }
     }
 </script>

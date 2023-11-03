@@ -460,6 +460,20 @@ class Lecturer
             }
         }
     }
+
+    public function isCourseIdExist($courseId){
+        $query = "SELECT * FROM {$this->course} WHERE course_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $courseId);
+        if ($stmt->execute()) {
+            $result = $stmt->get_result();
+            if ($result->num_rows > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
 }
 // List of Functions available
 //     public function createClass($lecrId, $courseId, $date, $sTime, $endTime)

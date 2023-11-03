@@ -2,7 +2,7 @@
 include_once ROOT_PATH . '/php/include/modal_form.php';
 
 ?>
-<nav class="navbar navbar-expand-md fixed-top navbar-light mt-0 mb-5">
+<nav class="navbar navbar-expand-md  navbar-light mt-0 mb-5">
     <div class="container-md rounded">
         <a class="navbar-brand" href="<?php echo SERVER_ROOT; ?>/index.php">
             <img id="logo" src="<?php echo SERVER_ROOT; ?>/res/logo/AMS_logo.png" alt="AMS_logo" width="40" height="40"
