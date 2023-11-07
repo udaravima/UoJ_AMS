@@ -13,13 +13,17 @@
                     <input type="hidden" name="class_id" id="class_id" value="">
                     <div class="form-group mt-3">
                         <label for="course_code">Course Code:</label>
-                        <select name="course_id" id="course_id" class="form-control" aria-label="course selection" title="course selection">
+                        <select name="course_id" id="course_id" class="form-control selectpicker" aria-label="course selection" title="course selection">
                             <?php
                             //TODO: check following
-                            //$courses = $lecr->getCourseList();
-                            //while ($course = $courses->fetch_assoc()) {
-                            //    echo "<option value='" . $course['course_id'] . "'>" . $course['course_code'] . "</option>";
-                            //}
+                            if ($user->isAdmin()) {
+                                $courses = $lecr->getCourseList();
+                            } else {
+                                $courses = $lecr->getLecturerCourseList($_SESSION["lecr_id"]);
+                            }
+                            while ($course = $courses->fetch_assoc()) {
+                                echo "<option value='" . $course['course_id'] . "'>" . $course['course_code'] . " - " . $course['course_name'] . "</option>";
+                            }
                             ?>
                         </select>
                     </div>
@@ -27,14 +31,15 @@
                         <label for="lecr_id">LectureID: </label>
                         <?php
                         if ($user->isAdmin()) {
-                            echo "<select name='lecr_id' id='lecr_id' class='form-control'>";
+                            echo "<select name='lecr_id' id='lecr_id' class='selectpicker form-control'>";
                             $lecturers = $user->getLecturerTable();
                             while ($lecturer = $lecturers->fetch_assoc()) {
                                 echo "<option value='" . $lecturer['lecr_id'] . "'>" . $lecturer['lecr_name'] . "</option>";
                             }
                             echo "</select>";
                         } else {
-                            echo "<input type='text' class='form-control' id='lecr_id' name='lecr_id' value='" . $_SESSION['user_id'] . "' readonly>";
+                            echo "<input type='hidden' class='form-control' id='lecr_id' name='lecr_id' value='" . $_SESSION['user_id'] . "' readonly>";
+                            echo "<input type='text' class='form-control' id='lecr_name_class' name='lecr_name_class' value='" . $user->getUsernameByUserId($_SESSION['user_id']) . "' disabled>";
                         }
                         ?>
                     </div>
@@ -50,14 +55,38 @@
                         <label for="end_time">End Time:</label>
                         <input type="time" class="form-control" id="end_time" name="end_time" required>
                     </div>
+                    <div class="form-group mt-3">
+                        <label for="class-instructors">Class Instructors:
+                        </label>
+                        <select name="class-instructors[]" id="class-instructors" multiple class="selectpicker form-control" aria-label="class_instrictors">
+                            <?php
+                            if ($user->isAdmin() || $user->isLecturer()) {
+                                $lecturers = $user->getInstructorList();
+                                while ($lecturer = $lecturers->fetch_assoc()) {
+                                    echo "<option value='" . $lecturer['lecr_id'] . "'>" . $lecturer["username"] . " - " . $lecturer['lecr_name'] . "</option>";
+                                }
+                            }
+                            ?>
+                        </select>
+                    </div>
                     <input type="hidden" name="submit_class" value="submit">
                 </form>
+                <!-- list of instructors selected -->
+                <div class="container mt-3 d-none" id="instructor-list-for-class">
+                    <div class="row">
+                        <div class="col">
+                            <h5>Selected Instructors</h5>
+                            <ul id="selected-instructors" class="list-group">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
             <!-- Modal Footer -->
             <div class="modal-footer mt-5">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-class">Close</button>
                 <button type="button" onclick="exeSubmit('addClass')" class="btn btn-primary" name="submit_class" id="sumbit_class">Add Class</button>
-                <?php if ($user->isAdmin()) {
+                <?php if ($user->isAdmin() && $user->isLecturer()) {
                     echo "<button type='button' onclick='deleteRec(\"addClass\")' class='btn btn-danger d-none'
                     name='deleteClass' id='deleteClass'>Delete</button>";
                 } ?>
@@ -343,6 +372,12 @@
                         $('#updateClass').removeClass('d-none');
                         $('#deleteClass').removeClass('d-none');
                         $('#addClass').addClass('d-none');
+                        $('#list-of-instructors').removeClass('d-none');
+                        let selectedInstructors = $('#selected-instructors');
+                        selectedInstructors.empty();
+                        (response.instructors).forEach(instructor => {
+                            selectedInstructors.append("<li class='list-group-item'>" + instructor + "</li>");
+                        });
                     } else {
                         console.log(response.error);
                     }

@@ -539,4 +539,62 @@ class User
             return false;
         }
     }
+
+    public function getInstructorList()
+    {
+        $query = "SELECT {$this->lecrTable}.lecr_id,{$this->userTable}.username, {$this->lecrTable}.lecr_name FROM {$this->lecrTable} INNER JOIN {$this->userTable} ON {$this->lecrTable}.user_id = {$this->userTable}.user_id WHERE {$this->userTable}.user_role = 2";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result;
+    }
+    public function getUsernameByUserId($userId)
+    {
+        $query = "SELECT username FROM {$this->userTable} WHERE user_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc()['username'];
+    }
 }
+
+// $user = new User($conn);
+// $user->login($username, $password, $rememberMe);
+// $user->logout();
+// $user->setUserLock($status);
+// $user->retrieveUserDetails($userId);
+// $user->getRoleStr($roleNo);
+// $user->getStatusStr($statusNo);
+// $user->getGenderStr($genderNo);
+// $user->retrieveUserRole($userId);
+// $user->isUsernameAvailable($username);
+// $user->isUserIdExist($userId);
+// $user->isLoggedIn();
+// $user->isAdmin();
+// $user->isLecturer();
+// $user->isInstructor();
+// $user->isStudent();
+// $user->listStaffUsers();
+// $user->getDefaultProfilePic();
+// $user->getStudentTable($order = array());
+// $user->getLecturerTable($order = array());
+// $user->countRecords($userTable, $filter = null, $filtervalue = null);
+// $user->registerUser($username, $password, $userRole, $userData, $userStatus);
+// $user->insertUser($username, $password, $userRole, $userStatus);
+// $user->insertStudent($userId, $userData);
+// $user->insertLecturer($userId, $userData);
+// $user->editUser($userId, $password, $userStatus, $userData);
+// $user->changeUserPassword($userId, $password);
+// $user->updateUser($userId, $userStatus);
+// $user->updateLecturer($userId, $userData);
+// $user->updateStudent($userId, $userData);
+// $user->deleteUser($userId);
+// $user->getStudentIdByUserId($userId);
+// $user->getLectureIdByUserId($userId);
+// $user->isStudentIdExist($stdId);
+// $user->isLectureIdExist($lecrId);
+// $user->setUserBadge();
+// $user->getLoginMessage();
+// $user->setLoginMessage($Message);
+// $user->processNameInitials($fullName);

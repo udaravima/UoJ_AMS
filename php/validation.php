@@ -84,11 +84,13 @@ if (isset($_POST['username'])) {
 
         if ($lecr->isCourseExist($courseId)) {
             $courseDetails = $lecr->retrieveCourseDetails($courseId);
+            $Instructors = $lecr->getInstructorForClass($courseId);
             $response = [
                 'error' => false,
                 'course_code' => $courseDetails['course_code'],
                 'course_name' => $courseDetails['course_name'],
-                'course_id' => $courseDetails['course_id']
+                'course_id' => $courseDetails['course_id'],
+                'instructors' => $Instructors->fetch_all()
             ];
             echo json_encode($response);
         } else {

@@ -70,10 +70,9 @@ include_once ROOT_PATH . '/php/include/modal_form.php';
     </table>
     <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center">
-            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+            <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
                 <li class="page-item <?php echo ($i == $currentPage) ? 'active' : ''; ?>">
-                    <a class="page-link"
-                        href="<?php echo SERVER_ROOT; ?>/php/lecturer_dashboard.php?pageC=<?php echo $i; ?>">
+                    <a class="page-link" href="<?php echo SERVER_ROOT; ?>/php/lecturer_dashboard.php?pageC=<?php echo $i; ?>">
                         <?php echo $i; ?>
                     </a>
                 </li>
@@ -82,7 +81,52 @@ include_once ROOT_PATH . '/php/include/modal_form.php';
     </nav>
 </div>
 
+<div class="container mt-3">
+    <div id="class-calandar-lecturer">
+
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('class-calandar-lecturer');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            navLinks: true,
+            selectable: true,
+            editable: true,
+            dayMaxEvents: true,
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            events: {
+                url: '<?php echo SERVER_ROOT; ?>/php/calendar_setup.php',
+                method: 'POST',
+                extraParams: {
+                    lecr_id: <?php echo $_SESSION["lecr_id"]; ?>,
+                    event_date: arguments.date
+                },
+                failure: function() {
+                    sendMessage('Error loading calendar events!', 'warning');
+                },
+                color: 'cyan', // a non-ajax option
+                textColor: 'black' // a non-ajax option
+            }
+        });
+        calendar.render();
+    });
+</script>
 
 <?php
 include ROOT_PATH . '/php/include/footer.php';
 ?>
+<!-- 
+    TODO:
+        class consider (lecr_id, course_id, class_date, start_time, end_time) for duplicates
+        fix calendar
+        class attendance
+        fix student cards and caleder setup
+
+        updates
+ -->

@@ -41,7 +41,6 @@ if (isset($_POST['submit_course'])) {
     } else {
         $errors[] = "Course Validation Faild";
     }
-
 } else if (isset($_POST['deleteCourse'])) {
     if (isset($_POST['course_id']) && $user->isAdmin()) {
         $courseId = $_POST['course_id'];
@@ -57,13 +56,20 @@ if (isset($_POST['submit_course'])) {
 
 // ----------- class Registration ------------ 
 else if (isset($_POST['submit_class'])) {
-    if (isset($_POST['course_id']) && isset($_POST['lecr_id']) && isset($_POST['class_date']) && isset($_POST['start_time']) && isset($_POST['end_time'])) {
+    if (isset($_POST['course_id']) && isset($_POST['lecr_id']) && isset($_POST['class_date']) && isset($_POST['start_time']) && isset($_POST['end_time']) && ($user->isAdmin() || $user->isLecturer())) {
         $courseId = $_POST['course_id'];
-        $lecrId = $_POST['lecr_id'];
+        $lecrId = $user->getLectureIdByUserId($_POST['lecr_id']);
         $classDate = $_POST['class_date'];
         $startTime = $_POST['start_time'];
         $endTime = $_POST['end_time'];
-        if ($lecr->createClass($lecrId, $courseId, $classDate, $startTime, $endTime)) {
+        $Instructors = isset($_POST['class-instructors']) ? $_POST['class-instructors'] : null;
+        if ($classId = $lecr->createClass($lecrId, $courseId, $classDate, $startTime, $endTime)) {
+            if ($Instructors != null) {
+                foreach ($Instructors as $instructor) {
+                    $lecr->addInstructorToClass($classId, intval($instructor));
+                    $goMessage[] = "Instructor " . $instructor . " Added Successfully";
+                }
+            }
             $goMessage[] = "Class Created Successfully";
         } else {
             $errors[] = "Class Creation Failed";
@@ -71,10 +77,9 @@ else if (isset($_POST['submit_class'])) {
     } else {
         $errors[] = "Class Validation Faild";
     }
-
 } else if (isset($_POST['updateClass'])) {
 
-    if (isset($_POST['class_id']) && isset($_POST['course_id']) && isset($_POST['lecr_id']) && isset($_POST['class_date']) && isset($_POST['start_time']) && isset($_POST['end_time'])) {
+    if (isset($_POST['class_id']) && isset($_POST['course_id']) && isset($_POST['lecr_id']) && isset($_POST['class_date']) && isset($_POST['start_time']) && isset($_POST['end_time']) && ($user->isAdmin() || $user->isLecturer())) {
         $classData = array();
         $classData['classId'] = $_POST['class_id'];
         $classData['courseId'] = $_POST['course_id'];
@@ -82,6 +87,7 @@ else if (isset($_POST['submit_class'])) {
         $classData['classDate'] = $_POST['class_date'];
         $classData['startTime'] = $_POST['start_time'];
         $classData['endTime'] = $_POST['end_time'];
+        $classData['Instructors'] = $_POST['class-instructors'];
         if ($lecr->updateClassInfo($classId, $classData)) {
             $goMessage[] = "Class Updated Successfully";
         } else {
@@ -90,7 +96,6 @@ else if (isset($_POST['submit_class'])) {
     } else {
         $errors[] = "Class Validation Faild";
     }
-
 } else if (isset($_POST['DeleteClass'])) {
     if (isset($_POST['class_id']) && ($user->isAdmin() || $user->isLecturer())) {
         $classId = $_POST['class_id'];
@@ -275,7 +280,6 @@ else if (isset($_POST['register'])) {
                 $picLocation = $util->storeProfilePic(ROOT_PATH . '/res/profiles/student/', 'std_profile_pic', $_POST['std_nic']);
                 if ($picLocation != null && $picLocation) {
                     $userData['std_profile_pic'] = SERVER_ROOT . "/res/profiles/student/" . basename($picLocation);
-
                 } else {
                     $userData['std_profile_pic'] = SERVER_ROOT . '/res/profiles/lecturer/default.png';
                     $errors[] = "Error Uploading Profile Picture";
@@ -292,7 +296,6 @@ else if (isset($_POST['register'])) {
     } else {
         $errors[] = "Username already exists";
     }
-
 } else if (isset($_POST['updateReg'])) {
     $userId = $_POST['user_id'];
     if ($user->isAdmin() || $_SESSION['user_id'] == $userId) {
@@ -354,7 +357,6 @@ else if (isset($_POST['register'])) {
                 } else {
                     $userData['lecr_mobile'] = $userDefault['lecr_mobile'];
                 }
-
             } else {
                 $userData['lecr_nic'] = $userDefault['lecr_nic'];
                 $userData['lecr_email'] = $userDefault['lecr_email'];
@@ -440,7 +442,6 @@ else if (isset($_POST['register'])) {
                 } else {
                     $userData['std_email'] = $userDefault['std_email'];
                 }
-
             } else {
                 $userData['std_nic'] = $userDefault['std_nic'];
                 $userData['mobile_tp_no'] = $userDefault['mobile_tp_no'];
@@ -533,7 +534,6 @@ else if (isset($_POST['register'])) {
                 $picLocation = $util->storeProfilePic(ROOT_PATH . '/res/profiles/student/', 'std_profile_pic', $userData['std_nic']);
                 if ($picLocation != null && $picLocation) {
                     $userData['std_profile_pic'] = SERVER_ROOT . "/res/profiles/student/" . basename($picLocation);
-
                 } else {
                     $userData['std_profile_pic'] = SERVER_ROOT . '/res/profiles/lecturer/default.png';
                     $errors[] = "Error Uploading Profile Picture";
@@ -574,8 +574,7 @@ echo "<title>AMS Registration</title>";
 include ROOT_PATH . '/php/include/content.php';
 ?>
 <!-- Modal -->
-<div class="modal fade" id="amsForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-    aria-labelledby="amsFormLabel" aria-hidden="true">
+<div class="modal fade" id="amsForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="amsFormLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -621,13 +620,13 @@ include ROOT_PATH . '/php/include/content.php';
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         var loginModal = new bootstrap.Modal(document.getElementById('amsForm'));
         loginModal.show();
     });
     // Returning to login
     var amsForm = document.getElementById('amsForm');
-    amsForm.addEventListener('hidden.bs.modal', function () {
+    amsForm.addEventListener('hidden.bs.modal', function() {
         window.location.href = '<?php echo SERVER_ROOT; ?>/index.php';
     });
 </script>

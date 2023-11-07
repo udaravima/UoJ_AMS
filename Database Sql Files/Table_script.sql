@@ -116,6 +116,15 @@ CREATE TABLE
         FOREIGN KEY(course_id) REFERENCES uoj_course(course_id) ON DELETE CASCADE
     );
 
+CREATE TABLE
+    uoj_class_instrucctor (
+        lecr_id INT,
+        class_id INT,
+        PRIMARY KEY (lecr_id, class_id),
+        FOREIGN KEY (lecr_id) REFERENCES uoj_lecturer (lecr_id) ON DELETE CASCADE,
+        FOREIGN KEY (class_id) REFERENCES uoj_class (class_id) ON DELETE CASCADE
+    );
+
 /*
  users has to be asignned by administrator (admin could be a lecture or a independant account without goining to any)
  user_status: -- 0:inactive, 1:active

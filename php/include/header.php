@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="<?php echo SERVER_ROOT; ?>/js/color-modes.js"></script>
+    <script src="<?php echo SERVER_ROOT; ?>/js/index.global.min.js"></script>
     <link rel="stylesheet" href="<?php echo SERVER_ROOT; ?>/css/bootstrap-icons.css">
     <link href="<?php echo SERVER_ROOT; ?>/css/bootstrap.min.css" rel="stylesheet">
     <link href="<?php echo SERVER_ROOT; ?>/css/bootstrap-select.min.css" rel="stylesheet">

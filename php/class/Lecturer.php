@@ -10,6 +10,7 @@ class Lecturer
     private $class = 'uoj_class';
     private $stdCourse = 'uoj_student_course';
     private $stdClass = 'uoj_student_class';
+    private $instructorForClass = 'uoj_class_instructor';
     private $conn;
 
     public function __construct($db)
@@ -23,7 +24,7 @@ class Lecturer
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('iisss', $lecrId, $courseId, $date, $sTime, $endTime);
         if ($stmt->execute()) {
-            return true;
+            return $stmt->insert_id;
         } else {
             return false;
         }
@@ -35,7 +36,7 @@ class Lecturer
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('ss', $courseCode, $courseName);
         if ($stmt->execute()) {
-            return true;
+            return $stmt->insert_id;
         } else {
             return false;
         }
@@ -113,7 +114,7 @@ class Lecturer
         }
     }
 
-    public function getLecturerCourseList($lecrId, $order)
+    public function getLecturerCourseList($lecrId, $order = array())
     {
         $query = "SELECT * FROM {$this->lecrCourse} INNER JOIN {$this->course} ON {$this->lecrCourse}.course_id = {$this->course}.course_id WHERE {$this->lecrCourse}.lecr_id = ?";
         if (isset($order['search'])) {
@@ -246,8 +247,30 @@ class Lecturer
             return false;
         }
     }
+    public function addInstructorToClass($classId, $lecrId)
+    {
+        $query = "INSERT INTO {$this->instructorForClass}(lecr_id, class_id) VALUES(?,?)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('ii', $lecrId, $classId);
+        if ($stmt->execute()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public function deleteInstructorToClass($classId, $lecrId)
+    {
+        $query = "DELETE FROM {$this->instructorForClass} WHERE lecr_id = ? AND class_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('ii', $lecrId, $classId);
+        if ($stmt->execute()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-    public function getCourseList($order)
+    public function getCourseList($order = array())
     {
         $query = "SELECT * FROM {$this->course} ";
 
@@ -310,14 +333,27 @@ class Lecturer
         }
     }
 
+    // How many students present for the paticular class
+    public function retrieveTotalAttendancePresentCountByClass($classId)
+    {
+        $query = "SELECT COUNT(*) FROM {$this->stdClass} WHERE class_id = ? AND attendance_status = 1 OR attendance_status = 2";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $classId);
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+    }
+
     // How many students for the paticular class
-    public function retrieveTotalAttendanceCountByClass($classId)
+    public function retrieveTotalAttendanceTotalCountByClass($classId)
     {
         $query = "SELECT COUNT(*) FROM {$this->stdClass} WHERE class_id = ?";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('i', $classId);
         if ($stmt->execute()) {
-            return $stmt->get_result();
+            return $stmt->get_result()->fetch_assoc();
         } else {
             return false;
         }
@@ -329,23 +365,23 @@ class Lecturer
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('i', $stdId);
         if ($stmt->execute()) {
-            return $stmt->get_result();
+            return $stmt->get_result()->fetch_assoc();
         } else {
             return false;
         }
     }
 
-    // public function isPresentForTheClass($stdId, $classId)
-    // {
-    //     $query = "SELECT COUNT(*) FROM {$this->stdClass} WHERE std_id = ? AND class_id = ?";
-    //     $stmt = $this->conn->prepare($query);
-    //     $stmt->bind_param('ii', $stdId, $classId);
-    //     if ($stmt->execute()) {
-    //         return $stmt->get_result();
-    //     } else {
-    //         return false;
-    //     }
-    // }
+    public function isPresentForTheClass($stdId, $classId)
+    {
+        $query = "SELECT COUNT(*) FROM {$this->stdClass} WHERE std_id = ? AND class_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('ii', $stdId, $classId);
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+    }
 
     public function isCourseExist($courseId)
     {
@@ -461,7 +497,8 @@ class Lecturer
         }
     }
 
-    public function isCourseIdExist($courseId){
+    public function isCourseIdExist($courseId)
+    {
         $query = "SELECT * FROM {$this->course} WHERE course_id = ?";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('i', $courseId);
@@ -474,34 +511,83 @@ class Lecturer
             }
         }
     }
+
+    public function getInstructorForClass($class_id)
+    {
+        $query = "SELECT * FROM {$this->instructorForClass} WHERE class_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $class_id);
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+    }
+
+    // for class profile
+    public function getInstructorForClassCount($class_id)
+    {
+        $query = "SELECT COUNT(*) FROM {$this->instructorForClass} WHERE class_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $class_id);
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+    }
+    public function getClassByLecturer($lecrId, $date = "")
+    {
+        $query = "SELECT {$this->class}.*, {$this->course}.course_code, {$this->course}.course_name  FROM {$this->class} INNER JOIN {$this->course} ON {$this->course}.course_id = {$this->class}.course_id WHERE {$this->class}.lecr_id = ?";
+        if ($date != "") {
+            $query .= " AND class_date = ?";
+        }
+        $stmt = $this->conn->prepare($query);
+        if ($date != "") {
+            $stmt->bind_param('is', $lecrId, $date);
+        } else {
+            $stmt->bind_param('i', $lecrId);
+        }
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+    }
+    public function getClassByCourse($courseId, $date = "")
+    {
+        $query = "SELECT * FROM {$this->class} WHERE course_id = ?";
+        if ($date != "") {
+            $query .= " AND class_date = ?";
+        }
+        $stmt = $this->conn->prepare($query);
+        if ($date != "") {
+            $stmt->bind_param('is', $courseId, $date);
+        } else {
+            $stmt->bind_param('i', $courseId);
+        }
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+    }
 }
-// List of Functions available
-//     public function createClass($lecrId, $courseId, $date, $sTime, $endTime)
-//     public function createCourse($courseCode, $courseName)
-//     public function deleteCourse($courseId)
-//     public function deleteClass($classId)
-//     public function updateClassInfo($classId, $classData)
-//     public function updateCourse($courseId, $courseCode, $courseName)
-//     public function derollLecturerCourse($lecrId, $courseId)
-//     public function derollStudentCourse($stdId, $courseId)
-//     public function getLecturerCourseList($lecrId, $order)
-//     public function getStudentCourseList($stdId, $order = array())
-//     public function enrollLectureCourse($lecrId, $courseId)
-//     public function enrollStudentCourse($stdId, $courseId)
-//     public function markAttendance($stdId, $classId, $attendTime, $status)
-//     public function editAttendance($stdId, $ClassId, $attendTime, $status)
-//     public function getCourseList($order)
-//     public function retrieveTotalClassCount($courseId)
-//     public function retrieveTotalStudentCount($courseId)
-//     public function retrieveTotalAttendanceCount($courseId)
-//     public function retrieveTotalAttendanceCountByClass($classId)
-//     public function retrieveTotalAttendanceCountByStudent($stdId)
-//     public function isPresentForTheClass($stdId, $classId)
-//     public function isCourseExist($courseId)
-//     public function retrieveCourseDetails($courseId)
-//     public function isClassExist($classId)
-//     public function retrieveClassDetails($classId)
-//     public function isLectureEnrolledToCourse($lecrId, $courseId)
-//     public function isStudentEnrolledToCourse($stdId, $courseId)
-//     public function isStudentEnrolledToClass($stdId, $classId)
-//     public function isCourseCodeAvailable($courseCode)
+// createClass($lecrId, $courseId, $date, $sTime, $endTime)
+// createCourse($courseCode, $courseName)
+// deleteCourse($courseId)
+// deleteClass($classId)
+// updateClassInfo($classId, $classData)
+// updateCourse($courseId, $courseCode, $courseName)
+// derollLecturerToCourse($lecrId, $courseId)
+// derollStudentToCourse($stdId, $courseId)
+// getLecturerCourseList($lecrId, $order)
+// getStudentCourseList($stdId, $order)
+// getStudentsFromCourseId($courseId, $order)
+// getLecturersFromCourseId($courseId, $order)
+// enrollLectureToCourse($lecrId, $courseId)
+// enrollStudentToCourse($stdId, $courseId)
+// markAttendance($stdId, $classId, $attendTime, $status)
+// editAttendance($stdId, $ClassId, $attendTime, $status)
+// getCourseList($order)
+// retrieveTotalClassCount($courseId)
