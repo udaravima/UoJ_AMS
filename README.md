@@ -51,4 +51,21 @@ mysql -h <hostname> -u <username> -p <password> < '<PathToProject>/Database Sql 
 #### config database setup localhost, username, password, database = uoj
 ```bash
 nano <pathToProject>/php/config/Database.php
+```
 
+### Creating Administrator
+- goto <serverlink>/UoJ_AMS
+  create a account using don't you have a account
+- get a terminal
+  ```bash
+  mysql -l <hostname> -u <username> -p <password>
+  ```
+  ```mysql
+  use uoj;
+  update uoj_user set user_status = 1, user_role = 0 where user_id = 1;
+  ```
+  since your first account will be user_id 1 it will make it admin and active
+
+### Log in using account created
+
+# Link to a demonstration
