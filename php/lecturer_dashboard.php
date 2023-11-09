@@ -80,7 +80,9 @@ include_once ROOT_PATH . '/php/include/modal_form.php';
         </ul>
     </nav>
 </div>
-
+<div class="container">
+    <button data-bs-target="#add_class" data-bs-toggle="modal" data-class-id="3" name="test-button" class="btn btn-primary d-none" id="class-trigger">class</button>
+</div>
 <div class="container mt-3">
     <div id="class-calandar-lecturer">
 
@@ -105,14 +107,25 @@ include_once ROOT_PATH . '/php/include/modal_form.php';
                 method: 'POST',
                 extraParams: {
                     lecr_id: <?php echo $_SESSION["lecr_id"]; ?>,
-                    event_date: arguments.date
                 },
                 failure: function() {
                     sendMessage('Error loading calendar events!', 'warning');
                 },
                 color: 'cyan', // a non-ajax option
                 textColor: 'black' // a non-ajax option
-            }
+            },
+            eventClick: function(info) {
+                var class_id = info.event.id;
+                var trig = document.getElementById('class-trigger');
+                trig.setAttribute('data-class-id', class_id);
+                trig.click();
+
+            },
+            select(info) {
+                var start = info.startStr;
+                $('#add_class').data('start', start);
+                $('#add_class').modal('show');
+            },
         });
         calendar.render();
     });

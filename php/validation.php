@@ -105,20 +105,28 @@ if (isset($_POST['username'])) {
     $classId = $_POST['clid'];
     if ($user->isLoggedIn()) {
         if ($lecr->isClassExist($classId)) {
-            $classDetails = $lecr->retrieveClassDetails($classId);
-            $response = [
-                'error' => false,
-                'class_id' => $classDetails['class_id'],
-                'class_name' => $classDetails['class_name'],
-                'class_type' => $classDetails['class_type'],
-                'class_date' => $classDetails['class_date'],
-                'class_time' => $classDetails['class_time'],
-                'class_duration' => $classDetails['class_duration'],
-                'class_venue' => $classDetails['class_venue'],
-                'class_status' => $classDetails['class_status'],
-                'course_id' => $classDetails['course_id']
-            ];
-            echo json_encode($response);
+            if ($classDetails = $lecr->retrieveClassDetails($classId)) {
+                $response = [
+                    'error' => false,
+                    'course_id' => $classDetails['course_id'],
+                    'class_date' => $classDetails['class_date'],
+                    'start_time' => $classDetails['start_time'],
+                    'end_time' => $classDetails['end_time'],
+                ];
+                if ($courseDetails = $lecr->retrieveCourseDetails($classDetails['course_id'])) {
+                    $response['class_name'] = $courseDetails['course_code'] . ' - ' . $courseDetails['course_name'];
+                } else {
+                    $response['class_name'] = 'Course not found';
+                }
+                if ($Instructors = $lecr->getInstructorForClass($classId)) {
+                    $response['instructors'] = $Instructors->fetch_all();
+                } else {
+                    $response['instructors'] = [];
+                }
+                echo json_encode($response);
+            } else {
+                echo json_encode(['error' => 'Class retrieval failed']);
+            }
         } else {
             echo json_encode(['error' => 'Class Id not found']);
         }

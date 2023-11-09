@@ -1,4 +1,6 @@
-USE UoJ;
+CREATE DATABASE IF NOT EXISTS uoj;
+
+USE uoj;
 
 CREATE TABLE
     uoj_user (

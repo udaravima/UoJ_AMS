@@ -96,7 +96,8 @@ else if (isset($_POST['submit_class'])) {
     } else {
         $errors[] = "Class Validation Faild";
     }
-} else if (isset($_POST['DeleteClass'])) {
+
+} else if (isset($_POST['deleteClass'])) {
     if (isset($_POST['class_id']) && ($user->isAdmin() || $user->isLecturer())) {
         $classId = $_POST['class_id'];
         if ($lecr->deleteClass($classId)) {

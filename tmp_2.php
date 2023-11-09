@@ -21,9 +21,9 @@ include_once ROOT_PATH . '/php/include/content.php';
 <div class="container mt-5">
     <h1>Temp testing</h1>
     <input type="search" class="form-control" placeholder="Search User" aria-label="Search Course" aria-describedby="course-addon" id="search-user-for-course" data-bs-toggle="dropdown" data-id="#tempo" name="search-user-for-course">
-    <select class="selectpicker" multiple aria-label="Default select example" id="tempo">
+    <select class="selectpicker" disabled multiple aria-label="Default select example" id="tempo">
         <optgroup label="Hellow 1">
-            <option value="1">One</option>
+            <option id="val1" value="1">One</option>
             <option value="2">Two</option>
         </optgroup>
         <option value="1">One</option>
@@ -40,7 +40,10 @@ include_once ROOT_PATH . '/php/include/content.php';
         <option value="4">Four</option>
     </select>
 </div>
-
+<script>
+    //select #val1 on selectpicker
+document.getElementById('tempo').value = '1';
+</script>
 <div class="container mt-5">
     dropdown
     <div class="dropdown">

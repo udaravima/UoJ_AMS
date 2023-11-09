@@ -4,7 +4,7 @@
         <div class="modal-content rounded shadow">
             <!-- Modal Header -->
             <div class="modal-header">
-                <h5 class="modal-title">Add Class</h5>
+                <h5 class="modal-title" id="class-modal-title">Add Class</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <!-- Modal body -->
@@ -12,7 +12,7 @@
                 <form action="<?php echo SERVER_ROOT; ?>/php/form_action.php" method="post" id="addClass">
                     <input type="hidden" name="class_id" id="class_id" value="">
                     <div class="form-group mt-3">
-                        <label for="course_code">Course Code:</label>
+                        <label for="course_id">Course Code:</label>
                         <select name="course_id" id="course_id" class="form-control selectpicker" aria-label="course selection" title="course selection">
                             <?php
                             //TODO: check following
@@ -22,7 +22,7 @@
                                 $courses = $lecr->getLecturerCourseList($_SESSION["lecr_id"]);
                             }
                             while ($course = $courses->fetch_assoc()) {
-                                echo "<option value='" . $course['course_id'] . "'>" . $course['course_code'] . " - " . $course['course_name'] . "</option>";
+                                echo "<option id='class-course" . $course['course_id'] . "' value='" . $course['course_id'] . "'>" . $course['course_code'] . " - " . $course['course_name'] . "</option>";
                             }
                             ?>
                         </select>
@@ -34,7 +34,7 @@
                             echo "<select name='lecr_id' id='lecr_id' class='selectpicker form-control'>";
                             $lecturers = $user->getLecturerTable();
                             while ($lecturer = $lecturers->fetch_assoc()) {
-                                echo "<option value='" . $lecturer['lecr_id'] . "'>" . $lecturer['lecr_name'] . "</option>";
+                                echo "<option id='class-lecr" . $lecturer['lecr_id'] . "' value='" . $lecturer['lecr_id'] . "'>" . $lecturer['lecr_name'] . "</option>";
                             }
                             echo "</select>";
                         } else {
@@ -63,13 +63,13 @@
                             if ($user->isAdmin() || $user->isLecturer()) {
                                 $lecturers = $user->getInstructorList();
                                 while ($lecturer = $lecturers->fetch_assoc()) {
-                                    echo "<option value='" . $lecturer['lecr_id'] . "'>" . $lecturer["username"] . " - " . $lecturer['lecr_name'] . "</option>";
+                                    echo "<option id='class-instructor-" . $lecturer['lecr_id'] . "' value='" . $lecturer['lecr_id'] . "'>" . $lecturer["username"] . " - " . $lecturer['lecr_name'] . "</option>";
                                 }
                             }
                             ?>
                         </select>
                     </div>
-                    <input type="hidden" name="submit_class" value="submit">
+                    <input type="hidden" name="submit_class" value="submit" id="submit_class">
                 </form>
                 <!-- list of instructors selected -->
                 <div class="container mt-3 d-none" id="instructor-list-for-class">
@@ -85,8 +85,8 @@
             <!-- Modal Footer -->
             <div class="modal-footer mt-5">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-class">Close</button>
-                <button type="button" onclick="exeSubmit('addClass')" class="btn btn-primary" name="submit_class" id="sumbit_class">Add Class</button>
-                <?php if ($user->isAdmin() && $user->isLecturer()) {
+                <button type="button" onclick="exeSubmit('addClass')" class="btn btn-primary" name="submit_class" id="class-add-button">Add Class</button>
+                <?php if ($user->isAdmin() || $user->isLecturer()) {
                     echo "<button type='button' onclick='deleteRec(\"addClass\")' class='btn btn-danger d-none'
                     name='deleteClass' id='deleteClass'>Delete</button>";
                 } ?>
@@ -350,34 +350,59 @@
     document.getElementById('add_class').addEventListener('show.bs.modal', function(event) {
         var clid = $(event.relatedTarget).data("class-id");
         if (typeof clid !== "undefined") {
+            document.getElementById('class-add-button').classList.add('d-none');
             document.getElementById('submit_class').name = "updateClass";
             document.getElementById('submit_class').value = "update";
             document.getElementById('class_id').value = clid;
+            document.getElementById('instructor-list-for-class').classList.remove('d-none');
+            document.getElementById('class-modal-title').innerHTML = "Update Class";
+            <?php if ($user->isLecturer() || $user->isAdmin()) {
+                echo "
+                document.getElementById('deleteClass').classList.remove('d-none');";
+            } ?>
             $.ajax({
                 method: 'POST',
                 url: '<?php echo SERVER_ROOT; ?>/php/validation.php',
                 data: {
-                    cid: cid
+                    clid: clid
                 },
                 dataType: 'json',
                 success: function(response) {
                     if (!response.error) {
-                        $('#course_id').val(response.course_id);
-                        $('#course_id').prop('readonly', true);
-                        $('#lecr_id').val(response.lecr_id);
-                        $('#lecr_id').prop('readonly', true);
+                        console.log(response);
+                        // $('#course_id').val(response.course_id);
+                        document.getElementById('course_id').value = response.course_id;
+                        $('#course_id').prop('disabled', true);
+                        $('#course_id').selectpicker('refresh');
+                        <?php
+                        if ($user->isAdmin()) {
+                            echo "$('#lecr_id').val(response.lecr_id);
+                            $('#lecr_id').prop('disabled', true);
+                            $('#lecr_id').selectpicker('refresh');";
+                        } else {
+                            echo "
+                            $('#lecr_id').val(response.lecr_id); 
+                            $('#lecr_id').prop('readonly', true);";
+                        }
+                        ?>
                         $('#class_date').val(response.class_date);
                         $('#start_time').val(response.start_time);
                         $('#end_time').val(response.end_time);
                         $('#updateClass').removeClass('d-none');
                         $('#deleteClass').removeClass('d-none');
-                        $('#addClass').addClass('d-none');
                         $('#list-of-instructors').removeClass('d-none');
+
                         let selectedInstructors = $('#selected-instructors');
                         selectedInstructors.empty();
+                        var selectables = [];
                         (response.instructors).forEach(instructor => {
-                            selectedInstructors.append("<li class='list-group-item'>" + instructor + "</li>");
+                            selectables.push(instructor[2]);
+                            selectedInstructors.append("<li class='list-group-item' value='" + instructor[2] + "'>" + instructor[0] + " - " + instructor[1] + "</li>");
                         });
+                        $('#class-instructors').val(selectables);
+                        $('#class-instructors').selectpicker('refresh');
+
+
                     } else {
                         console.log(response.error);
                     }
