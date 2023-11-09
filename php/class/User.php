@@ -59,6 +59,11 @@ class User
                     if ($user['user_status'] == 1) {
                         $_SESSION["user_id"] = $user['user_id'];
                         $_SESSION["user_role"] = $user['user_role'];
+                        if ($user['user_role'] == 3) {
+                            $_SESSION["std_id"] = $this->getStudentIdByUserId($user['user_id']);
+                        } else {
+                            $_SESSION["lecr_id"] = $this->getLectureIdByUserId($user['user_id']);
+                        }
                         $this->setUserBadge();
                         $this->setUserLock(true);
                         return true;
@@ -82,7 +87,14 @@ class User
             $this->loginMessage = "Username or Password Invalid!";
             return false; // Message if username or password is empty!
         }
+    }
 
+    public function logout()
+    {
+        $this->setUserLock(false);
+        $_SESSION['user_id'] = '';
+        session_destroy();
+        header("Location: " . SERVER_ROOT . "/index.php");
     }
 
     public function setUserLock($status)
@@ -119,6 +131,8 @@ class User
         $result = $stmt->get_result();
         if ($result->num_rows > 0) {
             $userRole = $result->fetch_assoc()['user_role'];
+        } else {
+            return false;
         }
 
         $table = ($userRole >= 0 && $userRole < 3) ? $this->lecrTable : $this->stdTable;
@@ -256,20 +270,18 @@ class User
 
     public function listStaffUsers()
     {
-
     }
 
     public function getDefaultProfilePic()
     {
         return $this->default_pro_picture;
-
     }
 
     public function getStudentTable($order = array())
     {
         $query = "SELECT std.*, users.user_role, users.user_status, users.username, users.user_id FROM $this->stdTable as std INNER JOIN $this->userTable as users ON users.user_id = std.user_id ";
         if (isset($order['search'])) {
-            $query .= "WHERE std.std_fullname LIKE '%" . $order['search'] . "%' OR OR users.username LIKE '%" . $order['search'] . "%' std.std_nic LIKE '%" . $order['search'] . "%' OR std.std_email LIKE '%" . $order['search'] . "%' OR std.std_mobile_tp_no LIKE '%" . $order['search'] . "%' OR std.std_home_tp_no LIKE '%" . $order['search'] . "%' OR std.std_batchno LIKE '%" . $order['search'] . "%' OR std.std_current_level LIKE '%" . $order['search'] . "%' OR std.std_dob LIKE '%" . $order['search'] . "%' OR std.std_date_admission LIKE '%" . $order['search'] . "%' OR std.std_current_address LIKE '%" . $order['search'] . "%' OR std.std_permanent_address LIKE '%" . $order['search'] . "%' ";
+            $query .= "WHERE std.std_fullname LIKE '%" . $order['search'] . "%' OR users.username LIKE '%" . $order['search'] . "%' OR std.std_nic LIKE '%" . $order['search'] . "%' OR std.std_email LIKE '%" . $order['search'] . "%' OR std.mobile_tp_no LIKE '%" . $order['search'] . "%' OR std.home_tp_no LIKE '%" . $order['search'] . "%'";
         }
         //TODO: CHECK
         if (isset($order['column'])) {
@@ -306,15 +318,19 @@ class User
         return $results;
     }
 
-    public function countRecords($userTable)
+    public function countRecords($userTable, $filter = null, $filtervalue = null)
     {
-        $query = "SELECT COUNT(*) as count FROM $userTable";
+        $query = "SELECT COUNT(*) as count FROM $userTable ";
+        if ($filter !== null && $filtervalue !== null) {
+            $query .= "WHERE $filter = $filtervalue";
+        }
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $results = $stmt->get_result();
         return $results->fetch_assoc()['count'];
     }
 
+    // Register User -> Insert User -> (Register Lecturer OR Register Student)
     public function registerUser($username, $password, $userRole, $userData, $userStatus)
     {
         $userId = $this->insertUser($username, $password, $userRole, $userStatus);
@@ -365,7 +381,6 @@ class User
         } else {
             return false;
         }
-
     }
 
     //UserData: 0->name, 1->mobile, 2->email, 3->gender, 4->address, 5->profile_pic
@@ -382,6 +397,7 @@ class User
         }
     }
 
+    // editUser -> Update User(User Status) -> (Update Lecturer OR Update Student)Details or update password
     public function editUser($userId, $password, $userStatus, $userData)
     {
         $userRole = $this->retrieveUserRole($userId);
@@ -469,10 +485,115 @@ class User
             return false;
         }
     }
+    public function getStudentIdByUserId($userId)
+    {
+        $query = "SELECT std_id FROM {$this->stdTable} WHERE user_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc()['std_id'];
+        } else {
+            return false;
+        }
+    }
+
+    public function getLectureIdByUserId($userId)
+    {
+        $query = "SELECT lecr_id FROM {$this->lecrTable} WHERE user_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc()['lecr_id'];
+        } else {
+            return false;
+        }
+    }
+
+    public function isStudentIdExist($stdId)
+    {
+        $query = "SELECT * FROM {$this->stdTable} WHERE std_id=?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $stdId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public function isLectureIdExist($lecrId)
+    {
+        $query = "SELECT * FROM {$this->lecrTable} WHERE lecr_id=?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $lecrId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function getInstructorList()
+    {
+        $query = "SELECT {$this->lecrTable}.lecr_id,{$this->userTable}.username, {$this->lecrTable}.lecr_name FROM {$this->lecrTable} INNER JOIN {$this->userTable} ON {$this->lecrTable}.user_id = {$this->userTable}.user_id WHERE {$this->userTable}.user_role = 2";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result;
+    }
+    public function getUsernameByUserId($userId)
+    {
+        $query = "SELECT username FROM {$this->userTable} WHERE user_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc()['username'];
+    }
 }
 
-/*
- *   /index.php
- *   /php/admin_dashboard.php
- *   /php/
- */
+// login($username, $password, $rememberMe);
+// logout();
+// setUserLock($status);
+// retrieveUserDetails($userId);
+// getRoleStr($roleNo);
+// getStatusStr($statusNo);
+// getGenderStr($genderNo);
+// retrieveUserRole($userId);
+// isUsernameAvailable($username);
+// isUserIdExist($userId);
+// isLoggedIn();
+// isAdmin();
+// isLecturer();
+// isInstructor();
+// isStudent();
+// listStaffUsers();
+// getDefaultProfilePic();
+// getStudentTable($order = array());
+// getLecturerTable($order = array());
+// countRecords($userTable, $filter = null, $filtervalue = null);
+// registerUser($username, $password, $userRole, $userData, $userStatus);
+// insertUser($username, $password, $userRole, $userStatus);
+// insertStudent($userId, $userData);
+// insertLecturer($userId, $userData);
+// editUser($userId, $password, $userStatus, $userData);
+// changeUserPassword($userId, $password);
+// updateUser($userId, $userStatus);
+// updateLecturer($userId, $userData);
+// updateStudent($userId, $userData);
+// deleteUser($userId);
+// getStudentIdByUserId($userId);
+// getLectureIdByUserId($userId);
+// isStudentIdExist($stdId);
+// isLectureIdExist($lecrId);
+// setUserBadge();
+// getLoginMessage();
+// setLoginMessage($Message);
+// processNameInitials($fullName);

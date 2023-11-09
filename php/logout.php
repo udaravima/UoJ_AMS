@@ -1,5 +1,4 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/MyAttendanceSys/config.php';
 require_once '../config.php';
 include_once ROOT_PATH . '/php/config/Database.php';
 include_once ROOT_PATH . '/php/class/User.php';
@@ -10,7 +9,6 @@ $user = new User($conn);
 
 session_start();
 $user->setUserLock(false);
-header("Location: " . SERVER_ROOT . "/index.php");
 $_SESSION['user_id'] = '';
 session_destroy();
 header("Location: " . SERVER_ROOT . "/index.php");

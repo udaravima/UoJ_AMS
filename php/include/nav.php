@@ -2,7 +2,7 @@
 include_once ROOT_PATH . '/php/include/modal_form.php';
 
 ?>
-<nav class="navbar navbar-expand-md fixed-top navbar-light mt-0 mb-5">
+<nav class="navbar navbar-expand-md  navbar-light mt-0 mb-5">
     <div class="container-md rounded">
         <a class="navbar-brand" href="<?php echo SERVER_ROOT; ?>/index.php">
             <img id="logo" src="<?php echo SERVER_ROOT; ?>/res/logo/AMS_logo.png" alt="AMS_logo" width="40" height="40"
@@ -39,11 +39,14 @@ include_once ROOT_PATH . '/php/include/modal_form.php';
                     <a class='nav-link " . (($activeDash == 2) ? "active" : "") . "' href='" . SERVER_ROOT . "/php/Instructor_dashboard.php'>Instructor</a>
                 </li>";
                 }
-                ?>
+                if ($_SESSION['user_role'] == 3) {
+                    echo "
                 <li class='nav-item'>
-                    <a class='nav-link <?php echo ($activeDash == 3) ? "active" : ""; ?>'
-                        href='<?php echo SERVER_ROOT; ?>/php/student_dashboard.php'>Student</a>
-                </li>
+                    <a class='nav-link " . ($activeDash == 3) ? "active" : "" . "
+                        href='" . SERVER_ROOT . "/php/student_dashboard.php'>Student</a>
+                </li>";
+                }
+                ?>
             </ul>
 
             <hr>

@@ -1,5 +1,4 @@
 <?php
-// require_once $_SERVER['DOCUMENT_ROOT'] . '/MyAttendanceSys/config.php';
 require_once '../config.php';
 include_once ROOT_PATH . '/php/config/Database.php';
 include_once ROOT_PATH . '/php/class/User.php';
@@ -9,7 +8,7 @@ $db = new Database();
 $conn = $db->getConnection();
 $user = new User($conn);
 
-if (!($user->isLoggedIn()) || $_SESSION['user_role'] > 3) {
+if (!($user->isLoggedIn()) || $_SESSION['user_role'] == 3) {
     header("Location: " . SERVER_ROOT . "/index.php");
 }
 

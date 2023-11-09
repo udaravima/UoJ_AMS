@@ -1,6 +1,4 @@
 <?php
-//TODO: USE REGISTRATION NUMBER AS USERNAME AND REMOVE REGNO FOR BOTH LECTURER AND STUDENT
-// require_once $_SERVER['DOCUMENT_ROOT'] . '/MyAttendanceSys/config.php';
 require_once '../config.php';
 include_once ROOT_PATH . '/php/config/Database.php';
 include_once ROOT_PATH . '/php/class/User.php';
@@ -16,14 +14,10 @@ $util = new Utils();
 $errors = [];
 $goMessage = [];
 
-// if (!($user->isLoggedIn())) {
-//     header("Location: " . SERVER_ROOT . "/index.php");
-// }
-
 // ---------- course Registration ---------------
 if (isset($_POST['submit_course'])) {
 
-    if (isset($_POST['course_code']) && isset($_POST['course_name'])) {
+    if (isset($_POST['course_code']) && isset($_POST['course_name']) && $user->isAdmin()) {
         $courseCode = $_POST['course_code'];
         $courseName = $_POST['course_name'];
         if ($lecr->createCourse($courseCode, $courseName)) {
@@ -34,23 +28,85 @@ if (isset($_POST['submit_course'])) {
     } else {
         $errors[] = "Course Validation Faild";
     }
+} else if (isset($_POST['updateCourse'])) {
+    if (isset($_POST['course_id']) && isset($_POST['course_code']) && isset($_POST['course_name']) && $user->isAdmin()) {
+        $courseId = $_POST['course_id'];
+        $courseCode = $_POST['course_code'];
+        $courseName = $_POST['course_name'];
+        if ($lecr->updateCourse($courseId, $courseCode, $courseName)) {
+            $goMessage[] = "Course Updated Successfully";
+        } else {
+            $errors[] = "Course Update Failed";
+        }
+    } else {
+        $errors[] = "Course Validation Faild";
+    }
+} else if (isset($_POST['deleteCourse'])) {
+    if (isset($_POST['course_id']) && $user->isAdmin()) {
+        $courseId = $_POST['course_id'];
+        if ($lecr->deleteCourse($courseId)) {
+            $goMessage[] = "Course Deleted Successfully";
+        } else {
+            $errors[] = "Course Deletion Failed";
+        }
+    } else {
+        $errors[] = "Invalid Privillages or Invalid Course";
+    }
 }
 
 // ----------- class Registration ------------ 
 else if (isset($_POST['submit_class'])) {
-    if (isset($_POST['course_id']) && isset($_POST['lecr_id']) && isset($_POST['class_date']) && isset($_POST['start_time']) && isset($_POST['end_time'])) {
+    if (isset($_POST['course_id']) && isset($_POST['lecr_id']) && isset($_POST['class_date']) && isset($_POST['start_time']) && isset($_POST['end_time']) && ($user->isAdmin() || $user->isLecturer())) {
         $courseId = $_POST['course_id'];
-        $lecrId = $_POST['lecr_id'];
+        $lecrId = $user->getLectureIdByUserId($_POST['lecr_id']);
         $classDate = $_POST['class_date'];
         $startTime = $_POST['start_time'];
         $endTime = $_POST['end_time'];
-        if ($lecr->createClass($lecrId, $courseId, $classDate, $startTime, $endTime)) {
+        $Instructors = isset($_POST['class-instructors']) ? $_POST['class-instructors'] : null;
+        if ($classId = $lecr->createClass($lecrId, $courseId, $classDate, $startTime, $endTime)) {
+            if ($Instructors != null) {
+                foreach ($Instructors as $instructor) {
+                    $lecr->addInstructorToClass($classId, intval($instructor));
+                    $goMessage[] = "Instructor " . $instructor . " Added Successfully";
+                }
+            }
             $goMessage[] = "Class Created Successfully";
         } else {
             $errors[] = "Class Creation Failed";
         }
     } else {
         $errors[] = "Class Validation Faild";
+    }
+} else if (isset($_POST['updateClass'])) {
+
+    if (isset($_POST['class_id']) && isset($_POST['course_id']) && isset($_POST['lecr_id']) && isset($_POST['class_date']) && isset($_POST['start_time']) && isset($_POST['end_time']) && ($user->isAdmin() || $user->isLecturer())) {
+        $classData = array();
+        $classData['classId'] = $_POST['class_id'];
+        $classData['courseId'] = $_POST['course_id'];
+        $classData['lecrId'] = $_POST['lecr_id'];
+        $classData['classDate'] = $_POST['class_date'];
+        $classData['startTime'] = $_POST['start_time'];
+        $classData['endTime'] = $_POST['end_time'];
+        $classData['Instructors'] = $_POST['class-instructors'];
+        if ($lecr->updateClassInfo($classId, $classData)) {
+            $goMessage[] = "Class Updated Successfully";
+        } else {
+            $errors[] = "Class Update Failed";
+        }
+    } else {
+        $errors[] = "Class Validation Faild";
+    }
+
+} else if (isset($_POST['deleteClass'])) {
+    if (isset($_POST['class_id']) && ($user->isAdmin() || $user->isLecturer())) {
+        $classId = $_POST['class_id'];
+        if ($lecr->deleteClass($classId)) {
+            $goMessage[] = "Class Deleted Successfully";
+        } else {
+            $errors[] = "Class Deletion Failed";
+        }
+    } else {
+        $errors[] = "Invalid Privillages or Invalid Class";
     }
 }
 
@@ -180,7 +236,7 @@ else if (isset($_POST['register'])) {
                 }
             }
             if (!empty($_POST['date_admission'])) {
-                if (preg_match("/^\d{4}-\d{2}-\d{2}$/", $_POST['date_addmission'])) {
+                if (preg_match("/^\d{4}-\d{2}-\d{2}$/", $_POST['date_admission'])) {
                     $userData['date_admission'] = $_POST['date_admission'];
                 } else {
                     $errors[] = "Date of Admission format invalid";
@@ -225,7 +281,6 @@ else if (isset($_POST['register'])) {
                 $picLocation = $util->storeProfilePic(ROOT_PATH . '/res/profiles/student/', 'std_profile_pic', $_POST['std_nic']);
                 if ($picLocation != null && $picLocation) {
                     $userData['std_profile_pic'] = SERVER_ROOT . "/res/profiles/student/" . basename($picLocation);
-
                 } else {
                     $userData['std_profile_pic'] = SERVER_ROOT . '/res/profiles/lecturer/default.png';
                     $errors[] = "Error Uploading Profile Picture";
@@ -242,7 +297,6 @@ else if (isset($_POST['register'])) {
     } else {
         $errors[] = "Username already exists";
     }
-
 } else if (isset($_POST['updateReg'])) {
     $userId = $_POST['user_id'];
     if ($user->isAdmin() || $_SESSION['user_id'] == $userId) {
@@ -304,7 +358,6 @@ else if (isset($_POST['register'])) {
                 } else {
                     $userData['lecr_mobile'] = $userDefault['lecr_mobile'];
                 }
-
             } else {
                 $userData['lecr_nic'] = $userDefault['lecr_nic'];
                 $userData['lecr_email'] = $userDefault['lecr_email'];
@@ -390,7 +443,6 @@ else if (isset($_POST['register'])) {
                 } else {
                     $userData['std_email'] = $userDefault['std_email'];
                 }
-
             } else {
                 $userData['std_nic'] = $userDefault['std_nic'];
                 $userData['mobile_tp_no'] = $userDefault['mobile_tp_no'];
@@ -409,7 +461,6 @@ else if (isset($_POST['register'])) {
             // Debugging
             if (isset($_POST['std_gender'])) {
                 if (preg_match("/^[0-2]{1}$/", $_POST['std_gender'])) {
-                    var_dump($_POST['std_gender']);
                     $userData['std_gender'] = $_POST['std_gender'];
                 } else {
                     $errors[] = "Gender format invalid";
@@ -435,7 +486,7 @@ else if (isset($_POST['register'])) {
             }
 
             if (!empty($_POST['date_admission'])) {
-                if (preg_match("/^\d{4}-\d{2}-\d{2}$/", $_POST['date_addmission'])) {
+                if (preg_match("/^\d{4}-\d{2}-\d{2}$/", $_POST['date_admission'])) {
                     $userData['date_admission'] = $_POST['date_admission'];
                 } else {
                     $errors[] = "Date of Admission format invalid";
@@ -484,7 +535,6 @@ else if (isset($_POST['register'])) {
                 $picLocation = $util->storeProfilePic(ROOT_PATH . '/res/profiles/student/', 'std_profile_pic', $userData['std_nic']);
                 if ($picLocation != null && $picLocation) {
                     $userData['std_profile_pic'] = SERVER_ROOT . "/res/profiles/student/" . basename($picLocation);
-
                 } else {
                     $userData['std_profile_pic'] = SERVER_ROOT . '/res/profiles/lecturer/default.png';
                     $errors[] = "Error Uploading Profile Picture";
@@ -525,8 +575,7 @@ echo "<title>AMS Registration</title>";
 include ROOT_PATH . '/php/include/content.php';
 ?>
 <!-- Modal -->
-<div class="modal fade" id="amsForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-    aria-labelledby="amsFormLabel" aria-hidden="true">
+<div class="modal fade" id="amsForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="amsFormLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -572,13 +621,13 @@ include ROOT_PATH . '/php/include/content.php';
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         var loginModal = new bootstrap.Modal(document.getElementById('amsForm'));
         loginModal.show();
     });
     // Returning to login
     var amsForm = document.getElementById('amsForm');
-    amsForm.addEventListener('hidden.bs.modal', function () {
+    amsForm.addEventListener('hidden.bs.modal', function() {
         window.location.href = '<?php echo SERVER_ROOT; ?>/index.php';
     });
 </script>
