@@ -94,7 +94,7 @@ CREATE TABLE
         std_id INT,
         class_id INT,
         attend_time TIME,
-        attendance_status TINYINT(1),
+        attendance_status TINYINT(1) DEFAULT 0,
         PRIMARY KEY (std_id, class_id),
         FOREIGN KEY (std_id) REFERENCES uoj_student (std_id) ON DELETE CASCADE,
         FOREIGN KEY (class_id) REFERENCES uoj_class (class_id) ON DELETE CASCADE

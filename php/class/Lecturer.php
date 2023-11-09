@@ -155,7 +155,17 @@ class Lecturer
             return false;
         }
     }
-
+    public function removeStudentFromClass($std_id, $class_id)
+    {
+        $query = "DELETE FROM {$this->stdClass} WHERE std_id = ? AND class_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('ii', $std_id, $class_id);
+        if ($stmt->execute()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
     public function getStudentsFromCourseId($courseId, $order = array())
     {
         $query = "SELECT {$this->user}.username , {$this->std}.std_fullname, {$this->std}.std_index , {$this->stdCourse}.std_id  FROM {$this->stdCourse} INNER JOIN {$this->std} ON {$this->stdCourse}.std_id = {$this->std}.std_id INNER JOIN {$this->user} ON {$this->std}.user_id = {$this->user}.user_id WHERE {$this->stdCourse}.course_id = ?";
@@ -324,7 +334,7 @@ class Lecturer
     }
 
     // How many classes for the course
-    public function retrieveTotalAttendanceCount($courseId)
+    public function retrieveTotalAttendanceCountForCourse($courseId)
     {
         $query = "SELECT COUNT(*) FROM {$this->stdClass} WHERE course_id = ?";
         $stmt = $this->conn->prepare($query);
@@ -373,7 +383,68 @@ class Lecturer
             return false;
         }
     }
-
+    public function retrieveAttendancePresentageForStudent($stdId)
+    {
+        $query = "SELECT COUNT(*) FROM {$this->stdClass} WHERE std_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $stdId);
+        if ($stmt->execute()) {
+            $total = $stmt->get_result()->fetch_assoc()['COUNT(*)'];
+            if ($total == 0) {
+                return [0, 0];
+            }
+            $query = "SELECT COUNT(*) FROM {$this->stdClass} WHERE std_id = ? AND attendance_status = 1";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bind_param('i', $stdId);
+            if ($stmt->execute()) {
+                $present = $stmt->get_result()->fetch_assoc()['COUNT(*)'];
+            } else {
+                $precent = 0;
+            }
+            $query = "SELECT COUNT(*) FROM {$this->stdClass} WHERE std_id = ? AND attendance_status = 2";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bind_param('i', $stdId);
+            if ($stmt->execute()) {
+                $late = $stmt->get_result()->fetch_assoc()['COUNT(*)'];
+            } else {
+                $late = 0;
+            }
+            return [($present / $total) * 100, ($late / $total) * 100];
+        } else {
+            return false;
+        }
+    }
+    public function attendancePrecentageForCourse($stdId, $courseId)
+    {
+        $query = "SELECT COUNT(*) FROM {$this->stdClass} INNER JOIN {$this->class} ON {$this->class}.class_id = {$this->stdClass}.class_id WHERE {$this->stdClass}.std_id = ? AND {$this->class}.course_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('ii', $stdId, $courseId);
+        if ($stmt->execute()) {
+            $total = $stmt->get_result()->fetch_assoc()['COUNT(*)'];
+            if ($total == 0) {
+                return [0, 0];
+            }
+            $query = "SELECT COUNT(*) FROM {$this->stdClass} INNER JOIN {$this->class} ON {$this->class}.class_id = {$this->stdClass}.class_id WHERE {$this->stdClass}.std_id = ? AND {$this->class}.course_id = ? AND attendance_status = 1";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bind_param('ii', $stdId, $courseId);
+            if ($stmt->execute()) {
+                $present = $stmt->get_result()->fetch_assoc()['COUNT(*)'];
+            } else {
+                $precent = 0;
+            }
+            $query = "SELECT COUNT(*) FROM {$this->stdClass} INNER JOIN {$this->class} ON {$this->class}.class_id = {$this->stdClass}.class_id WHERE {$this->stdClass}.std_id = ? AND {$this->class}.course_id = ? AND attendance_status = 2";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bind_param('ii', $stdId, $courseId);
+            if ($stmt->execute()) {
+                $late = $stmt->get_result()->fetch_assoc()['COUNT(*)'];
+            } else {
+                $late = 0;
+            }
+            return [($present / $total) * 100, ($late / $total) * 100];
+        } else {
+            return false;
+        }
+    }
     public function isPresentForTheClass($stdId, $classId)
     {
         $query = "SELECT COUNT(*) FROM {$this->stdClass} WHERE std_id = ? AND class_id = ?";
@@ -430,7 +501,7 @@ class Lecturer
 
     public function retrieveClassDetails($classId)
     {
-        $query = "SELECT * FROM {$this->class} WHERE class_id = ?";
+        $query = "SELECT {$this->course}.course_code, {$this->course}.course_name, {$this->class}.* FROM {$this->class} INNER JOIN {$this->course} ON {$this->course}.course_id = {$this->class}.course_id WHERE class_id = ?";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('i', $classId);
         if ($stmt->execute()) {
@@ -439,7 +510,17 @@ class Lecturer
             return false;
         }
     }
-
+    public function getStudentListByClassId($class_id)
+    {
+        $query = "SELECT {$this->user}.username, {$this->std}.std_fullname, {$this->std}.std_index, {$this->stdClass}.std_id, {$this->stdClass}.attendance_status FROM {$this->stdClass} INNER JOIN {$this->std} ON {$this->stdClass}.std_id = {$this->std}.std_id INNER JOIN {$this->user} ON {$this->std}.user_id = {$this->user}.user_id WHERE {$this->stdClass}.class_id = ? ORDER BY {$this->user}.username ASC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $class_id);
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+    }
     public function isLectureEnrolledToCourse($lecrId, $courseId)
     {
         $query = "SELECT * FROM {$this->lecrCourse} WHERE lecr_id = ? AND course_id = ?";

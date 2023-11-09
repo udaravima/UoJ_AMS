@@ -16,12 +16,15 @@
     </div>
 </div>
 <script>
-    function sendMessage(message, level) {
+    function sendMessage(message, level, reload = false) {
         let messageModalBody = document.getElementById('messageModalBody');
         messageModalBody.innerHTML = "<div class='alert alert-" + level + "'><p>" + message + "</p></div>";
         $('#messageModal').modal('show');
         $('#messageModal').on('hidden.bs.modal', function() {
             $('#messageModalBody').empty();
+            if (reload) {
+                location.reload();
+            }
         });
     }
 </script>

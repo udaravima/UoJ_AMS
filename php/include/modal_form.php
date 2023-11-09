@@ -197,7 +197,7 @@
                         <!-- std_index -->
                         <div class="form-group mt-3">
                             <label for="std_index">Student Index:</label>
-                            <input type="text" class="form-control" id="std_index" name="std_index">
+                            <input type="text" class="form-control" id="std_index" name="std_index" placeholder="S 12345">
                         </div>
                         <!-- std_fullname -->
                         <div class="form-group mt-3">
