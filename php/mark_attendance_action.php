@@ -62,6 +62,24 @@ if (isset($_POST["userSearch"]) && $user->isAdmin()) {
     $response['messages'] = $messages;
     $response['error'] = false;
     echo json_encode($response);
+} else if (isset($_POST['attendanceStatus']) && isset($_POST['currentTimeString'])) {
+    $std_id = $_POST['stdId'];
+    $class_id = $_POST['classId'];
+    $attendanceStatus = $_POST['attendanceStatus'];
+    $currentTimeString = $_POST['currentTimeString'];
+    $errors = [];
+    $messages = [];
+    $response = [];
+    try {
+        $lecr->editAttendance($std_id, $class_id, $currentTimeString, $attendanceStatus);
+        $messages[] = "Attendance marked";
+    } catch (Exception $e) {
+        $errors[] = "Error in marking attendance";
+    }
+    $response['errors'] = $errors;
+    $response['messages'] = $messages;
+    $response['error'] = false;
+    echo json_encode($response);
 } else {
     $response['error'] = true;
     $response['errors'] = ["Unauthorized access"];

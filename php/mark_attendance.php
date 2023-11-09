@@ -21,7 +21,7 @@ echo "<title>AMS Lecturer</title>";
 include_once ROOT_PATH . '/php/include/content.php';
 $activeDash = 1;
 include_once ROOT_PATH . '/php/include/nav.php';
-// include_once ROOT_PATH . '/php/include/modal_form.php';
+include_once ROOT_PATH . '/php/include/modal_form.php';
 
 $classId = intval($_POST['class-id']);
 try {
@@ -35,9 +35,14 @@ try {
     </script>";
     header("Location: " . SERVER_ROOT . "/php/lecturer_dashboard.php");
 }
-?>
 
-<div class="container-md mt-5 p-3">
+if ($user->isAdmin() || $user->isLecturer()) {
+    echo "<div class='container mt-3'>
+            <button class='btn btn-group btn-success' data-bs-toggle='modal' data-bs-target='#add_class' data-class-id='" . $classId . "'>Edit Class</button>
+        </div>";
+}
+?>
+<div class="container-md mt-3 p-3">
     <div class="input-group mb-3">
         <input type="search" class="form-control" placeholder="Search User" aria-label="Search Course" aria-describedby="course-addon" id="search-user-for-course" data-bs-toggle="dropdown" data-bs-target="#course-assigned-user" name="search-user-for-course">
         <div class="input-group-append">
@@ -50,9 +55,10 @@ try {
         </div>
     </div>
 </div>
-<div class="container-md mt-5 p-3">
+<div class="container-md mt-3 p-3">
     <table class="table table-hover border shadow">
         <h3 id="class-title"></h3>
+        <h6><?php echo $class['class_date'] . " " . $class['start_time'] . " - " . $class['end_time']; ?></h6>
         <thead>
             <tr>
                 <th>#</th>
@@ -83,22 +89,23 @@ try {
                 echo "
                 <td>
                     <div class='form-check form-check-inline'>
-                        <input type='radio' class='form-check-input' id='std-" . $student[3] . "-present' name='std-" . $student[3] . "' value='1' " . (($student[4] == 1) ? "checked" : "") . ">
+                        <input type='radio' class='form-check-input' id='std-" . $student[3] . "-present' name='std-" . $student[3] . "' value='1' " . (($student[4] == 1) ? "checked" : "") . " disabled>
                         <label class='form-check-label' for='std-" . $student[3] . "-present'><span class='badge text-bg-success'>Present</span></label>
                     </div>
                     <div class='form-check form-check-inline'>
-                        <input type='radio' class='form-check-input' id='std-" . $student[3] . "-late' name='std-" . $student[3] . "' value='1' " . (($student[4] == 2) ? "checked" : "") . ">
+                        <input type='radio' class='form-check-input' id='std-" . $student[3] . "-late' name='std-" . $student[3] . "' value='1' " . (($student[4] == 2) ? "checked" : "") . " disabled>
                         <label class='form-check-label' for='std-" . $student[3] . "-late'><span class='badge text-bg-warning'>Late</span></label>
                     </div>
                     <div class='form-check form-check-inline'>
-                        <input type='radio' class='form-check-input' id='std-" . $student[3] . "-absent' name='std-" . $student[3] . "' value='1' " . (($student[4] == 0) ? "checked" : "") . ">
+                        <input type='radio' class='form-check-input' id='std-" . $student[3] . "-absent' name='std-" . $student[3] . "' value='1' " . (($student[4] == 0) ? "checked" : "") . " disabled>
                         <label class='form-check-label' for='std-" . $student[3] . "-absent'><span class='badge text-bg-danger'>Absent</span></label>
                     </div>
                 </td>";
-                echo "<td><button class='btn btn-success' onclick='markAttendace(this)' data-std-id='" . $student[3] . "' data-user-role='3' data-user-name='" . $student[1] . "' data-user-index='" . $student[2] . "' data-user-reg='" . $student[0] . "'>Mark</button>
-                            <button class='btn btn-danger' onclick='removeUserFromCourse(this)' data-std-id='" . $student[3] . "' data-user-role='3' data-user-name='" . $student[1] . "' data-user-index='" . $student[2] . "' data-user-reg='" . $student[0] . "'>Remove</button>
+                echo "<td><button class='btn btn-success' onclick='markAttendace(this)' data-std-id='" . $student[3] . "' data-user-role='3' data-user-name='" . $student[1] . "' data-user-index='" . $student[2] . "' data-user-reg='" . $student[0] . "' data-attendance-status='" . $student[4] . "'>Mark</button>
+                            <button class='btn btn-danger' id='remove-" . $student[3] . "' onclick='removeUserFromCourse(this)' data-std-id='" . $student[3] . "' data-user-role='3' data-user-name='" . $student[1] . "' data-user-index='" . $student[2] . "' data-user-reg='" . $student[0] . "'>Remove</button>
                             </td>";
                 echo "</tr>";
+                //<button class='btn btn-warning' onclick='editAttendance(this)' data-std-id='" . $student[3] . "' data-user-role='3' data-user-name='" . $student[1] . "' data-user-index='" . $student[2] . "' data-user-reg='" . $student[0] . "'>Edit</button>
             }
 
             ?>
@@ -111,6 +118,9 @@ try {
     echo "let courseId = " . $class['course_id'] . ";";
     echo "let courseCode = '" . $class['course_code'] . "';";
     echo "let courseName = '" . $class['course_name'] . "';";
+    echo "let classStart = '" . $class['start_time'] . "';";
+    echo "let classEnd = '" . $class['end_time'] . "';";
+    echo "let classDate = '" . $class['class_date'] . "';";
     ?>
     let addStudentsToClassList = [];
     let removeStudentsFromClassList = [];
@@ -118,31 +128,6 @@ try {
     document.addEventListener('DOMContentLoaded', function() {
         if (classId != -1) {
             document.getElementById('class-title').innerHTML = courseCode + " - " + courseName;
-            // $.ajax({
-            //     method: 'POST',
-            //     url: '<?php //echo SERVER_ROOT; 
-                            ?>/php/validation.php',
-            //     data: {
-            //         classId: classId
-            //     },
-            //     dataType: 'json',
-            //     success: function(response) {
-            //         let classAttendance = $('#class-attendance');
-            //         classAttendance.empty();
-            //         let i = 1;
-            //         (response.attendance).forEach(attendance => {
-            //             let data = $(document.createElement("tr"));
-            //             data.append($(document.createElement("td")).text(i++));
-            //             data.append($(document.createElement("td")).text(attendance[0]));
-            //             data.append($(document.createElement("td")).text(attendance[1]));
-            //             data.append($(document.createElement("td")).text(attendance[2]));
-            //             classAttendance.append(data);
-            //         });
-            //     },
-            //     error: function() {
-            //         sendMessage('Error on loading attendance', 'danger');
-            //     }
-            // })
         } else {
             sendMessage('No class selected', 'warning');
             window.location.href = '<?php echo SERVER_ROOT; ?>/php/lecturer_dashboard.php';
@@ -229,8 +214,7 @@ try {
                     if (response.error) {
                         sendMessage(response.errors, 'danger');
                     } else {
-                        sendMessage(response.messages, 'success');
-                        window.location.reload();
+                        sendMessage(response.messages, 'success', true);
                     }
                 },
                 error: function() {
@@ -242,7 +226,74 @@ try {
         }
     }
 
-    
+    function markAttendace(std) {
+        if (std.dataset.attendanceStatus == 1 || std.dataset.attendanceStatus == 2) {
+            sendMessage('Already marked', 'warning');
+            return 0;
+        }
+        let currentTime = new Date();
+        let currentTimeString = [
+            currentTime.getHours().toString().padStart(2, '0'),
+            currentTime.getMinutes().toString().padStart(2, '0'),
+            currentTime.getSeconds().toString().padStart(2, '0')
+        ].join(':');
+
+        let classStartTime = new Date(currentTime.toDateString() + " " + classStart);
+        let classEndTime = new Date(currentTime.toDateString() + " " + classEnd);
+        let timeSpace = 10; //10 Minutes before and after
+        let timeDifferece = Math.floor(Math.abs(currentTime - classStartTime) / 60000);
+
+        if (currentTime < classStartTime && timeDifferece > timeSpace) {
+            sendMessage('Class has not started yet', 'warning');
+            return 0;
+        } else if (currentTime > classEndTime) {
+            sendMessage('Class has ended', 'warning');
+            return 0;
+        } else {
+            let attendanceStatus = 1;
+            if (currentTime > classStartTime && timeDifferece > timeSpace) {
+                attendanceStatus = 2;
+            }
+            $.ajax({
+                method: 'POST',
+                url: '<?php echo SERVER_ROOT; ?>/php/mark_attendance_action.php',
+                data: {
+                    stdId: std.dataset.stdId,
+                    classId: classId,
+                    attendanceStatus: attendanceStatus,
+                    currentTimeString: currentTimeString
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.error) {
+                        sendMessage(response.errors, 'danger', true);
+                    } else {
+                        sendMessage(response.messages, 'success', true);
+                    }
+                },
+                error: function() {
+                    sendMessage('Error on loading users', 'danger');
+                }
+            })
+        }
+
+    }
+
+    function removeUserFromCourse(std) {
+        let stdId = std.dataset.stdId;
+        if (removeStudentsFromClassList.includes(stdId)) {
+            removeStudentsFromClassList.splice(removeStudentsFromClassList.indexOf(stdId), 1);
+            $('#remove-' + stdId).removeClass('btn-warning');
+            $('#remove-' + stdId).addClass('btn-danger');
+            $('#remove-' + stdId).text('Remove');
+            return 0;
+        } else {
+            removeStudentsFromClassList.push(stdId);
+            $('#remove-' + stdId).removeClass('btn-danger');
+            $('#remove-' + stdId).addClass('btn-warning');
+            $('#remove-' + stdId).text('-Pending');
+        }
+    }
 </script>
 <?php
 include ROOT_PATH . '/php/include/footer.php';
