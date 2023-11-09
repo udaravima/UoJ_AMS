@@ -16,6 +16,7 @@ if (!($user->isLoggedIn()) || $_SESSION['user_role'] > 2) {
 }
 
 if (isset($_POST["userSearch"]) && $user->isAdmin()) {
+    $courseId = $_POST["courseId"];
     $errors = [];
     $messages = [];
     $order = [];
@@ -33,6 +34,34 @@ if (isset($_POST["userSearch"]) && $user->isAdmin()) {
     $response['error'] = false;
     echo json_encode($response);
     //add user to course by admin
+
+} else if (isset($_POST['addStudentsToClassList']) || isset($_POST['removeStudentsFromClassList'])) {
+    $classId = $_POST['classId'];
+    $studentsToAdd = isset($_POST['addStudentsToClassList']) ? $_POST['addStudentsToClassList'] : [];
+    $studentsToRemove = isset($_POST['removeStudentsFromClassList']) ? $_POST['removeStudentsFromClassList'] : [];
+    $errors = [];
+    $messages = [];
+    $response = [];
+    foreach ($studentsToAdd as $student) {
+        try {
+            $lecr->markAttendance($student, $classId, "", 0);
+            $messages[] = "Student " . $student . " added to class";
+        } catch (Exception $e) {
+            $errors[] = "Error in adding student to class";
+        }
+    }
+    foreach ($studentsToRemove as $student) {
+        try {
+            $lecr->removeStudentFromClass($student, $classId);
+            $messages[] = "Student " . $student . " removed from class";
+        } catch (Exception $e) {
+            $errors[] = "Error in removing student from class";
+        }
+    }
+    $response['errors'] = $errors;
+    $response['messages'] = $messages;
+    $response['error'] = false;
+    echo json_encode($response);
 } else {
     $response['error'] = true;
     $response['errors'] = ["Unauthorized access"];

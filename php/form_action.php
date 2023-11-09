@@ -199,7 +199,7 @@ else if (isset($_POST['register'])) {
 
             //  ----------------------------- To Student data --> userData --------------------------------
         } else if ($user_role == 3) {
-            if (!empty($_POST['std_index']) && preg_match("/^S\s\d{5}$/", $_POST['std_index'])) {
+            if (isset($_POST['std_index']) && preg_match("/^S\s\d{5}$/", $_POST['std_index'])) {
                 $userData['std_index'] = $_POST['std_index'];
             } else {
                 $errors[] = "Index is not set or Invalid Index number format.";

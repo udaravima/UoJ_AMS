@@ -1,6 +1,6 @@
 <?php
 // require_once $_SERVER['DOCUMENT_ROOT'] . '/MyAttendanceSys/config.php';
-require_once 'config.php';
+include_once 'config.php';
 include_once ROOT_PATH . '/php/config/Database.php'; // Carefull with location!
 include_once ROOT_PATH . '/php/class/Utils.php';
 include_once ROOT_PATH . '/php/class/User.php';
@@ -9,7 +9,7 @@ include_once ROOT_PATH . '/php/class/Lecturer.php';
 $database = new Database();
 $db = $database->getConnection();
 $user = new User($db);
-$lecturer = new Lecturer($db);
+$lecr = new Lecturer($db);
 $util = new Utils();
 
 if ($user->isLoggedIn()) {
@@ -42,7 +42,6 @@ if (isset($_POST['sign_in'])) {
         } else {
             echo "Something Wrong!";
         }
-
     } else {
         // get the message and preview on modal
         $message[] = $user->getLoginMessage();
@@ -56,11 +55,11 @@ if (isset($_POST['sign_in'])) {
 }
 ?>
 <?php
-include ROOT_PATH . '/php/include/header.php';
+include_once ROOT_PATH . '/php/include/header.php';
 
 echo "<title> AMS Login </title>";
 
-include ROOT_PATH . '/php/include/content.php';
+include_once ROOT_PATH . '/php/include/content.php';
 ?>
 <!-- content begins  -->
 
@@ -68,24 +67,20 @@ include ROOT_PATH . '/php/include/content.php';
 <div class="container-lg justify-content-center align-items-center mt-5">
     <div class="row align-items-center justify-content-center">
 
-        <div
-            class="col-8 col-md-4 col-lg-3 border rounded shadow form-signin align-items-center justify-content-center">
+        <div class="col-8 col-md-4 col-lg-3 border rounded shadow form-signin align-items-center justify-content-center">
             <form action="" method="post" class="form">
-                <img id="logo" class="img-fluid" src="<?php echo SERVER_ROOT; ?>/res/logo/AMS_side_banner_w.png"
-                    alt="AMS_Banner" width="" height="">
+                <img id="logo" class="img-fluid" src="<?php echo SERVER_ROOT; ?>/res/logo/AMS_side_banner_w.png" alt="AMS_Banner" width="" height="">
                 <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
                 <!-- <div id="login-alert" class="alert">
                      <p class="">Hello</p> 
                 </div> -->
                 <div class="form-floating">
-                    <input type="text" class="form-control" id="reg-name" name="reg-name" placeholder="2020csc000"
-                        autocomplete="username" required autofocus>
+                    <input type="text" class="form-control" id="reg-name" name="reg-name" placeholder="2020csc000" autocomplete="username" required autofocus>
                     <label for="reg-name">Registration No:</label>
                 </div>
 
                 <div class="form-floating">
-                    <input type="password" class="form-control" id="user_password" name="user_password"
-                        placeholder="Password" autocomplete="current-password" required>
+                    <input type="password" class="form-control" id="user_password" name="user_password" placeholder="Password" autocomplete="current-password" required>
                     <label for="user_password">Password</label>
                 </div>
 
@@ -102,8 +97,7 @@ include ROOT_PATH . '/php/include/content.php';
                         </a>
                     </p>
                     <p class="align-items-center justify-content-center">
-                        <a class="link-underline link-offset-2 link-opacity-75-hover" data-bs-toggle="modal"
-                            data-bs-target="#reg_user" href="#">Don't have an account?
+                        <a class="link-underline link-offset-2 link-opacity-75-hover" data-bs-toggle="modal" data-bs-target="#reg_user" href="#">Don't have an account?
                         </a>
                     </p>
                 </div>
@@ -118,18 +112,15 @@ include ROOT_PATH . '/php/include/content.php';
 </div>
 
 <!-- Reg User Module -->
-<?php
-include ROOT_PATH . '/php/include/modal_form.php';
-?>
 
 <!-- page scripts -->
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         const logo = document.getElementById('logo');
         const themeLinks = document.querySelectorAll('[data-bs-theme]');
 
         themeLinks.forEach(link => {
-            link.addEventListener("click", function (e) {
+            link.addEventListener("click", function(e) {
                 // e.preventDefault(); // unable to click when its on
                 const theme = this.getAttribute("data-bs-theme");
                 updateImage(theme);
@@ -151,5 +142,6 @@ include ROOT_PATH . '/php/include/modal_form.php';
 
 <!-- content ends  -->
 <?php
-include ROOT_PATH . '/php/include/footer.php';
+include_once ROOT_PATH . '/php/include/modal_form.php';
+include_once ROOT_PATH . '/php/include/footer.php';
 ?>

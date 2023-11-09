@@ -116,9 +116,19 @@ include_once ROOT_PATH . '/php/include/modal_form.php';
             },
             eventClick: function(info) {
                 var class_id = info.event.id;
-                var trig = document.getElementById('class-trigger');
-                trig.setAttribute('data-class-id', class_id);
-                trig.click();
+                // var trig = document.getElementById('class-trigger');
+                // trig.setAttribute('data-class-id', class_id);
+                // trig.click();
+                let form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '<?php echo SERVER_ROOT; ?>/php/mark_attendance.php';
+                let input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'class-id';
+                input.value = class_id;
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
 
             },
             select(info) {
