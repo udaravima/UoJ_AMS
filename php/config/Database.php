@@ -23,9 +23,9 @@ if (isset($_SESSION['last_activity'])) {
 $_SESSION['last_activity'] = time();
 class Database
 {
-    private $host = 'localhost';
-    private $username = 'dbadmin';
-    private $password = 'Admin123@';
+    private $host = '127.0.0.1';
+    private $username = 'root';
+    private $password = 'beyondm';
     private $database = 'uoj';
 
     public function getConnection()

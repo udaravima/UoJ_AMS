@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS uoj;
 
 USE uoj;
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
     uoj_user (
         user_id INT AUTO_INCREMENT PRIMARY KEY,
         username VARCHAR(50) NOT NULL UNIQUE,
@@ -18,7 +18,7 @@ CREATE TABLE
         user_session TINYINT(1) DEFAULT 0 -- To check whether user is already logged in or not! May not need
     );
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
     uoj_student (
         std_id INT AUTO_INCREMENT,
         std_index CHAR(7) NOT NULL UNIQUE,
@@ -41,11 +41,11 @@ CREATE TABLE
         std_profile_pic VARCHAR(255),
         current_level CHAR(2),
         user_id INT,
-        PRIMARY KEY(std_id, user_id),
+        PRIMARY KEY(std_id),
         FOREIGN KEY (user_id) REFERENCES uoj_user (user_id) ON DELETE CASCADE
     );
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
     uoj_lecturer (
         lecr_id INT AUTO_INCREMENT,
         lecr_nic VARCHAR(12) UNIQUE NOT NULL,
@@ -56,18 +56,18 @@ CREATE TABLE
         lecr_address VARCHAR(50),
         lecr_profile_pic VARCHAR(255),
         user_id INT,
-        PRIMARY key(lecr_id, user_id),
+    PRIMARY KEY(lecr_id),
         FOREIGN KEY (user_id) REFERENCES uoj_user (user_id) ON DELETE CASCADE
     );
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
     uoj_course (
         course_id INT AUTO_INCREMENT PRIMARY KEY,
         course_code VARCHAR(10) UNIQUE,
         course_name VARCHAR(50)
     );
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
     uoj_class (
         class_id INT AUTO_INCREMENT,
         lecr_id INT,
@@ -75,12 +75,12 @@ CREATE TABLE
         class_date DATE,
         start_time TIME,
         end_time TIME,
-        PRIMARY key(class_id, lecr_id, course_id),
+        PRIMARY key(class_id),
         FOREIGN Key (course_id) REFERENCES uoj_course (course_id),
         FOREIGN Key (lecr_id) REFERENCES uoj_lecturer (lecr_id)
     );
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
     uoj_lecturer_course (
         lecr_id INT,
         course_id INT,
@@ -89,7 +89,7 @@ CREATE TABLE
         FOREIGN KEY (course_id) REFERENCES uoj_course (course_id) ON DELETE CASCADE
     );
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
     uoJ_student_class (
         std_id INT,
         class_id INT,
