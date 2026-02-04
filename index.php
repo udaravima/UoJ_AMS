@@ -123,7 +123,9 @@ include_once ROOT_PATH . '/php/include/content.php';
                     </p>
                 </div>
                 <div class="mt-4">
-                    <p class="align-items-center justify-content-center">&copy; 2023 Attendance Management System </p>
+                    <p class="align-items-center justify-content-center">&copy;
+                        <?php echo date("Y"); ?> Attendance Management System
+                    </p>
                 </div>
 
                 <!-- <p class="mt-5 mb-3 text-body-secondary align-items-center justify-content-center">Attendance Management System <br> Department of Computer Science<br> University of Jaffna</p> -->

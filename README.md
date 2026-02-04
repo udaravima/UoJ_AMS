@@ -1,71 +1,119 @@
 # UoJ_AMS - Attendance Management System for DCS_UoJ
 
-## 1. Introduction
-Welcome to the Attendance Management System for University Departments. This system streamlines and manages the process of handling attendance, lectures, and percentage within the department. This README provides an overview of the system, its features, and instructions for installation and usage.
+**UoJ_AMS** is a comprehensive web-based Attendance Management System designed for university departments. It streamlines the entire attendance lifecycle, from marking attendance in classes to generating detailed PDF reports for administration.
 
-## 2. Features
-### User Authentication
-- Secure login and access control for administrators and users.
-  
-### Attendance register 
--Lecturer or Instructor can mark the students attendance 
+## 🚀 Features
 
-### Attendance Management
-- Administrators track and resolve attendants percentage for each subject efficiently.
+### 👤 Role-Based Access Control
+- **Administrator**: Full system control, user management (Student/Lecturer), and system configuration.
+- **Lecturer**: Create classes, mark attendance, and view course reports.
+- **Instructor**: Assist in marking attendance.
+- **Student**: View personal attendance records and course history.
 
-### Bulk User Upload
-- Can entroll student users to course.
+### 📅 Attendance Management
+- **Efficient Marking**: Manual or NFC-based attendance marking.
+- **Status Tracking**: Distinguishes between 'Present', 'Late', and 'Absent'.
+- **Class Scheduling**: Schedule classes, defining dates and times.
+- **Dynamic Status**: Lecturers can update student status dynamically.
 
+### 💳 NFC Integration
+- **Card Management**: Assign NFC cards to students for quick identification.
+- **Seamless Attendance**: Infrastructure for tapping cards to mark attendance.
 
-### Customization
-- Can change status of students and Lecturer dynamically from the admin panel.
+### 📊 Reporting & Analytics
+- **PDF Generation**: Powered by **Dompdf** for professional-grade reports.
+- **Report Types**:
+    - **Class Attendance Report**: Detailed list of students for a specific session.
+    - **Student Attendance Report**: Individual attendance history across courses.
+    - **Course Summary Report**: Aggregate statistics for course performance.
 
-## 3. Installation
-To install and set up the Attendance Management System, follow these steps:
+### 🛠 Administrative Tools
+- **User Registration**: Enrolling students and staff.
+- **Course Management**: Enroll students into specific courses.
+- **Calendar Setup**: Manage academic calendar settings and semesters.
 
-### Requirements
-- Web server (e.g., Apache, Nginx)
-- PHP (>= 7.0) and a MySQL database
-- Composer for PHP
+## 🛠 Technology Stack
+- **Backend**: PHP (>= 7.0)
+- **Database**: MySQL
+- **Frontend**: HTML5, CSS3, JavaScript (Vanilla), Bootstrap
+- **Dependencies**:
+    - `Dompdf`: For generating PDF reports.
 
-#### Clone the Repository in to desired server path
-```bash
-git clone https://github.com/udaravima/UoJ_AMS.git 
-```
-#### change directory in to UoJ_AMS
-```bash
-cd UoJ_AMS
-```
-#### configure 
-```bash
-nano config.php
-```
-```bash
-change define('SERVER_ROOT', '/MyAttendanceSys'); -> define('SERVER_ROOT', '<Your Server Path>/UoJ_AMS');
-```
-#### import table_script.sql 
-```bash
-mysql -h <hostname> -u <username> -p <password> < '<PathToProject>/Database Sql File/Table_script.sql'
-```
-##### if you are get any error due to database already existance drop uoj and do it again
-#### config database setup localhost, username, password, database = uoj
-```bash
-nano <pathToProject>/php/config/Database.php
-```
+## ⚙️ Installation & Setup
 
-### Creating Administrator
-- goto <serverlink>/UoJ_AMS
-  create a account using don't you have a account
-- get a terminal
-  ```bash
-  mysql -l <hostname> -u <username> -p <password>
-  ```
-  ```mysql
-  use uoj;
-  update uoj_user set user_status = 1, user_role = 0 where user_id = 1;
-  ```
-  since your first account will be user_id 1 it will make it admin and active
+### Prerequisites
+- PHP >= 7.0
+- MySQL Database
+- Composer (for dependency management)
+- Web Server (Apache/Nginx)
 
-### Log in using account created
+### Steps
 
-# Link to a demonstration
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/udaravima/UoJ_AMS.git
+    cd UoJ_AMS
+    ```
+
+2.  **Install Dependencies**
+    Ensure you have Composer installed, then run:
+    ```bash
+    composer install
+    ```
+
+3.  **Database Configuration**
+    - Import the database schema:
+        ```bash
+        mysql -h <hostname> -u <username> -p <password> < 'Database Sql Files/Table_script.sql'
+        ```
+        *Note: If you encounter errors about the database existing, drop the `uoj` database and retry.*
+
+    - Configure the database connection:
+        Open `php/config/Database.php` and update the credentials:
+        ```php
+        private $host = "localhost";
+        private $db_name = "uoj";
+        private $username = "<your_username>";
+        private $password = "<your_password>";
+        ```
+
+4.  **System Configuration**
+    - Open `config.php` and set the server root path:
+        ```php
+        // Example: If your project is at http://localhost/UoJ_AMS
+        define('SERVER_ROOT', '/UoJ_AMS'); 
+        ```
+
+5.  **Create Administrator Account**
+    1.  Access the web interface (e.g., `http://localhost/UoJ_AMS`) and register a new account.
+    2.  Manually promote the user to Admin via SQL (since the first user needs to be bootstrapped):
+        ```bash
+        mysql -u <username> -p <password>
+        ```
+        ```sql
+        USE uoj;
+        UPDATE uoj_user SET user_status = 1, user_role = 0 WHERE user_id = 1;
+        ```
+        *This sets the first registered user (ID 1) as an active Administrator.*
+
+## 📖 Usage Guide
+
+### For Administrators
+- Log in to access the **Admin Dashboard**.
+- Manage users, configure semester details, and oversee all courses.
+- Use the **NFC Management** section to register student cards.
+- Generate system-wide reports.
+
+### For Lecturers
+- Log in to the **Lecturer Dashboard**.
+- **Create Class**: Schedule a new lecture session.
+- **Mark Attendance**: Use the interface to mark students present.
+- **Reports**: Generate PDF reports for your specific classes or courses.
+
+### For Students
+- Log in to the **Student Dashboard**.
+- View your attendance percentage per course.
+- Check valid vs. invalid attendance records.
+
+## 🤝 Contribution
+Contributions are welcome! Please fork the repository and submit a pull request.
