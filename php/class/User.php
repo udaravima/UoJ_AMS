@@ -281,16 +281,22 @@ class User
     {
         $query = "SELECT std.*, users.user_role, users.user_status, users.username, users.user_id FROM $this->stdTable as std INNER JOIN $this->userTable as users ON users.user_id = std.user_id ";
         if (isset($order['search'])) {
-            $query .= "WHERE std.std_fullname LIKE '%" . $order['search'] . "%' OR users.username LIKE '%" . $order['search'] . "%' OR std.std_nic LIKE '%" . $order['search'] . "%' OR std.std_email LIKE '%" . $order['search'] . "%' OR std.mobile_tp_no LIKE '%" . $order['search'] . "%' OR std.home_tp_no LIKE '%" . $order['search'] . "%'";
+            // Escape search input to prevent SQL injection
+            $search = $this->conn->real_escape_string($order['search']);
+            $query .= "WHERE std.std_fullname LIKE '%" . $search . "%' OR users.username LIKE '%" . $search . "%' OR std.std_nic LIKE '%" . $search . "%' OR std.std_email LIKE '%" . $search . "%' OR std.mobile_tp_no LIKE '%" . $search . "%' OR std.home_tp_no LIKE '%" . $search . "%'";
         }
-        //TODO: CHECK
-        if (isset($order['column'])) {
-            $query .= " ORDER BY " . $order['column'] . ' ' . $order['dir'];
+        // Whitelist allowed columns to prevent SQL injection
+        $allowedColumns = ['std_fullname', 'username', 'std_nic', 'std_email', 'mobile_tp_no', 'user_status'];
+        if (isset($order['column']) && in_array($order['column'], $allowedColumns)) {
+            $dir = (isset($order['dir']) && strtoupper($order['dir']) === 'DESC') ? 'DESC' : 'ASC';
+            $query .= " ORDER BY " . $order['column'] . ' ' . $dir;
         } else {
             $query .= " ORDER BY users.username ASC";
         }
         if (isset($order['offset']) && $order['offset'] != -1) {
-            $query .= " LIMIT " . $order['limit'] . ' OFFSET ' . $order['offset'];
+            $limit = intval($order['limit']);
+            $offset = intval($order['offset']);
+            $query .= " LIMIT " . $limit . ' OFFSET ' . $offset;
         }
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
@@ -302,15 +308,22 @@ class User
     {
         $query = "SELECT lecr.*, users.user_role, users.user_status, users.username, users.user_id FROM $this->lecrTable as lecr INNER JOIN $this->userTable as users ON users.user_id = lecr.user_id ";
         if (isset($order['search'])) {
-            $query .= "WHERE lecr.lecr_name LIKE '%" . $order['search'] . "%' OR lecr.lecr_nic LIKE '%" . $order['search'] . "%' OR users.username LIKE '%" . $order['search'] . "%' OR lecr.lecr_email LIKE '%" . $order['search'] . "%' OR lecr.lecr_mobile LIKE '%" . $order['search'] . "%' OR lecr.lecr_address LIKE '%" . $order['search'] . "%' ";
+            // Escape search input to prevent SQL injection
+            $search = $this->conn->real_escape_string($order['search']);
+            $query .= "WHERE lecr.lecr_name LIKE '%" . $search . "%' OR lecr.lecr_nic LIKE '%" . $search . "%' OR users.username LIKE '%" . $search . "%' OR lecr.lecr_email LIKE '%" . $search . "%' OR lecr.lecr_mobile LIKE '%" . $search . "%' OR lecr.lecr_address LIKE '%" . $search . "%' ";
         }
-        if (isset($order['column'])) {
-            $query .= " ORDER BY " . $order['column'] . ' ' . $order['dir'];
+        // Whitelist allowed columns to prevent SQL injection
+        $allowedColumns = ['lecr_name', 'lecr_nic', 'username', 'lecr_email', 'lecr_mobile', 'user_status'];
+        if (isset($order['column']) && in_array($order['column'], $allowedColumns)) {
+            $dir = (isset($order['dir']) && strtoupper($order['dir']) === 'DESC') ? 'DESC' : 'ASC';
+            $query .= " ORDER BY " . $order['column'] . ' ' . $dir;
         } else {
             $query .= " ORDER BY users.username ASC";
         }
         if (isset($order['offset']) && $order['offset'] != -1) {
-            $query .= " LIMIT " . $order['limit'] . ' OFFSET ' . $order['offset'];
+            $limit = intval($order['limit']);
+            $offset = intval($order['offset']);
+            $query .= " LIMIT " . $limit . ' OFFSET ' . $offset;
         }
         $stmt = $this->conn->prepare($query);
         $stmt->execute();

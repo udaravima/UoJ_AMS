@@ -11,8 +11,11 @@ $user = new User($conn);
 $lecr = new Lecturer($conn);
 $utils = new Utils();
 
+header('Content-Type: application/json');
+
 if (!($user->isLoggedIn()) || $_SESSION['user_role'] > 2) {
-    header("Location: " . SERVER_ROOT . "/index.php");
+    echo json_encode(['error' => true, 'errors' => ['Unauthorized access']]);
+    exit();
 }
 
 if (isset($_POST["userSearch"]) && $user->isAdmin()) {

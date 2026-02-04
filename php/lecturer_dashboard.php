@@ -14,6 +14,7 @@ $lecr = new Lecturer($conn);
 
 if (!($user->isLoggedIn()) || $_SESSION['user_role'] > 1) {
     header("Location: " . SERVER_ROOT . "/index.php");
+    exit();
 }
 
 ?>
@@ -70,9 +71,10 @@ include_once ROOT_PATH . '/php/include/modal_form.php';
     </table>
     <nav aria-label="Page navigation">
         <ul class="pagination justify-content-center">
-            <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                 <li class="page-item <?php echo ($i == $currentPage) ? 'active' : ''; ?>">
-                    <a class="page-link" href="<?php echo SERVER_ROOT; ?>/php/lecturer_dashboard.php?pageC=<?php echo $i; ?>">
+                    <a class="page-link"
+                        href="<?php echo SERVER_ROOT; ?>/php/lecturer_dashboard.php?pageC=<?php echo $i; ?>">
                         <?php echo $i; ?>
                     </a>
                 </li>
@@ -81,7 +83,8 @@ include_once ROOT_PATH . '/php/include/modal_form.php';
     </nav>
 </div>
 <div class="container">
-    <button data-bs-target="#add_class" data-bs-toggle="modal" data-class-id="3" name="test-button" class="btn btn-primary d-none" id="class-trigger">class</button>
+    <button data-bs-target="#add_class" data-bs-toggle="modal" data-class-id="3" name="test-button"
+        class="btn btn-primary d-none" id="class-trigger">class</button>
 </div>
 <div class="container mt-3">
     <div id="class-calandar-lecturer">
@@ -89,7 +92,7 @@ include_once ROOT_PATH . '/php/include/modal_form.php';
     </div>
 </div>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         var calendarEl = document.getElementById('class-calandar-lecturer');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
@@ -108,13 +111,13 @@ include_once ROOT_PATH . '/php/include/modal_form.php';
                 extraParams: {
                     lecr_id: <?php echo $_SESSION["lecr_id"]; ?>,
                 },
-                failure: function() {
+                failure: function () {
                     sendMessage('Error loading calendar events!', 'warning');
                 },
                 color: 'cyan', // a non-ajax option
                 textColor: 'black' // a non-ajax option
             },
-            eventClick: function(info) {
+            eventClick: function (info) {
                 var class_id = info.event.id;
                 // var trig = document.getElementById('class-trigger');
                 // trig.setAttribute('data-class-id', class_id);

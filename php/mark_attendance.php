@@ -14,6 +14,7 @@ $utils = new Utils();
 
 if (!($user->isLoggedIn()) || $_SESSION['user_role'] > 2 || !isset($_POST['class-id'])) {
     header("Location: " . SERVER_ROOT . "/index.php");
+    exit();
 }
 
 include_once ROOT_PATH . '/php/include/header.php';
@@ -44,12 +45,17 @@ if ($user->isAdmin() || $user->isLecturer()) {
 ?>
 <div class="container-md mt-3 p-3">
     <div class="input-group mb-3">
-        <input type="search" class="form-control" placeholder="Search User" aria-label="Search Course" aria-describedby="course-addon" id="search-user-for-course" data-bs-toggle="dropdown" data-bs-target="#course-assigned-user" name="search-user-for-course">
+        <input type="search" class="form-control" placeholder="Search User" aria-label="Search Course"
+            aria-describedby="course-addon" id="search-user-for-course" data-bs-toggle="dropdown"
+            data-bs-target="#course-assigned-user" name="search-user-for-course">
         <div class="input-group-append">
-            <button class="btn btn-secondary rounded btn-group" type="button" id="user-selectAll" onclick="selectAllUsers(this, 'student-list[]')">* select</button>
-            <button class="btn btn-warning rounded btn-group" type="button" id="addStudents" onclick="updateStudent(this)">Update</button>
+            <button class="btn btn-secondary rounded btn-group" type="button" id="user-selectAll"
+                onclick="selectAllUsers(this, 'student-list[]')">* select</button>
+            <button class="btn btn-warning rounded btn-group" type="button" id="addStudents"
+                onclick="updateStudent(this)">Update</button>
         </div>
-        <div class="dropdown-menu" aria-labelledby="users-addon-course" style="overflow:hidden auto; max-height:245px;" id="course-assigned-user">
+        <div class="dropdown-menu" aria-labelledby="users-addon-course" style="overflow:hidden auto; max-height:245px;"
+            id="course-assigned-user">
             <!-- users goes here -->
             <!-- wait -->
         </div>
@@ -125,7 +131,7 @@ if ($user->isAdmin() || $user->isLecturer()) {
     let addStudentsToClassList = [];
     let removeStudentsFromClassList = [];
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         if (classId != -1) {
             document.getElementById('class-title').innerHTML = courseCode + " - " + courseName;
         } else {
@@ -134,7 +140,7 @@ if ($user->isAdmin() || $user->isLecturer()) {
         }
     });
 
-    document.getElementById('search-user-for-course').addEventListener('keyup', function(event) {
+    document.getElementById('search-user-for-course').addEventListener('keyup', function (event) {
         let userSearch = document.getElementById('search-user-for-course').value;
         if (userSearch.length > 3) {
             $.ajax({
@@ -145,7 +151,7 @@ if ($user->isAdmin() || $user->isLecturer()) {
                     courseId: courseId
                 },
                 dataType: 'json',
-                success: function(response) {
+                success: function (response) {
                     let userListCourse = $('#course-assigned-user');
                     userListCourse.empty();
                     userListCourse.append($(document.createElement("div")).addClass("dropdown-header").text("Student"));
@@ -159,7 +165,7 @@ if ($user->isAdmin() || $user->isLecturer()) {
                     $('#course-assigned-user').selectpicker('refresh');
 
                 },
-                error: function() {
+                error: function () {
                     sendMessage('Error on loading users', 'danger');
                 }
             })
@@ -210,14 +216,14 @@ if ($user->isAdmin() || $user->isLecturer()) {
                     classId: classId
                 },
                 dataType: 'json',
-                success: function(response) {
+                success: function (response) {
                     if (response.error) {
                         sendMessage(response.errors, 'danger');
                     } else {
                         sendMessage(response.messages, 'success', true);
                     }
                 },
-                error: function() {
+                error: function () {
                     sendMessage('Error on loading users', 'danger');
                 }
             })
@@ -264,14 +270,14 @@ if ($user->isAdmin() || $user->isLecturer()) {
                     currentTimeString: currentTimeString
                 },
                 dataType: 'json',
-                success: function(response) {
+                success: function (response) {
                     if (response.error) {
                         sendMessage(response.errors, 'danger', true);
                     } else {
                         sendMessage(response.messages, 'success', true);
                     }
                 },
-                error: function() {
+                error: function () {
                     sendMessage('Error on loading users', 'danger');
                 }
             })

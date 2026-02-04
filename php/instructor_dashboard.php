@@ -10,7 +10,8 @@ $conn = $db->getConnection();
 $user = new User($conn);
 
 if (!($user->isLoggedIn()) || $_SESSION['user_role'] > 2) {
-    header("Location: " . SERVER_ROOT. "/index.php");
+    header("Location: " . SERVER_ROOT . "/index.php");
+    exit();
 }
 
 ?>

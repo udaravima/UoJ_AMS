@@ -74,7 +74,7 @@ if (isset($_POST['username'])) {
             echo json_encode(['error' => 'User Id not found']);
         }
     } else {
-        echo json_encode(['error' => 'Invalid Privillages']);
+        echo json_encode(['error' => 'Invalid Privileges']);
     }
 
     // retrieve course data of a paticular course by logged in user
@@ -97,7 +97,7 @@ if (isset($_POST['username'])) {
             echo json_encode(['error' => 'Course Id not found']);
         }
     } else {
-        echo json_encode(['error' => 'Invalid Privillages']);
+        echo json_encode(['error' => 'Invalid Privileges']);
     }
 
     // retrieve class data of a paticular class by logged in user
@@ -131,7 +131,7 @@ if (isset($_POST['username'])) {
             echo json_encode(['error' => 'Class Id not found']);
         }
     } else {
-        echo json_encode(['error' => 'Invalid Privillages']);
+        echo json_encode(['error' => 'Invalid Privileges']);
         exit();
     }
 
@@ -273,7 +273,7 @@ else if (isset($_POST['courseId'])) {
         $response['error'] = false;
         echo json_encode($response);
     } else {
-        echo json_encode(['error' => 'Invalid Privillages']);
+        echo json_encode(['error' => 'Invalid Privileges']);
         exit();
     }
 }
@@ -290,7 +290,7 @@ else if (isset($_POST['cids'])) {
         ];
         echo json_encode($response);
     } else {
-        echo json_encode(['error' => 'Invalid Privillages']);
+        echo json_encode(['error' => 'Invalid Privileges']);
         exit();
     }
 

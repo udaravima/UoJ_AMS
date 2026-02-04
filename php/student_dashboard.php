@@ -13,6 +13,7 @@ $lecr = new Lecturer($conn);
 
 if (!($user->isLoggedIn()) || $_SESSION['user_role'] != 3) {
     header("Location: " . SERVER_ROOT . "/index.php");
+    exit();
 }
 include ROOT_PATH . '/php/include/header.php';
 echo "<title>AMS Student</title>";
@@ -40,15 +41,16 @@ include ROOT_PATH . '/php/include/nav.php';
     <div class="row">
         <div class="col-md-12">
             <h4 class="text-center <?php $tempText = "";
-                                    if ($totalPrecentage[0] + $totalPrecentage[1] > 80) {
-                                        echo "text-success";
-                                    } else if ($totalPrecentage[0] + $totalPrecentage[1] > 50) {
-                                        echo "text-warning";
-                                    } else {
-                                        echo "text-danger";
-                                    }
-                                    ?> ">Your Attendance Precentage is <?php echo $totalPrecentage[0] + $totalPrecentage[1] . "% ";
-                                                                        echo ($totalPrecentage[0] + $totalPrecentage[1] > 80) ? " Keep it up!" : (($totalPrecentage[0] + $totalPrecentage[1] > 80) ? "Work around fast!" : "Oops..!"); ?>
+            if ($totalPrecentage[0] + $totalPrecentage[1] > 80) {
+                echo "text-success";
+            } else if ($totalPrecentage[0] + $totalPrecentage[1] > 50) {
+                echo "text-warning";
+            } else {
+                echo "text-danger";
+            }
+            ?> ">Your Attendance Precentage is
+                <?php echo $totalPrecentage[0] + $totalPrecentage[1] . "% ";
+                echo ($totalPrecentage[0] + $totalPrecentage[1] > 80) ? " Keep it up!" : (($totalPrecentage[0] + $totalPrecentage[1] > 80) ? "Work around fast!" : "Oops..!"); ?>
             </h4></br>
             <div class="progress" style="height: 30px;">
                 <div class="progress-bar bg-success <?php echo " w-" . $totalPrecentage[0]; ?> p-3">
@@ -106,9 +108,10 @@ include ROOT_PATH . '/php/include/nav.php';
             </table>
             <nav aria-label="Page navigation">
                 <ul class="pagination justify-content-center">
-                    <?php for ($i = 1; $i <= $totalPages; $i++) : ?>
+                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                         <li class="page-item <?php echo ($i == $currentPage) ? 'active' : ''; ?>">
-                            <a class="page-link" href="<?php echo SERVER_ROOT; ?>/php/student_dashboard.php?pageC=<?php echo $i; ?>">
+                            <a class="page-link"
+                                href="<?php echo SERVER_ROOT; ?>/php/student_dashboard.php?pageC=<?php echo $i; ?>">
                                 <?php echo $i; ?>
                             </a>
                         </li>
@@ -123,7 +126,7 @@ include ROOT_PATH . '/php/include/nav.php';
             </div>
         </div>
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 var calendarEl = document.getElementById('class-calandar-student');
                 var calendar = new FullCalendar.Calendar(calendarEl, {
                     initialView: 'dayGridMonth',
@@ -138,7 +141,7 @@ include ROOT_PATH . '/php/include/nav.php';
                         extraParams: {
                             std_id: <?php echo $_SESSION["std_id"]; ?>
                         },
-                        failure: function() {
+                        failure: function () {
                             sendMessage('there was an error while fetching events!', 'warning');
                         },
                         color: 'yellow', // a non-ajax option

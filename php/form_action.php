@@ -26,7 +26,7 @@ if (isset($_POST['submit_course'])) {
             $errors[] = "Course Creation Failed";
         }
     } else {
-        $errors[] = "Course Validation Faild";
+        $errors[] = "Course Validation Failed";
     }
 } else if (isset($_POST['updateCourse'])) {
     if (isset($_POST['course_id']) && isset($_POST['course_code']) && isset($_POST['course_name']) && $user->isAdmin()) {
@@ -39,7 +39,7 @@ if (isset($_POST['submit_course'])) {
             $errors[] = "Course Update Failed";
         }
     } else {
-        $errors[] = "Course Validation Faild";
+        $errors[] = "Course Validation Failed";
     }
 } else if (isset($_POST['deleteCourse'])) {
     if (isset($_POST['course_id']) && $user->isAdmin()) {
@@ -50,7 +50,7 @@ if (isset($_POST['submit_course'])) {
             $errors[] = "Course Deletion Failed";
         }
     } else {
-        $errors[] = "Invalid Privillages or Invalid Course";
+        $errors[] = "Invalid Privileges or Invalid Course";
     }
 }
 
@@ -75,7 +75,7 @@ else if (isset($_POST['submit_class'])) {
             $errors[] = "Class Creation Failed";
         }
     } else {
-        $errors[] = "Class Validation Faild";
+        $errors[] = "Class Validation Failed";
     }
 } else if (isset($_POST['updateClass'])) {
 
@@ -88,13 +88,13 @@ else if (isset($_POST['submit_class'])) {
         $classData['startTime'] = $_POST['start_time'];
         $classData['endTime'] = $_POST['end_time'];
         $classData['Instructors'] = $_POST['class-instructors'];
-        if ($lecr->updateClassInfo($classId, $classData)) {
+        if ($lecr->updateClassInfo($classData['classId'], $classData)) {
             $goMessage[] = "Class Updated Successfully";
         } else {
             $errors[] = "Class Update Failed";
         }
     } else {
-        $errors[] = "Class Validation Faild";
+        $errors[] = "Class Validation Failed";
     }
 
 } else if (isset($_POST['deleteClass'])) {
@@ -106,7 +106,7 @@ else if (isset($_POST['submit_class'])) {
             $errors[] = "Class Deletion Failed";
         }
     } else {
-        $errors[] = "Invalid Privillages or Invalid Class";
+        $errors[] = "Invalid Privileges or Invalid Class";
     }
 }
 
@@ -132,7 +132,7 @@ else if (isset($_POST['register'])) {
                 if ($user->isAdmin()) {
                     $user_role = $_POST['user_role'];
                 } else {
-                    $errors[] = "User Operation not permited!";
+                    $errors[] = "User Operation not permitted!";
                 }
             } else {
                 $user_role = $_POST['user_role'];
@@ -370,7 +370,7 @@ else if (isset($_POST['register'])) {
                     $errors[] = "Gender format invalid";
                 }
             } else {
-                $userData['std_gender'] = $userDefault['std_gender'];
+                $userData['lecr_gender'] = $userDefault['lecr_gender'];
             }
 
 
@@ -551,7 +551,7 @@ else if (isset($_POST['register'])) {
             }
         }
     } else {
-        $errors[] = "User Operation not permited!";
+        $errors[] = "User Operation not permitted!";
     }
 
     // Delete a User
@@ -564,7 +564,7 @@ else if (isset($_POST['register'])) {
             $errors[] = "User Deletion Failed";
         }
     } else {
-        $errors[] = "User Operation not permited!";
+        $errors[] = "User Operation not permitted!";
     }
 } else {
     header("Location: " . SERVER_ROOT . "/index.php");
@@ -575,7 +575,8 @@ echo "<title>AMS Registration</title>";
 include ROOT_PATH . '/php/include/content.php';
 ?>
 <!-- Modal -->
-<div class="modal fade" id="amsForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="amsFormLabel" aria-hidden="true">
+<div class="modal fade" id="amsForm" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="amsFormLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -621,13 +622,13 @@ include ROOT_PATH . '/php/include/content.php';
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         var loginModal = new bootstrap.Modal(document.getElementById('amsForm'));
         loginModal.show();
     });
     // Returning to login
     var amsForm = document.getElementById('amsForm');
-    amsForm.addEventListener('hidden.bs.modal', function() {
+    amsForm.addEventListener('hidden.bs.modal', function () {
         window.location.href = '<?php echo SERVER_ROOT; ?>/index.php';
     });
 </script>
