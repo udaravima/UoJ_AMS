@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS uoj_student_nfc (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    std_id INT NOT NULL,
+    nfc_uid VARCHAR(255) NOT NULL UNIQUE,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (std_id) REFERENCES uoj_student(std_id) ON DELETE CASCADE
+);
