@@ -7,9 +7,10 @@ $db = new Database();
 $conn = $db->getConnection();
 $user = new User($conn);
 
-session_start();
+// Session already started by Database.php
 $user->setUserLock(false);
 $_SESSION['user_id'] = '';
 session_destroy();
 header("Location: " . SERVER_ROOT . "/index.php");
+exit();
 ?>
