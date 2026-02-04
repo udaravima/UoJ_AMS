@@ -81,10 +81,10 @@ include_once ROOT_PATH . '/php/include/nav.php';
                         <?php echo CSRF::getTokenField(); ?>
                         <div class="mb-3">
                             <label for="student_id" class="form-label">Student</label>
-                            <!-- Simple input for now, ideally a search/dropdown -->
-                            <input type="number" class="form-control" id="student_id" name="student_id" required
-                                placeholder="Enter Student ID">
-                            <div class="form-text">Enter the internal Student ID (not Registration No).</div>
+                            <select class="form-select" id="student_id" name="student_id" required>
+                                <option value="">Select Student...</option>
+                            </select>
+                            <div class="form-text">Search by registration number or name.</div>
                         </div>
                         <div class="mb-3">
                             <label for="nfc_uid" class="form-label">NFC UID (Hex)</label>
@@ -146,6 +146,24 @@ include_once ROOT_PATH . '/php/include/nav.php';
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const serverRoot = '<?php echo SERVER_ROOT; ?>';
+
+    // Load all students for NFC registration
+    fetch(serverRoot + '/php/api/report_data.php?action=get_students')
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById('student_id');
+            data.forEach(student => {
+                const option = new Option(student.text, student.id);
+                select.add(option);
+            });
+        })
+        .catch(error => console.error('Error loading students:', error));
+});
+</script>
 
 <?php
 include_once ROOT_PATH . '/php/include/footer.php';
