@@ -23,16 +23,25 @@ if (isset($_SESSION['last_activity'])) {
 $_SESSION['last_activity'] = time();
 class Database
 {
-    private $host = '127.0.0.1';
-    private $username = 'root';
-    private $password = 'beyondm';
-    private $database = 'uoj';
+    private $host;
+    private $username;
+    private $password;
+    private $database;
+
+    public function __construct()
+    {
+        // Use environment variables if available (Docker), otherwise use defaults (local development)
+        $this->host = getenv('DB_HOST') ?: '127.0.0.1';
+        $this->username = getenv('DB_USER') ?: 'root';
+        $this->password = getenv('DB_PASSWORD') ?: 'beyondm';
+        $this->database = getenv('DB_NAME') ?: 'uoj';
+    }
 
     public function getConnection()
     {
         $conn = new mysqli($this->host, $this->username, $this->password, $this->database);
         if ($conn->connect_error) {
-            die("MySQL Connection error occurd!: " . $conn->connect_error);
+            die("MySQL Connection error occurred!: " . $conn->connect_error);
         } else {
             return $conn;
         }
