@@ -78,7 +78,7 @@ Indexes {
 }
 }
 
-Table "uoJ_student_class" {
+Table "uoj_student_class" {
   "std_id" INT
   "class_id" INT
   "attend_time" TIME
@@ -111,8 +111,8 @@ Ref:"uoj_lecturer"."lecr_id" < "uoj_lecturer_course"."lecr_id"
 
 Ref:"uoj_course"."course_id" < "uoj_lecturer_course"."course_id"
 
-Ref:"uoj_student"."std_id" < "uoJ_student_class"."std_id"
+Ref:"uoj_student"."std_id" < "uoj_student_class"."std_id"
 
-Ref:"uoj_class"."class_id" < "uoJ_student_class"."class_id"
+Ref:"uoj_class"."class_id" < "uoj_student_class"."class_id"
 
 Ref:"uoj_user"."user_id" < "uoj_nfc_data"."user_id"

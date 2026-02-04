@@ -64,7 +64,7 @@ if (isset($_POST['submit_course'])) {
 else if (isset($_POST['submit_class'])) {
     if (isset($_POST['course_id']) && isset($_POST['lecr_id']) && isset($_POST['class_date']) && isset($_POST['start_time']) && isset($_POST['end_time']) && ($user->isAdmin() || $user->isLecturer())) {
         $courseId = $_POST['course_id'];
-        $lecrId = $user->getLectureIdByUserId($_POST['lecr_id']);
+        $lecrId = $_POST['lecr_id'];
         $classDate = $_POST['class_date'];
         $startTime = $_POST['start_time'];
         $endTime = $_POST['end_time'];

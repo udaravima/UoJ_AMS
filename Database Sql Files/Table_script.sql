@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS
     );
 
 CREATE TABLE IF NOT EXISTS
-    uoJ_student_class (
+    uoj_student_class (
         std_id INT,
         class_id INT,
         attend_time TIME,

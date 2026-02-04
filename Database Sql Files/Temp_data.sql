@@ -91,7 +91,7 @@ INSERT INTO uoj_lecturer_course (lecr_id, course_id)
 VALUES (2, 1),
     (2, 2);
 
-INSERT INTO uoJ_student_class (std_id, class_id, attend_time, attendance_status)
+INSERT INTO uoj_student_class (std_id, class_id, attend_time, attendance_status)
 VALUES (1, 1, '09:15:00', 1),
     (3, 2, '10:30:00', 0),
     (1, 2, '10:30:00', 1),
