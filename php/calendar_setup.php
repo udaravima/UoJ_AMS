@@ -14,12 +14,18 @@ $utils = new Utils();
 header('Content-Type: application/json');
 
 if (isset($_POST['lecr_id'])) {
-    if (($user->isAdmin() || $user->isLecturer()) && $_SESSION['lecr_id'] == $_POST['lecr_id']) {
+    if (($user->isAdmin() || $user->isLecturer() || $user->isInstructor()) && $_SESSION['lecr_id'] == $_POST['lecr_id']) {
         $lecr_id = $_POST['lecr_id'];
         $events = [];
         $startDate = substr($_POST['start'], 0, 10);
         $endDate = substr($_POST['end'], 0, 10);
-        $classes = $lecr->getClassByLecturer($lecr_id, $startDate, $endDate);
+
+        if ($user->isInstructor()) {
+            $classes = $lecr->getClassesForInstructor($lecr_id, $startDate, $endDate);
+        } else {
+            $classes = $lecr->getClassByLecturer($lecr_id, $startDate, $endDate);
+        }
+
         while ($class = $classes->fetch_assoc()) {
             $event = [];
             $event['id'] = $class['class_id'];

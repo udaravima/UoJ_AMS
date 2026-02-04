@@ -626,12 +626,42 @@ class Lecturer
         if ($startDate != "") {
             $query .= " AND class_date BETWEEN ? AND ?";
         }
+        $query .= " ORDER BY class_date DESC, start_time DESC";
         $stmt = $this->conn->prepare($query);
         if ($startDate != "") {
             $stmt->bind_param('iss', $lecrId, $startDate, $endDate);
         } else {
             $stmt->bind_param('i', $lecrId);
         }
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+    }
+
+    public function getClassesForInstructor($instructorId, $startDate = "", $endDate = "")
+    {
+        $query = "SELECT c.*, co.course_code, co.course_name 
+                  FROM {$this->class} c 
+                  INNER JOIN {$this->course} co ON c.course_id = co.course_id 
+                  INNER JOIN {$this->instructorForClass} ci ON c.class_id = ci.class_id 
+                  WHERE ci.lecr_id = ?";
+
+        if ($startDate != "") {
+            $query .= " AND c.class_date BETWEEN ? AND ?";
+        }
+
+        $query .= " ORDER BY c.class_date DESC, c.start_time DESC";
+
+        $stmt = $this->conn->prepare($query);
+
+        if ($startDate != "") {
+            $stmt->bind_param('iss', $instructorId, $startDate, $endDate);
+        } else {
+            $stmt->bind_param('i', $instructorId);
+        }
+
         if ($stmt->execute()) {
             return $stmt->get_result();
         } else {

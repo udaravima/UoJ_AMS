@@ -9,6 +9,7 @@ include_once ROOT_PATH . '/php/config/Database.php'; // Carefull with location!
 include_once ROOT_PATH . '/php/class/Utils.php';
 include_once ROOT_PATH . '/php/class/User.php';
 include_once ROOT_PATH . '/php/class/Lecturer.php';
+include_once ROOT_PATH . '/php/class/CSRF.php';
 // Initializing
 $database = new Database();
 $db = $database->getConnection();
@@ -19,12 +20,16 @@ $util = new Utils();
 if ($user->isLoggedIn()) {
     if ($user->isAdmin()) {
         header("Location: " . SERVER_ROOT . "/php/admin_dashboard.php");
+        exit();
     } else if ($user->isLecturer()) {
         header("Location: " . SERVER_ROOT . "/php/lecturer_dashboard.php");
+        exit();
     } else if ($user->isInstructor()) {
         header("Location: " . SERVER_ROOT . "/php/instructor_dashboard.php");
+        exit();
     } else if ($user->isStudent()) {
         header("Location: " . SERVER_ROOT . "/php/student_dashboard.php");
+        exit();
     }
 }
 
@@ -35,14 +40,19 @@ if (isset($_POST['sign_in'])) {
     $rememberMe = (isset($_POST['rem_me'])) ? $_POST['rem_me'] : null;
 
     if ($user->login($username, $password, $rememberMe)) {
+        CSRF::regenerateToken(); // Regenerate token on successful login
         if ($user->isAdmin()) {
             header("Location: " . SERVER_ROOT . "/php/admin_dashboard.php");
+            exit();
         } else if ($user->isLecturer()) {
             header("Location: " . SERVER_ROOT . "/php/lecturer_dashboard.php");
+            exit();
         } else if ($user->isInstructor()) {
             header("Location: " . SERVER_ROOT . "/php/instructor_dashboard.php");
+            exit();
         } else if ($user->isStudent()) {
             header("Location: " . SERVER_ROOT . "/php/student_dashboard.php");
+            exit();
         } else {
             echo "Something Wrong!";
         }
@@ -71,20 +81,25 @@ include_once ROOT_PATH . '/php/include/content.php';
 <div class="container-lg justify-content-center align-items-center mt-5">
     <div class="row align-items-center justify-content-center">
 
-        <div class="col-8 col-md-4 col-lg-3 border rounded shadow form-signin align-items-center justify-content-center">
+        <div
+            class="col-8 col-md-4 col-lg-3 border rounded shadow form-signin align-items-center justify-content-center">
             <form action="" method="post" class="form">
-                <img id="logo" class="img-fluid" src="<?php echo SERVER_ROOT; ?>/res/logo/AMS_side_banner_w.png" alt="AMS_Banner" width="" height="">
+                <?php echo CSRF::getTokenField(); ?>
+                <img id="logo" class="img-fluid" src="<?php echo SERVER_ROOT; ?>/res/logo/AMS_side_banner_w.png"
+                    alt="AMS_Banner" width="" height="">
                 <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
                 <!-- <div id="login-alert" class="alert">
                      <p class="">Hello</p> 
                 </div> -->
                 <div class="form-floating">
-                    <input type="text" class="form-control" id="reg-name" name="reg-name" placeholder="2020csc000" autocomplete="username" required autofocus>
+                    <input type="text" class="form-control" id="reg-name" name="reg-name" placeholder="2020csc000"
+                        autocomplete="username" required autofocus>
                     <label for="reg-name">Registration No:</label>
                 </div>
 
                 <div class="form-floating">
-                    <input type="password" class="form-control" id="user_password" name="user_password" placeholder="Password" autocomplete="current-password" required>
+                    <input type="password" class="form-control" id="user_password" name="user_password"
+                        placeholder="Password" autocomplete="current-password" required>
                     <label for="user_password">Password</label>
                 </div>
 
@@ -97,11 +112,13 @@ include_once ROOT_PATH . '/php/include/content.php';
                 <button class="btn btn-primary w-100 py-2" type="submit" name="sign_in" id="sign_in">Sign in</button>
                 <div class="mt-4">
                     <p class="align-items-center justify-content-center">
-                        <a class="link-underline link-opacity-75-hover link-offset-2" href="#"> Forgot your password?
+                        <a class="link-underline link-opacity-75-hover link-offset-2"
+                            href="<?php echo SERVER_ROOT; ?>/php/forgot_password.php"> Forgot your password?
                         </a>
                     </p>
                     <p class="align-items-center justify-content-center">
-                        <a class="link-underline link-offset-2 link-opacity-75-hover" data-bs-toggle="modal" data-bs-target="#reg_user" href="#">Don't have an account?
+                        <a class="link-underline link-offset-2 link-opacity-75-hover" data-bs-toggle="modal"
+                            data-bs-target="#reg_user" href="#">Don't have an account?
                         </a>
                     </p>
                 </div>
@@ -119,12 +136,12 @@ include_once ROOT_PATH . '/php/include/content.php';
 
 <!-- page scripts -->
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         const logo = document.getElementById('logo');
         const themeLinks = document.querySelectorAll('[data-bs-theme]');
 
         themeLinks.forEach(link => {
-            link.addEventListener("click", function(e) {
+            link.addEventListener("click", function (e) {
                 // e.preventDefault(); // unable to click when its on
                 const theme = this.getAttribute("data-bs-theme");
                 updateImage(theme);

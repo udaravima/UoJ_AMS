@@ -4,12 +4,18 @@ include_once ROOT_PATH . '/php/config/Database.php';
 include_once ROOT_PATH . '/php/class/User.php';
 include_once ROOT_PATH . '/php/class/Utils.php';
 include_once ROOT_PATH . '/php/class/Lecturer.php';
+include_once ROOT_PATH . '/php/class/CSRF.php';
 
 $database = new Database();
 $db = $database->getConnection();
 $user = new User($db);
 $lecr = new Lecturer($db);
 $util = new Utils();
+
+// Validate CSRF token for all POST requests
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    CSRF::requireValidToken(false); // Don't regenerate to allow form resubmission on error
+}
 
 $errors = [];
 $goMessage = [];
