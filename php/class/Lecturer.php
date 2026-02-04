@@ -760,10 +760,10 @@ class Lecturer
 
     public function getClassesForInstructor($instructorId, $startDate = "", $endDate = "")
     {
-        $query = "SELECT c.*, co.course_code, co.course_name 
-                  FROM {$this->class} c 
-                  INNER JOIN {$this->course} co ON c.course_id = co.course_id 
-                  INNER JOIN {$this->instructorForClass} ci ON c.class_id = ci.class_id 
+        $query = "SELECT c.*, co.course_code, co.course_name
+                  FROM {$this->class} c
+                  INNER JOIN {$this->course} co ON c.course_id = co.course_id
+                  INNER JOIN {$this->instructorForClass} ci ON c.class_id = ci.class_id
                   WHERE ci.lecr_id = ?";
 
         if ($startDate != "") {
@@ -786,6 +786,45 @@ class Lecturer
             return false;
         }
     }
+
+    /**
+     * Get classes for a specific student based on their course enrollments
+     * @param int $studentId Student ID
+     * @param string $startDate Optional start date filter (YYYY-MM-DD)
+     * @param string $endDate Optional end date filter (YYYY-MM-DD)
+     * @return mysqli_result|false Result set or false on failure
+     */
+    public function getClassesByStudent($studentId, $startDate = "", $endDate = "")
+    {
+        $query = "SELECT c.*, co.course_code, co.course_name,
+                         sc.attendance_status, sc.attend_time
+                  FROM {$this->class} c
+                  INNER JOIN {$this->course} co ON c.course_id = co.course_id
+                  INNER JOIN {$this->stdCourse} stc ON co.course_id = stc.course_id
+                  LEFT JOIN {$this->stdClass} sc ON c.class_id = sc.class_id AND sc.std_id = ?
+                  WHERE stc.std_id = ?";
+
+        if ($startDate != "") {
+            $query .= " AND c.class_date BETWEEN ? AND ?";
+        }
+
+        $query .= " ORDER BY c.class_date DESC, c.start_time DESC";
+
+        $stmt = $this->conn->prepare($query);
+
+        if ($startDate != "") {
+            $stmt->bind_param('iiss', $studentId, $studentId, $startDate, $endDate);
+        } else {
+            $stmt->bind_param('ii', $studentId, $studentId);
+        }
+
+        if ($stmt->execute()) {
+            return $stmt->get_result();
+        } else {
+            return false;
+        }
+    }
+
     public function getClassByCourse($courseId, $date = "")
     {
         $query = "SELECT * FROM {$this->class} WHERE course_id = ?";

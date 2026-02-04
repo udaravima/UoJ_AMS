@@ -46,4 +46,38 @@ if (isset($_POST['lecr_id'])) {
     } else {
         echo json_encode(array("message" => "Unauthorized access."));
     }
+} elseif (isset($_POST['std_id'])) {
+    // Handle student calendar requests
+    if ($user->isStudent() && $_SESSION['std_id'] == $_POST['std_id']) {
+        $std_id = $_POST['std_id'];
+        $events = [];
+        $startDate = substr($_POST['start'], 0, 10);
+        $endDate = substr($_POST['end'], 0, 10);
+
+        $classes = $lecr->getClassesByStudent($std_id, $startDate, $endDate);
+
+        while ($class = $classes->fetch_assoc()) {
+            $event = [];
+            $event['id'] = $class['class_id'];
+            $event['title'] = $class['course_code'] . ' - ' . $class['course_name'];
+            $event['start'] = $class['class_date'] . "T" . $class['start_time'];
+            $event['end'] = $class['class_date'] . "T" . $class['end_time'];
+
+            // Color based on attendance status
+            if ($class['attendance_status'] === null) {
+                $event['color'] = '#808080'; // Gray - not marked yet
+            } elseif ($class['attendance_status'] == 1) {
+                $event['color'] = '#00ff00'; // Green - Present
+            } elseif ($class['attendance_status'] == 2) {
+                $event['color'] = '#ff8000'; // Orange - Late
+            } else {
+                $event['color'] = '#ff0000'; // Red - Absent
+            }
+
+            $events[] = $event;
+        }
+        echo json_encode($events);
+    } else {
+        echo json_encode(array("message" => "Unauthorized access."));
+    }
 }

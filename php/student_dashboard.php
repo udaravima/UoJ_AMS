@@ -75,7 +75,7 @@ include ROOT_PATH . '/php/include/nav.php';
             $currentPage = isset($_GET['pageC']) ? $_GET['pageC'] : 1;
             $order['offset'] = ($currentPage - 1) * $itemsPerPage;
             $order['limit'] = $itemsPerPage;
-            $totalCount = $user->countRecords('uoj_Student_course', 'std_id', $_SESSION["std_id"]);
+            $totalCount = $user->countRecords('uoj_student_course', 'std_id', $_SESSION["std_id"]);
             $totalPages = ceil($totalCount / $itemsPerPage);
             ?>
 
