@@ -20,6 +20,11 @@ class Lecturer
 
     public function createClass($lecrId, $courseId, $date, $sTime, $endTime)
     {
+        // Check for schedule conflicts before creating
+        if ($conflict = $this->hasScheduleConflict($lecrId, $date, $sTime, $endTime)) {
+            return false; // Conflict exists, cannot create class
+        }
+
         $query = "INSERT INTO {$this->class}(lecr_id, course_id, class_date, start_time, end_time) VALUES(?,?,?,?,?)";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('iisss', $lecrId, $courseId, $date, $sTime, $endTime);
@@ -68,6 +73,24 @@ class Lecturer
 
     public function updateClassInfo($classId, $classData)
     {
+        // Get lecturer ID from existing class
+        $existing = $this->retrieveClassDetails($classId);
+        if (!$existing) {
+            return false;
+        }
+        $lecrId = $existing['lecr_id'];
+
+        // Check for schedule conflicts (excluding current class)
+        if ($conflict = $this->hasScheduleConflict(
+            $lecrId,
+            $classData['class_date'],
+            $classData['start_time'],
+            $classData['end_time'],
+            $classId
+        )) {
+            return false; // Conflict exists, cannot update
+        }
+
         $query = "UPDATE {$this->class} SET class_date = ?, start_time = ?, end_time = ? WHERE class_id = ?";
         $stmt = $this->conn->prepare($query);
         $stmt->bind_param('sssi', $classData['class_date'], $classData['start_time'], $classData['end_time'], $classId);
@@ -170,7 +193,7 @@ class Lecturer
     {
         $query = "SELECT {$this->user}.username , {$this->std}.std_fullname, {$this->std}.std_index , {$this->stdCourse}.std_id  FROM {$this->stdCourse} INNER JOIN {$this->std} ON {$this->stdCourse}.std_id = {$this->std}.std_id INNER JOIN {$this->user} ON {$this->std}.user_id = {$this->user}.user_id WHERE {$this->stdCourse}.course_id = ?";
         if (isset($order["search"])) {
-            $query .= " AND {$this->std}.std_fullname LIKE '%" . $order['search'] . "%' OR {$this->std}.std_index LIKE '%" . $order['search'] . "%' OR {$this->user}.username LIKE '%" . $order['search'] . "%'";
+            $query .= " AND ({$this->std}.std_fullname LIKE ? OR {$this->std}.std_index LIKE ? OR {$this->user}.username LIKE ?)";
         }
         if (isset($order["column"])) {
             $query .= " ORDER BY " . $order['column'] . " " . $order['order'];
@@ -179,7 +202,12 @@ class Lecturer
             $query .= " LIMIT " . $order['limit'] . " OFFSET " . $order['offset'];
         }
         $stmt = $this->conn->prepare($query);
-        $stmt->bind_param('i', $courseId);
+        if (isset($order["search"])) {
+            $searchTerm = "%" . $order['search'] . "%";
+            $stmt->bind_param('isss', $courseId, $searchTerm, $searchTerm, $searchTerm);
+        } else {
+            $stmt->bind_param('i', $courseId);
+        }
         if ($stmt->execute()) {
             return $stmt->get_result();
         } else {
@@ -260,6 +288,96 @@ class Lecturer
             return false;
         }
     }
+
+    /**
+     * Calculate attendance status based on class time
+     * @param int $classId Class ID
+     * @param string $attendTime Current time (H:i:s)
+     * @return int Status: 1=Present, 2=Late, 0=Absent
+     */
+    public function calculateAttendanceStatus($classId, $attendTime)
+    {
+        $query = "SELECT start_time, end_time FROM {$this->class} WHERE class_id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $classId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows == 0) {
+            return 0; // Class not found, mark absent
+        }
+
+        $class = $result->fetch_assoc();
+        $startTime = strtotime($class['start_time']);
+        $endTime = strtotime($class['end_time']);
+        $currentTime = strtotime($attendTime);
+
+        // Define thresholds
+        $lateThreshold = $startTime + (15 * 60);    // 15 minutes after start
+        $absentThreshold = $startTime + (30 * 60);  // 30 minutes after start
+
+        // Determine status based on time
+        if ($currentTime > $endTime || $currentTime > $absentThreshold) {
+            return 0; // Absent - too late or after class ended
+        } elseif ($currentTime > $lateThreshold) {
+            return 2; // Late - arrived 15-30 minutes after start
+        } else {
+            return 1; // Present - on time or within 15 minutes
+        }
+    }
+
+    /**
+     * Check if lecturer has conflicting class at given time
+     * @param int $lecrId Lecturer ID
+     * @param string $date Class date (YYYY-MM-DD)
+     * @param string $startTime Start time (HH:MM:SS)
+     * @param string $endTime End time (HH:MM:SS)
+     * @param int|null $excludeClassId Optional class ID to exclude from check (for updates)
+     * @return bool|int False if no conflict, class_id if conflict exists
+     */
+    public function hasScheduleConflict($lecrId, $date, $startTime, $endTime, $excludeClassId = null)
+    {
+        $query = "SELECT class_id FROM {$this->class}
+                  WHERE lecr_id = ?
+                  AND class_date = ?
+                  AND (
+                      (start_time < ? AND end_time > ?) OR
+                      (start_time < ? AND end_time > ?) OR
+                      (start_time >= ? AND end_time <= ?)
+                  )";
+
+        if ($excludeClassId !== null) {
+            $query .= " AND class_id != ?";
+        }
+
+        $stmt = $this->conn->prepare($query);
+
+        if ($excludeClassId !== null) {
+            $stmt->bind_param('isssssssi',
+                $lecrId, $date,
+                $endTime, $startTime,
+                $endTime, $startTime,
+                $startTime, $endTime,
+                $excludeClassId
+            );
+        } else {
+            $stmt->bind_param('isssssss',
+                $lecrId, $date,
+                $endTime, $startTime,
+                $endTime, $startTime,
+                $startTime, $endTime
+            );
+        }
+
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc()['class_id'];
+        }
+        return false;
+    }
+
     public function addInstructorToClass($classId, $lecrId)
     {
         $query = "INSERT INTO {$this->instructorForClass}(lecr_id, class_id) VALUES(?,?)";

@@ -1,5 +1,5 @@
 <?php
-require_once 'config.php';
+require_once '../config.php';
 include_once ROOT_PATH . '/php/config/Database.php';
 include_once ROOT_PATH . '/php/class/User.php';
 include_once ROOT_PATH . '/php/class/Lecturer.php';
@@ -19,7 +19,7 @@ if (!($user->isLoggedIn()) || !($user->isAdmin() || $user->isLecturer() || $user
 include_once ROOT_PATH . '/php/include/header.php';
 echo "<title>Reports & Analytics</title>";
 include_once ROOT_PATH . '/php/include/content.php';
-$activeDash = 2; // Arbitrary active index
+$activeDash = 4; // Reports navigation index
 include_once ROOT_PATH . '/php/include/nav.php';
 include_once ROOT_PATH . '/php/include/modal_form.php';
 ?>

@@ -1,4 +1,5 @@
 <?php
+include_once ROOT_PATH . '/php/class/CSRF.php';
 include_once ROOT_PATH . '/php/include/modal_form.php';
 
 ?>
@@ -44,6 +45,22 @@ include_once ROOT_PATH . '/php/include/modal_form.php';
                 <li class='nav-item'>
                     <a class='nav-link " . ($activeDash == 3) ? "active" : "" . "
                         href='" . SERVER_ROOT . "/php/student_dashboard.php'>Student</a>
+                </li>";
+                }
+
+                // Reports page - for Admin, Lecturer, Instructor
+                if ($_SESSION['user_role'] < 3) {
+                    echo "
+                <li class='nav-item'>
+                    <a class='nav-link " . (($activeDash == 4) ? "active" : "") . "' href='" . SERVER_ROOT . "/php/reports.php'>Reports</a>
+                </li>";
+                }
+
+                // NFC Management - Admin only
+                if ($_SESSION['user_role'] == 0) {
+                    echo "
+                <li class='nav-item'>
+                    <a class='nav-link " . (($activeDash == 5) ? "active" : "") . "' href='" . SERVER_ROOT . "/php/nfc_management.php'>NFC Cards</a>
                 </li>";
                 }
                 ?>

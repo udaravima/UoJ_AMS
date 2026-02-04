@@ -14,6 +14,7 @@ $lecr = new Lecturer($conn);
 
 if (!($user->isLoggedIn()) || !($user->isAdmin())) {
     header("Location: " . SERVER_ROOT . "/index.php");
+    exit();
 }
 ?>
 
@@ -32,7 +33,7 @@ include_once ROOT_PATH . '/php/include/nav.php';
     </div>
     <div class="dropdown">
         <form action="" class="input-group">
-            
+
         </form>
     </div>
 
@@ -207,8 +208,7 @@ include_once ROOT_PATH . '/php/include/nav.php';
         <ul class="pagination justify-content-center">
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                 <li class="page-item <?php echo ($i == $currentPage) ? 'active' : ''; ?>">
-                    <a class="page-link"
-                        href="<?php echo SERVER_ROOT; ?>/php/admin_dashboard.php?pageC=<?php echo $i; ?>">
+                    <a class="page-link" href="<?php echo SERVER_ROOT; ?>/php/admin_dashboard.php?pageC=<?php echo $i; ?>">
                         <?php echo $i; ?>
                     </a>
                 </li>

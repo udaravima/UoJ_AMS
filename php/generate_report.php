@@ -21,6 +21,15 @@ $db = new Database();
 $conn = $db->getConnection();
 $report = new Report($conn);
 
+// Authentication check
+include_once ROOT_PATH . '/php/class/User.php';
+$user = new User($conn);
+
+if (!($user->isLoggedIn()) || !($user->isAdmin() || $user->isLecturer() || $user->isInstructor())) {
+    http_response_code(403);
+    die("Unauthorized access. Please log in.");
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['report_type'])) {
 
     $reportType = $_POST['report_type'];

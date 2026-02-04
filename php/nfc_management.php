@@ -1,5 +1,5 @@
 <?php
-require_once 'config.php';
+require_once '../config.php';
 include_once ROOT_PATH . '/php/config/Database.php';
 include_once ROOT_PATH . '/php/class/User.php';
 include_once ROOT_PATH . '/php/class/NFC.php';
@@ -11,6 +11,10 @@ $conn = $db->getConnection();
 $user = new User($conn);
 $nfc = new NFC($conn);
 
+// Initialize Lecturer class (required by nav.php > modal_form.php)
+include_once ROOT_PATH . '/php/class/Lecturer.php';
+$lecr = new Lecturer($conn);
+
 if (!($user->isLoggedIn()) || !$user->isAdmin()) {
     header("Location: " . SERVER_ROOT . "/index.php");
     exit();
@@ -20,6 +24,10 @@ if (!($user->isLoggedIn()) || !$user->isAdmin()) {
 $message = '';
 $msgType = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // CSRF Token Validation
+    include_once ROOT_PATH . '/php/class/CSRF.php';
+    CSRF::requireValidToken();
+
     if (isset($_POST['register_card'])) {
         $stdId = $_POST['student_id'];
         $nfcUid = trim($_POST['nfc_uid']);
@@ -47,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 include_once ROOT_PATH . '/php/include/header.php';
 echo "<title>NFC Management</title>";
 include_once ROOT_PATH . '/php/include/content.php';
-$activeDash = 3;
+$activeDash = 5; // NFC Management navigation index
 include_once ROOT_PATH . '/php/include/nav.php';
 ?>
 
@@ -70,6 +78,7 @@ include_once ROOT_PATH . '/php/include/nav.php';
                 </div>
                 <div class="card-body">
                     <form action="" method="post">
+                        <?php echo CSRF::getTokenField(); ?>
                         <div class="mb-3">
                             <label for="student_id" class="form-label">Student</label>
                             <!-- Simple input for now, ideally a search/dropdown -->
@@ -118,6 +127,7 @@ include_once ROOT_PATH . '/php/include/nav.php';
                                         echo "<td>" . $row['assigned_at'] . "</td>";
                                         echo "<td>
                                                 <form action='' method='post' onsubmit=\"return confirm('Are you sure you want to revoke this card?');\">
+                                                    " . CSRF::getTokenField() . "
                                                     <input type='hidden' name='nfc_uid_to_revoke' value='" . $row['nfc_uid'] . "'>
                                                     <button type='submit' name='revoke_card' class='btn btn-sm btn-danger'>Revoke</button>
                                                 </form>

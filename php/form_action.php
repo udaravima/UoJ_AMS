@@ -78,7 +78,7 @@ else if (isset($_POST['submit_class'])) {
             }
             $goMessage[] = "Class Created Successfully";
         } else {
-            $errors[] = "Class Creation Failed";
+            $errors[] = "Class Creation Failed - Possible schedule conflict or database error";
         }
     } else {
         $errors[] = "Class Validation Failed";
@@ -97,7 +97,7 @@ else if (isset($_POST['submit_class'])) {
         if ($lecr->updateClassInfo($classData['classId'], $classData)) {
             $goMessage[] = "Class Updated Successfully";
         } else {
-            $errors[] = "Class Update Failed";
+            $errors[] = "Class Update Failed - Possible schedule conflict or database error";
         }
     } else {
         $errors[] = "Class Validation Failed";
@@ -293,6 +293,29 @@ else if (isset($_POST['register'])) {
                 }
             }
         }
+
+        // Uniqueness validation before registration
+        if ($user_role == 3) {
+            // Student uniqueness checks
+            if (isset($userData['std_index']) && $user->isStudentIndexExist($userData['std_index'])) {
+                $errors[] = "Student index number already exists";
+            }
+            if (isset($userData['std_nic']) && $user->isNicExist($userData['std_nic'])) {
+                $errors[] = "NIC number already registered";
+            }
+            if (isset($userData['std_email']) && $user->isEmailExist($userData['std_email'])) {
+                $errors[] = "Email address already registered";
+            }
+        } else {
+            // Lecturer uniqueness checks
+            if (isset($userData['lecr_nic']) && $user->isNicExist($userData['lecr_nic'])) {
+                $errors[] = "NIC number already registered";
+            }
+            if (isset($userData['lecr_email']) && $user->isEmailExist($userData['lecr_email'])) {
+                $errors[] = "Email address already registered";
+            }
+        }
+
         if (empty($errors)) {
             if ($user->registerUser($username, $password, $user_role, $userData, $user_status)) {
                 $goMessage[] = "User Registration successfull";

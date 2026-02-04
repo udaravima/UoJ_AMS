@@ -25,6 +25,8 @@ services:
       - SMTP_PASS=${SMTP_PASS:-}
       - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL:-}
       - SMTP_FROM_NAME=UoJ Attendance System
+      # NFC API Security (Generate a secure key: openssl rand -hex 32)
+      - NFC_API_KEY=${NFC_API_KEY:-CHANGE_ME_IN_PRODUCTION}
     networks:
       - uoj_network
     restart: unless-stopped

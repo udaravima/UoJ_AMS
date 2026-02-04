@@ -11,6 +11,8 @@ $user = new User($conn);
 $lecr = new Lecturer($conn);
 $utils = new Utils();
 
+// Include CSRF protection
+include_once ROOT_PATH . '/php/class/CSRF.php';
 
 if (!($user->isLoggedIn()) || $_SESSION['user_role'] > 2 || !isset($_POST['class-id'])) {
     header("Location: " . SERVER_ROOT . "/index.php");
@@ -127,6 +129,7 @@ if ($user->isAdmin() || $user->isLecturer()) {
     echo "let classStart = '" . $class['start_time'] . "';";
     echo "let classEnd = '" . $class['end_time'] . "';";
     echo "let classDate = '" . $class['class_date'] . "';";
+    echo "let csrfToken = '" . CSRF::generateToken() . "';";
     ?>
     let addStudentsToClassList = [];
     let removeStudentsFromClassList = [];
@@ -148,7 +151,8 @@ if ($user->isAdmin() || $user->isLecturer()) {
                 url: '<?php echo SERVER_ROOT; ?>/php/mark_attendance_action.php',
                 data: {
                     userSearch: userSearch,
-                    courseId: courseId
+                    courseId: courseId,
+                    csrf_token: csrfToken
                 },
                 dataType: 'json',
                 success: function (response) {
@@ -213,7 +217,8 @@ if ($user->isAdmin() || $user->isLecturer()) {
                 data: {
                     addStudentsToClassList: addStudentsToClassList,
                     removeStudentsFromClassList: removeStudentsFromClassList,
-                    classId: classId
+                    classId: classId,
+                    csrf_token: csrfToken
                 },
                 dataType: 'json',
                 success: function (response) {
@@ -267,7 +272,8 @@ if ($user->isAdmin() || $user->isLecturer()) {
                     stdId: std.dataset.stdId,
                     classId: classId,
                     attendanceStatus: attendanceStatus,
-                    currentTimeString: currentTimeString
+                    currentTimeString: currentTimeString,
+                    csrf_token: csrfToken
                 },
                 dataType: 'json',
                 success: function (response) {

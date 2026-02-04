@@ -148,6 +148,68 @@ class User
         }
     }
 
+    /**
+     * Check if student index number already exists
+     * @param string $stdIndex Student index/registration number
+     * @return bool True if exists, false otherwise
+     */
+    public function isStudentIndexExist($stdIndex)
+    {
+        $query = "SELECT std_id FROM {$this->stdTable} WHERE std_index = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('s', $stdIndex);
+        $stmt->execute();
+        return $stmt->get_result()->num_rows > 0;
+    }
+
+    /**
+     * Check if NIC already exists (for students or lecturers)
+     * @param string $nic National Identity Card number
+     * @return bool True if exists, false otherwise
+     */
+    public function isNicExist($nic)
+    {
+        // Check in student table
+        $query1 = "SELECT std_id FROM {$this->stdTable} WHERE std_nic = ?";
+        $stmt = $this->conn->prepare($query1);
+        $stmt->bind_param('s', $nic);
+        $stmt->execute();
+        if ($stmt->get_result()->num_rows > 0) {
+            return true;
+        }
+
+        // Check in lecturer table
+        $query2 = "SELECT lecr_id FROM {$this->lecrTable} WHERE lecr_nic = ?";
+        $stmt = $this->conn->prepare($query2);
+        $stmt->bind_param('s', $nic);
+        $stmt->execute();
+        return $stmt->get_result()->num_rows > 0;
+    }
+
+    /**
+     * Check if email already exists (for students or lecturers)
+     * @param string $email Email address
+     * @return bool True if exists, false otherwise
+     */
+    public function isEmailExist($email)
+    {
+        // Check in student table
+        $query1 = "SELECT std_id FROM {$this->stdTable} WHERE std_email = ?";
+        $stmt = $this->conn->prepare($query1);
+        $stmt->bind_param('s', $email);
+        $stmt->execute();
+        if ($stmt->get_result()->num_rows > 0) {
+            return true;
+        }
+
+        // Check in lecturer table
+        $query2 = "SELECT lecr_id FROM {$this->lecrTable} WHERE lecr_email = ?";
+        $stmt = $this->conn->prepare($query2);
+        $stmt->bind_param('s', $email);
+        $stmt->execute();
+        return $stmt->get_result()->num_rows > 0;
+    }
+
     public function getRoleStr($roleNo)
     {
         if ($roleNo == 0) {

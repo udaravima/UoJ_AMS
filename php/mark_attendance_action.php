@@ -18,6 +18,20 @@ if (!($user->isLoggedIn()) || $_SESSION['user_role'] > 2) {
     exit();
 }
 
+// CSRF Token Validation for POST requests
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!isset($_POST['csrf_token'])) {
+        echo json_encode(['error' => true, 'errors' => ['CSRF token missing']]);
+        exit();
+    }
+
+    include_once ROOT_PATH . '/php/class/CSRF.php';
+    if (!CSRF::validateToken($_POST['csrf_token'])) {
+        echo json_encode(['error' => true, 'errors' => ['CSRF validation failed']]);
+        exit();
+    }
+}
+
 if (isset($_POST["userSearch"]) && $user->isAdmin()) {
     $courseId = $_POST["courseId"];
     $errors = [];
@@ -68,19 +82,24 @@ if (isset($_POST["userSearch"]) && $user->isAdmin()) {
 } else if (isset($_POST['attendanceStatus']) && isset($_POST['currentTimeString'])) {
     $std_id = $_POST['stdId'];
     $class_id = $_POST['classId'];
-    $attendanceStatus = $_POST['attendanceStatus'];
     $currentTimeString = $_POST['currentTimeString'];
+
+    // Server-side attendance status calculation (ignore client-provided status)
+    $attendanceStatus = $lecr->calculateAttendanceStatus($class_id, $currentTimeString);
+
     $errors = [];
     $messages = [];
     $response = [];
     try {
         $lecr->editAttendance($std_id, $class_id, $currentTimeString, $attendanceStatus);
-        $messages[] = "Attendance marked";
+        $statusText = ['Absent', 'Present', 'Late'][$attendanceStatus];
+        $messages[] = "Attendance marked as " . $statusText;
     } catch (Exception $e) {
         $errors[] = "Error in marking attendance";
     }
     $response['errors'] = $errors;
     $response['messages'] = $messages;
+    $response['status'] = $attendanceStatus; // Return calculated status to frontend
     $response['error'] = false;
     echo json_encode($response);
 } else {
